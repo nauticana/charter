@@ -10,7 +10,8 @@ Harbor distinguishes identities from positions, assignments, credentials, sessio
 | `ASGN-JORDAN-PP-PLN-01` | `HUMAN-JORDAN-KIM` | Position | `PP-PLN-01` | Occupies | 2026-01-01 onward |
 | `ASGN-OEC-ORDER-EXCEPTION-SUPPORT` | `AGENT-ORDER-EXCEPTION-COORDINATOR` | Work context | `PROC-RESOLVE-ORDER-EXCEPTION` instances | Supports | 2026-04-01 through 2026-12-31 |
 | `ASGN-ELENA-SALES-MANAGER` | `HUMAN-ELENA-TORRES` | Position | `POS-SALES-OPERATIONS-MANAGER` | Occupies | 2025-07-01 onward |
-| `ASGN-ALEX-CREDIT-APPROVAL` | `HUMAN-ALEX-RIVERA` | Responsibility | `RESP-APPROVE-CREDIT-EXCEPTION` | Approves | 2026-01-01 onward while Credit Manager assignment is active |
+| `ASGN-ALEX-CREDIT-MANAGER` | `HUMAN-ALEX-RIVERA` | Position | `POS-CREDIT-MANAGER` | Occupies | 2026-01-01 onward |
+| `ASGN-ALEX-CREDIT-APPROVAL` | `HUMAN-ALEX-RIVERA` | Responsibility | `RESP-APPROVE-CREDIT-EXCEPTION` | Approves | 2026-01-01 onward while `ASGN-ALEX-CREDIT-MANAGER` is active |
 
 The work-context assignment does not place the agent in a position. The responsibility assignment does not change the organization tree. Authority is evaluated separately for each assignment context.
 

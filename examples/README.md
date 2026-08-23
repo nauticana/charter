@@ -4,4 +4,4 @@ Examples are non-normative. They illustrate the current specification and must d
 
 Every released example must validate against its declared schema version and pass the applicable conformance profile.
 
-The [Harbor Manufacturing example](harbor-manufacturing/README.md) is the canonical fictional end-to-end scenario. It uses one connected order exception to illustrate every Charter concept area without introducing vendor-specific models.
+The [Harbor Manufacturing example](harbor-manufacturing/README.md) is the canonical fictional end-to-end scenario. Its Charter objects remain vendor-independent, while one non-normative SAP S/4HANA Cloud API binding demonstrates how a downstream system is connected.

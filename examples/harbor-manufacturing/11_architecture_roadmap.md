@@ -4,7 +4,7 @@ Status: Conceptual, non-normative example
 
 ## Baseline
 
-`ARCH-BASELINE-2026-Q1` describes an observed current state: Sales Operations coordinates exceptions through messages and HOS screens; approval evidence is inconsistently linked to execution; retries after timeouts are manual; and process-level outcome measures are incomplete. The state is time-bounded and remains historical after later changes.
+`ARCH-BASELINE-2026-Q1` describes an observed current state: Sales Operations coordinates exceptions through messages and SAP S/4HANA Cloud screens; approval evidence is inconsistently linked to execution; retries after timeouts are manual; and process-level outcome measures are incomplete. The state is time-bounded and remains historical after later changes.
 
 ## Target
 

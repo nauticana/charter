@@ -11,7 +11,7 @@ The example provides conceptual instances and walkthroughs for:
 - Human and agent identities
 - An order-exception value stream, process, tasks, and execution instance
 - Authority, delegation, approval, and separation-of-duties cases
-- A fictional enterprise system named Harbor Operations System
+- A non-normative SAP S/4HANA Cloud binding example
 - Capability, data, authority, and event bindings
 - Action evidence, exceptions, and escalation
 - Baseline, target, gap, and roadmap architecture states
@@ -27,7 +27,7 @@ All documents use the same fictional order-exception scenario and stable example
 5. [Value stream and process definition](04_process_definition.md)
 6. [Authority and approvals](05_authority_and_approvals.md)
 7. [Capability contracts](06_capability_contracts.md)
-8. [Fictional-system binding](07_system_binding.md)
+8. [SAP S/4HANA Cloud binding](07_system_binding.md)
 9. [Execution walkthrough](08_execution_walkthrough.md)
 10. [Evidence and escalation](09_evidence_and_escalation.md)
 11. [Information governance](10_information_governance.md)

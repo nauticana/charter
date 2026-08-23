@@ -25,4 +25,4 @@ Bindings connect stable Charter capability and authority semantics to a specific
 - **CHR-BIND-008:** Adapter authentication, retry, transaction, and monitoring behavior MUST be documented without becoming normative vendor behavior in the Charter core.
 - **CHR-BIND-009:** Binding conformance MUST be evaluated against declared features rather than inferred from successful connectivity.
 
-Vendor profiles, mappings, adapters, and proprietary accelerator content belong downstream unless adopted as vendor-neutral examples.
+Vendor profiles, mappings, adapters, and proprietary accelerator content belong downstream unless adopted as non-normative examples.

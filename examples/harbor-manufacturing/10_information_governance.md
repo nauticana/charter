@@ -12,6 +12,6 @@ Status: Conceptual, non-normative example
 
 Capabilities expose only the minimum fields needed for their operation. Access to a broader source does not permit the agent to use unrelated customer or employee information.
 
-The proposal records material sources and transformations, including currency conversion and inventory subtraction. The HOS DataBinding declares its minute-level expiry precision. If classification, precision, fields, or governance boundaries change during transformation, the change and decision impact are explicit.
+The proposal records material sources and transformations, including currency conversion and inventory subtraction. The SAP DataBinding declares omitted fields, unit or precision changes, identifier mappings, and SAP configuration assumptions. If classification, precision, fields, or governance boundaries change during transformation, the change and decision impact are explicit.
 
 The example retention policy applies separately to prompts, intermediate proposals, cache entries, external references, action evidence, and approval records. Deletion of a cache does not delete required evidence; retention of evidence does not authorize indefinite retention of every intermediate artifact. Conflicting rules fail closed unless an approved precedence rule resolves them.

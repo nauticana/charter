@@ -158,9 +158,9 @@ The following focused example distinguishes stable positions from the human and 
 ```mermaid
 flowchart LR
     subgraph ProductionPlanningOrganization["Production Planning"]
-        direction TB
+        direction LR
         ProductionPlanningUnit["Production Planning<br/>OrganizationUnit"]
-        PlanningManagerPosition["Planning Manager<br/>Position PP-MGR-01"]
+        PlanningManagerPosition["Production Planning Manager<br/>Position PP-MGR-01"]
         PlannerPositionOne["Production Planner<br/>Position PP-PLN-01"]
         PlannerPositionTwo["Production Planner<br/>Position PP-PLN-02"]
 
@@ -231,4 +231,4 @@ Roles group related responsibilities; they are not positions, identities, or ext
 | `RESP-APPROVE-CREDIT-EXCEPTION` | Responsibility | Credit risk is explicitly accepted or rejected within policy | Credit Manager |
 | `RESP-CONFIRM-FULFILLMENT-FEASIBILITY` | Responsibility | Material and capacity feasibility is current and evidenced | Production Planner |
 
-`ROLE-ORDER-EXCEPTION-SUPPORT` contains the coordination and investigation responsibilities. Role membership does not transfer the Credit Manager's approval authority, and a similarly named role in Harbor Operations System does not automatically confer Charter authority.
+`ROLE-ORDER-EXCEPTION-SUPPORT` contains the coordination and investigation responsibilities. Role membership does not transfer the Credit Manager's approval authority, and a similarly named SAP business role or authorization does not automatically confer Charter authority.

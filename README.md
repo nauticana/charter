@@ -17,7 +17,7 @@ The specification is an unreleased draft. Start with the [specification index](s
 - `spec/` contains normative semantics and behavioral requirements.
 - `schema/` will contain normative language-independent schemas.
 - `conformance/` defines profiles, traceability, rules, and fixtures.
-- `examples/` contains non-normative, vendor-neutral scenarios.
+- `examples/` contains non-normative scenarios. Core example objects remain vendor-independent, while examples may name external products to illustrate bindings.
 - `sdk/` and `cmd/` contain the planned Go reference SDK and validation CLI.
 - `doc/` contains non-normative strategy and architecture decisions.
 

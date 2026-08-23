@@ -73,7 +73,7 @@ Observe, recommend, prepare, approve, and execute remain distinct. Preparing a p
 
 ## Bounded authority
 
-`AUTH-OEC-STOCK-RESERVATION-2026` delegates only `CAP-RESERVE-ORDER-STOCK` to the stable agent identity for its assigned Harbor exception. It is limited to USD 25,000 equivalent, 72 hours, and 2026-01-01 through 2026-12-31 unless revoked. Further delegation is prohibited. Identity, assignment, policy, system support, value, duration, resource scope, separation of duties, and idempotency are checked at execution time. Missing or unverifiable authority is denial.
+`AUTH-OEC-STOCK-RESERVATION-2026` delegates only `CAP-RESERVE-ORDER-STOCK` to the stable agent identity for its assigned Harbor exception. It is limited to USD 25,000 equivalent, 72 hours, and 2026-04-01 through 2026-12-31 unless revoked, matching the agent's assignment period. Further delegation is prohibited. Identity, assignment, policy, system support, value, duration, resource scope, separation of duties, and idempotency are checked at execution time. Missing or unverifiable authority is denial.
 
 The agent evaluates authority in its current assignment context and cannot combine authority from positions or other assignments. It never approves a proposal it prepared where separation of duties requires another actor.
 

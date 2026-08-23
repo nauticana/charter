@@ -30,11 +30,12 @@ This catalogue gives the recurring Harbor Manufacturing objects stable example i
 | Capability | `CAP-READ-ORDER-EXCEPTION` | Read relevant exception facts |
 | Capability | `CAP-PROPOSE-ORDER-RESOLUTION` | Prepare a resolution proposal |
 | Capability | `CAP-REQUEST-EXCEPTION-APPROVAL` | Request a bound approval |
+| Capability | `CAP-APPROVE-CREDIT-EXCEPTION` | Record an authorized credit decision |
 | Capability | `CAP-RESERVE-ORDER-STOCK` | Reserve eligible stock |
 | Authority grant | `AUTH-OEC-STOCK-RESERVATION-2026` | Bounded reservation delegation |
 | Approval | `APPR-OE-2026-0042-CREDIT-01` | Credit decision for the example instance |
-| System profile | `SYSPROFILE-HOS-2026-01` | Harbor Operations System profile |
-| Binding set | `BIND-HOS-ORDER-EXCEPTION-1` | Charter-to-HOS mappings |
+| System profile | `SYSPROFILE-HARBOR-S4-2602` | Harbor's example SAP S/4HANA Cloud Public Edition profile |
+| Capability binding | `BIND-S4-RESERVE-ORDER-STOCK-1` | Example reservation binding to SAP |
 | Evidence bundle | `EVID-OE-2026-0042` | Evidence for the example process instance |
 | Baseline state | `ARCH-BASELINE-2026-Q1` | Current manually coordinated state |
 | Target state | `ARCH-TARGET-2026-Q4` | Governed agent-supported state |
