@@ -1,0 +1,9 @@
+format_version: 1
+specification:
+  name: Nauticana Charter
+  version: draft
+profiles: []
+rules: []
+
+# No conformance rules are active yet. Add a rule only with requirement
+# references and the fixtures or behavioral procedure needed to verify it.

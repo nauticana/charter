@@ -8,7 +8,20 @@ Its purpose is not to replace an enterprise's human organization. It creates an 
 
 It extends an existing enterprise architecture with an agentic operating model. It does not replace TOGAF, the SAP Enterprise Architecture Framework, an ERP or CRM platform, or the enterprise's established architecture practice.
 
-This repository currently documents the concepts and planned interfaces. No implementation is planned at this phase.
+This repository currently documents the concepts and planned interfaces. Implementation of the Go reference SDK and validation CLI is deferred until the normative model and initial schemas are sufficiently stable.
+
+## Specification status and repository map
+
+The specification is an unreleased draft. Start with the [specification index](spec/README.md).
+
+- `spec/` contains normative semantics and behavioral requirements.
+- `schema/` will contain normative language-independent schemas.
+- `conformance/` defines profiles, traceability, rules, and fixtures.
+- `examples/` contains non-normative, vendor-neutral scenarios.
+- `sdk/` and `cmd/` contain the planned Go reference SDK and validation CLI.
+- `doc/` contains non-normative strategy and architecture decisions.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for change requirements and [GOVERNANCE.md](GOVERNANCE.md) for specification authority and release policy.
 
 ## The problem
 
@@ -67,7 +80,7 @@ The following concepts are related but distinct:
 - An **LLM** may provide reasoning or language capabilities; an LLM alone has no enterprise identity, responsibility, or authority and is therefore not a Charter agent.
 - A **workflow** follows an explicitly modeled sequence; an agent may invoke, supervise, or participate in workflows while adapting its actions to context.
 - An **MCP server or enterprise API** exposes capabilities and information; it is part of the agent's operating environment, not the agent itself.
-- **Scout** provides the reference runtime for Charter agents and their MCP interactions.
+- **Scout** provides the initial reference runtime for Charter agents and their MCP interactions.
 
 A conventional service that merely executes a fixed operation when called is not, by itself, a Charter agent. It becomes part of an agentic system when a governed agent uses it to pursue an assigned business outcome.
 
