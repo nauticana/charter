@@ -14,6 +14,33 @@
   "allOf": [
     {
       "$ref": "../common.schema.json#/$defs/documentBase"
+    },
+    {
+      "if": {
+        "properties": {
+          "approvalEvaluations": {
+            "contains": {
+              "properties": {
+                "result": {
+                  "const": "approved"
+                }
+              },
+              "required": [
+                "result"
+              ]
+            }
+          }
+        },
+        "required": [
+          "approvalEvaluations"
+        ]
+      },
+      "then": {
+        "required": [
+          "materialInputsDigest",
+          "subjectRefs"
+        ]
+      }
     }
   ],
   "properties": {
@@ -72,6 +99,20 @@
     "capabilityId": {
       "$ref": "../common.schema.json#/$defs/idRef"
     },
+    "materialInputsDigest": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Digest of the material inputs used for this action; required when an approval is evaluated as approved."
+    },
+    "subjectRefs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/objectRef"
+      },
+      "description": "Business subjects of the action, used to bind evaluated approvals to the same context."
+    },
     "operationClass": {
       "type": "string",
       "enum": [
@@ -129,6 +170,11 @@
           "approvalId": {
             "$ref": "../common.schema.json#/$defs/idRef"
           },
+          "approvedAction": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
           "result": {
             "enum": [
               "approved",
@@ -148,7 +194,23 @@
           "result",
           "reason"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "if": {
+          "properties": {
+            "result": {
+              "const": "approved"
+            }
+          },
+          "required": [
+            "result"
+          ]
+        },
+        "then": {
+          "required": [
+            "approvalId",
+            "approvedAction"
+          ]
+        }
       }
     },
     "approvalIds": {

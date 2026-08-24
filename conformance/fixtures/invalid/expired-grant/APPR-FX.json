@@ -9,6 +9,12 @@
     "id": "HUMAN-FX"
   },
   "approvedAction": "CAP-FX",
+  "subjectRefs": [
+    {
+      "kind": "CapabilityContract",
+      "id": "CAP-FX"
+    }
+  ],
   "materialInputsDigest": "sha256:fx",
   "limits": [],
   "conditions": [],

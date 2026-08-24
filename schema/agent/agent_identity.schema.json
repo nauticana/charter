@@ -10,7 +10,8 @@
     "CHR-ID-002",
     "CHR-ID-003",
     "CHR-ID-004",
-    "CHR-ID-007"
+    "CHR-ID-007",
+    "CHR-ID-009"
   ],
   "type": "object",
   "allOf": [
@@ -41,6 +42,10 @@
           "$ref": "../common.schema.json#/$defs/objectRef"
         }
       ]
+    },
+    "lifecycleHistory": {
+      "$ref": "../common.schema.json#/$defs/lifecycleHistory",
+      "description": "Required semantically when this identity acts in a governed ActionRecord; optional for identities with no governed action evidence in the corpus."
     }
   },
   "required": [

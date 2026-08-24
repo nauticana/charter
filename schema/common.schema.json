@@ -65,6 +65,31 @@
         "retired"
       ]
     },
+    "lifecycleHistory": {
+      "description": "Ordered effective identity lifecycle transitions retained so historical action evidence can be evaluated at action time (CHR-ID-009).",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "$ref": "#/$defs/identityLifecycleState"
+          },
+          "effectiveAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authority": {
+            "$ref": "#/$defs/objectRef"
+          }
+        },
+        "required": [
+          "state",
+          "effectiveAt"
+        ],
+        "additionalProperties": false
+      }
+    },
     "validity": {
       "description": "Effective-dated validity; absent `to` means open-ended.",
       "type": "object",
@@ -84,7 +109,7 @@
       "additionalProperties": false
     },
     "objectRef": {
-      "description": "Reference by kind and identifier; `namespace` required for cross-namespace targets.",
+      "description": "Reference by kind and identifier; `namespace` is required for cross-namespace targets, and `external: true` is required for targets outside the Charter document set.",
       "type": "object",
       "properties": {
         "kind": {
@@ -97,6 +122,10 @@
         },
         "namespace": {
           "$ref": "#/$defs/namespace"
+        },
+        "external": {
+          "type": "boolean",
+          "description": "True only when the target is outside the Charter document set."
         }
       },
       "required": [
@@ -195,6 +224,12 @@
         "currency": {
           "type": "string",
           "pattern": "^[A-Z]{3}$"
+        },
+        "currencyExponent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "description": "Decimal exponent for an integer minor-unit currency value; for example USD uses 2 and JPY uses 0."
         }
       },
       "required": [
@@ -202,7 +237,26 @@
         "operator",
         "value"
       ],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "currency"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "currencyExponent"
+            ]
+          }
+        }
+      ]
     },
     "conformanceClaimEnvelope": {
       "description": "Fields shared by general and domain-specific conformance claims.",

@@ -5,7 +5,7 @@ profile: core-model
 verification: semantic
 applies_to: ["*"]
 check: >-
-  Every idRef resolves to a document in the set, and every objectRef whose kind is a Charter kind resolves to a document of that kind. objectRefs with non-Charter kinds are external and exempt.
+  Every idRef resolves to a document in the set, and every objectRef whose kind is a Charter kind resolves to a document of that kind. An objectRef with a non-Charter kind is exempt only when it declares external as true.
 fixtures:
   valid: fixtures/valid/harbor
   invalid: fixtures/invalid/dangling-reference

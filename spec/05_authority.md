@@ -18,3 +18,5 @@ Authority determines which actor may perform which operation, on which resources
 - **CHR-AUTH-010:** An implementation MUST fail closed when required authority cannot be established.
 
 External authorization systems may enforce these requirements, but their native roles or permissions do not replace the Charter authority semantics.
+
+Monetary limits use integer minor units and declare the currency exponent. This preserves exact comparisons and supports currencies whose exponent is not two.

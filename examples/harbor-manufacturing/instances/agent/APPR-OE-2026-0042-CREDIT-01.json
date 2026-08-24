@@ -21,8 +21,9 @@
     {
       "limitKind": "credit-exposure",
       "operator": "lte",
-      "value": 18500,
-      "currency": "USD"
+      "value": 1850000,
+      "currency": "USD",
+      "currencyExponent": 2
     }
   ],
   "conditions": [

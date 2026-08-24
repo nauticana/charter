@@ -10,7 +10,8 @@
   },
   "target": {
     "kind": "WorkContext",
-    "id": "WC-FX"
+    "id": "WC-FX",
+    "external": true
   },
   "participation": "supports",
   "validity": {

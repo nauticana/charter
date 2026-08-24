@@ -13,7 +13,8 @@
   "contextRefs": [
     {
       "kind": "SalesOrder",
-      "id": "ORD-2026-0173"
+      "id": "ORD-2026-0173",
+      "external": true
     }
   ]
 }

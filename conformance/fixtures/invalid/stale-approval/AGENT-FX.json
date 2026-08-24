@@ -5,5 +5,11 @@
   "kind": "AgentIdentity",
   "id": "AGENT-FX",
   "name": "AGENT-FX",
-  "lifecycleState": "active"
+  "lifecycleState": "active",
+  "lifecycleHistory": [
+    {
+      "state": "active",
+      "effectiveAt": "2026-01-01T00:00:00Z"
+    }
+  ]
 }

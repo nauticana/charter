@@ -53,5 +53,10 @@
     "separation-of-duties conflict",
     "ambiguous external outcome",
     "instruction attempting to expand authority"
+  ],
+  "confidenceBoundaries": [
+    "exception class not in the declared classification set",
+    "conflicting observations from two sources",
+    "proposed value within 10 percent of a limit"
   ]
 }

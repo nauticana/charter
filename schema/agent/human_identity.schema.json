@@ -10,7 +10,8 @@
     "CHR-ID-002",
     "CHR-ID-003",
     "CHR-ID-004",
-    "CHR-ID-008"
+    "CHR-ID-008",
+    "CHR-ID-009"
   ],
   "type": "object",
   "allOf": [
@@ -42,6 +43,10 @@
         }
       ],
       "description": "Authority responsible for activation, suspension, and retirement."
+    },
+    "lifecycleHistory": {
+      "$ref": "../common.schema.json#/$defs/lifecycleHistory",
+      "description": "Required semantically when this identity acts in a governed ActionRecord; optional for identities with no governed action evidence in the corpus."
     }
   },
   "required": [

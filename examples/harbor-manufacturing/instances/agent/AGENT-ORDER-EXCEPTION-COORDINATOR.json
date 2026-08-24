@@ -6,6 +6,12 @@
   "enterpriseId": "ENT-HARBOR",
   "name": "Order Exception Coordinator",
   "lifecycleState": "active",
+  "lifecycleHistory": [
+    {
+      "state": "active",
+      "effectiveAt": "2026-01-01T00:00:00Z"
+    }
+  ],
   "lifecycleAuthority": {
     "kind": "Position",
     "id": "POS-SALES-OPERATIONS-MANAGER"

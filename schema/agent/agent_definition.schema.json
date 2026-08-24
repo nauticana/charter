@@ -8,7 +8,8 @@
   "x-charter-requirements": [
     "CHR-AGENT-001",
     "CHR-AGENT-002",
-    "CHR-ENT-003"
+    "CHR-ENT-003",
+    "CHR-AGENT-004"
   ],
   "type": "object",
   "allOf": [
@@ -114,6 +115,16 @@
         "maxLength": 500
       },
       "minItems": 1
+    },
+    "confidenceBoundaries": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "minItems": 1,
+      "description": "Conditions under which the agent must stop or escalate instead of acting on its own judgment."
     }
   },
   "required": [
@@ -128,6 +139,7 @@
     "expectedOutcomes",
     "capabilityIds",
     "policies",
+    "confidenceBoundaries",
     "escalationConditions"
   ],
   "unevaluatedProperties": false

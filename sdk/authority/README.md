@@ -1,3 +1,3 @@
 # Authority SDK
 
-Interfaces for grants, delegation, typed limits, approval, and separation-of-duties evaluation. Reusable evaluators are fail-closed and return structured, evidence-ready decisions.
+`Evaluator` and `GrantSource` interfaces, `AbstractEvaluator` (enterprise, actor, capability, resource, validity, organizational context, and typed-limit comparison; embed it and supply a `GrantSource`), `BaseGrantSource` (in-memory), delegation-depth and separation-of-duties helpers. Evaluation is fail-closed and returns a namespaced grant reference, result, and reason.

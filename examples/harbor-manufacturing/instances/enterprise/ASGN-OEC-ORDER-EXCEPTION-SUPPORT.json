@@ -10,7 +10,8 @@
   },
   "target": {
     "kind": "WorkContext",
-    "id": "PROC-RESOLVE-ORDER-EXCEPTION"
+    "id": "PROC-RESOLVE-ORDER-EXCEPTION",
+    "external": true
   },
   "participation": "supports",
   "validity": {

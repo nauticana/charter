@@ -19,8 +19,9 @@
     {
       "limitKind": "reservation-value",
       "operator": "lte",
-      "value": 25000,
-      "currency": "USD"
+      "value": 2500000,
+      "currency": "USD",
+      "currencyExponent": 2
     },
     {
       "limitKind": "reservation-duration",

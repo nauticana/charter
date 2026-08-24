@@ -27,7 +27,7 @@ Profiles are not active until their required rules are listed in `conformance/ma
 - **CHR-CONF-009:** Partial support MUST be reported as partial and MUST identify omitted or unsupported features.
 - **CHR-CONF-010:** A minor or patch release MUST NOT intentionally invalidate an artifact that conformed to the preceding release in the same major version.
 - **CHR-CONF-011:** Conformance results MUST distinguish structural validation, semantic validation, and runtime behavioral verification.
-- **CHR-CONF-012:** A reference to a Charter document MUST resolve within its declared namespace to a document of the required kind. References explicitly declared external are exempt.
+- **CHR-CONF-012:** A reference to a Charter document MUST resolve within its declared namespace to a document of the required kind. A reference to a kind outside the Charter catalogue MUST be explicitly declared external; only such declared external references are exempt from Charter document resolution.
 
 ## Compatibility
 

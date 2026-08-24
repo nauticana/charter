@@ -1,11 +1,11 @@
 id: CHR-RULE-ID-001
-title: Governed actions are performed by active identities
-requirements: [CHR-ID-005]
+title: Governed actions are performed by identities active at action time
+requirements: [CHR-ID-005, CHR-ID-009]
 profile: core-model
 verification: semantic
 applies_to: [ActionRecord]
 check: >-
-  Every ActionRecord.actor resolves to an identity whose lifecycleState is active.
+  Every ActionRecord.actor resolves to an identity whose lifecycleHistory establishes active state at actionTime.
 fixtures:
   valid: fixtures/valid/harbor
   invalid: fixtures/invalid/suspended-actor

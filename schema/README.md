@@ -32,3 +32,31 @@ A string-valued `idRef` resolves in the referring document's namespace. Cross-na
 Because each schema has an absolute `$id`, an offline validator must register the local schema file under that `$id` before resolving relative `$ref` values. `catalog.json` provides the mapping. Validation must use JSON Schema draft 2020-12, support `unevaluatedProperties`, enable `format` assertion for `date` and `date-time` values, and accept or register the `x-charter-*` annotation keywords.
 
 Structural validation alone cannot establish graph acyclicity, reference existence or kind, date ordering, authority effectiveness, or runtime behavior. Those constraints require active semantic or behavioral conformance rules.
+
+## Domain relations
+
+Arrows read "references"; each domain diagram in its README shows the properties.
+
+```mermaid
+flowchart LR
+    binding -->|informationDefinitionId| information
+    binding -->|capabilityId| process
+    process -->|sodConstraintIds| agent
+    process -->|accountableResponsibilityId, performer, assignmentId| enterprise
+    evidence -->|capabilityId| process
+    evidence -->|actor, runtimeInstanceId, authorityGrantId, approvalId| agent
+    evidence -->|assignmentId, responsibilityId| enterprise
+    enterprise -->|Assignment.subject| agent
+    agent -->|accountable, responsibilityIds| enterprise
+    agent -->|capabilityIds, constrainedActions| process
+
+    binding["binding<br/>EnterpriseSystem, SystemProfile, CapabilityBinding,<br/>DataBinding, AuthorityBinding, EventBinding,<br/>BindingConformance"]
+    information["information<br/>InformationDefinition,<br/>InformationGovernancePolicy"]
+    enterprise["enterprise<br/>Enterprise, OrganizationUnit, PositionType,<br/>Position, Role, Responsibility,<br/>OrganizationRelationship, Assignment"]
+    agent["agent<br/>HumanIdentity, AgentIdentity, AgentDefinition,<br/>AgentRuntime, AuthorityGrant, Approval, SodConstraint"]
+    process["process<br/>ValueStream, BusinessProcess, Task, ProcessRelationship,<br/>ProcessInstance, TaskInstance, CapabilityContract,<br/>ArchitectureState, Gap, RoadmapItem"]
+    evidence["evidence<br/>EvidenceRecord, ActionRecord, ExceptionRecord,<br/>Escalation, EvidenceBundle"]
+    conformance["conformance<br/>ConformanceClaim"]
+```
+
+Every document also references its `Enterprise` through `enterpriseId`, except binding and conformance documents.

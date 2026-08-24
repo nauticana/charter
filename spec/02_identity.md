@@ -14,6 +14,7 @@ Identity establishes who or what participates in Charter-governed activity. Auth
 - **CHR-ID-006:** Reinstatement, replacement, and succession MUST preserve the historical identity referenced by existing evidence.
 - **CHR-ID-007:** Credential rotation MUST NOT change the enterprise identity of the actor.
 - **CHR-ID-008:** Identity records SHOULD identify the authority responsible for activation, suspension, and retirement.
+- **CHR-ID-009:** Evidence for a governed action MUST allow the acting identity's lifecycle state at the action time to be established. The identity's retained lifecycle transitions MUST be ordered and effective-dated sufficiently to establish that state.
 
 ## Human and agent distinctions
 

@@ -28,6 +28,9 @@
   "policies": [
     "p"
   ],
+  "confidenceBoundaries": [
+    "c"
+  ],
   "escalationConditions": [
     "e"
   ]
