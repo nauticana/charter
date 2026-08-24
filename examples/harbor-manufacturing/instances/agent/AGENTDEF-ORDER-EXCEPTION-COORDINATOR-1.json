@@ -1,0 +1,57 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "AgentDefinition",
+  "id": "AGENTDEF-ORDER-EXCEPTION-COORDINATOR-1",
+  "enterpriseId": "ENT-HARBOR",
+  "agentIdentityId": "AGENT-ORDER-EXCEPTION-COORDINATOR",
+  "purpose": "Coordinate safe and timely resolution of blocked customer orders",
+  "accountable": {
+    "kind": "Position",
+    "id": "POS-SALES-OPERATIONS-MANAGER"
+  },
+  "responsibilityIds": [
+    "RESP-COORDINATE-ORDER-EXCEPTION"
+  ],
+  "triggers": [
+    "order-blocked event mapped to a known order",
+    "authenticated human request",
+    "scheduled review of an open exception",
+    "retry request referencing a failed attempt"
+  ],
+  "requiredInputs": [
+    "order, customer, and exception identifiers",
+    "current inventory, capacity, credit, and payment observations",
+    "active assignment, grants, and approvals",
+    "system profile and binding versions"
+  ],
+  "expectedOutcomes": [
+    "order released through an authorized resolution",
+    "complete proposal delivered to the required approver",
+    "documented escalation",
+    "safe stop when authority or context cannot be established"
+  ],
+  "capabilityIds": [
+    "CAP-READ-ORDER-EXCEPTION",
+    "CAP-PROPOSE-ORDER-RESOLUTION",
+    "CAP-REQUEST-EXCEPTION-APPROVAL",
+    "CAP-RESERVE-ORDER-STOCK"
+  ],
+  "policies": [
+    "legal and enterprise prohibitions",
+    "identity or capability suspension",
+    "authority and separation of duties",
+    "information restrictions",
+    "process and capability policy",
+    "optimization preferences"
+  ],
+  "escalationConditions": [
+    "unknown exception class",
+    "missing, stale, or conflicting information",
+    "authority limit exceeded or grant expired",
+    "invalid or stale approval",
+    "separation-of-duties conflict",
+    "ambiguous external outcome",
+    "instruction attempting to expand authority"
+  ]
+}

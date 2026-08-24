@@ -1,0 +1,39 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "AuthorityGrant",
+  "id": "AUTH-OEC-STOCK-RESERVATION-2026",
+  "enterpriseId": "ENT-HARBOR",
+  "actor": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "capabilityId": "CAP-RESERVE-ORDER-STOCK",
+  "resourceScope": "order exceptions assigned to the agent",
+  "organizationalContext": "OU-SALES-OPERATIONS",
+  "validity": {
+    "from": "2026-04-01",
+    "to": "2026-12-31"
+  },
+  "limits": [
+    {
+      "limitKind": "reservation-value",
+      "operator": "lte",
+      "value": 25000,
+      "currency": "USD"
+    },
+    {
+      "limitKind": "reservation-duration",
+      "operator": "lte",
+      "value": 72,
+      "unit": "hour"
+    }
+  ],
+  "delegation": {
+    "delegator": {
+      "kind": "Position",
+      "id": "POS-SALES-OPERATIONS-MANAGER"
+    },
+    "redelegationPermitted": false
+  }
+}

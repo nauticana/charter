@@ -1,0 +1,29 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "EvidenceBundle",
+  "id": "EVID-OE-2026-0042",
+  "enterpriseId": "ENT-HARBOR",
+  "subject": {
+    "kind": "ProcessInstance",
+    "id": "PROCINST-OE-2026-0042"
+  },
+  "recordIds": [
+    "EVR-0042-STOCK-OBSERVED",
+    "EVR-0042-CLASSIFICATION",
+    "EVR-0042-CREDIT-DECISION",
+    "EVR-0042-SAP-RESERVATION",
+    "EVR-0042-COVERAGE",
+    "EVR-0042-STOCK-CORRECTED",
+    "ACT-0042-READ-1",
+    "ACT-0042-EXECUTE-1",
+    "EXC-OE-2026-0042-01",
+    "ESC-OE-2026-0042-01"
+  ],
+  "assuranceProfile": "harbor-standard",
+  "integrity": {
+    "method": "sha256-hash-chain",
+    "value": "sha256:9b1e0c7d6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d",
+    "verifiedAt": "2026-06-18T17:20:30Z"
+  }
+}

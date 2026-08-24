@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Responsibility",
+  "id": "RESP-APPROVE-CREDIT-EXCEPTION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Approve credit exception",
+  "expectedOutcome": "Credit risk is explicitly accepted or rejected within policy",
+  "accountable": {
+    "kind": "Position",
+    "id": "POS-CREDIT-MANAGER"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "PositionType",
+  "id": "PT-FUNCTIONAL-MANAGER",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Functional Manager",
+  "purpose": "Classifies positions that lead one functional organization unit"
+}

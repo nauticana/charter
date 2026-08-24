@@ -1,0 +1,10 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-0042-CLASSIFICATION",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "agent-assertion",
+  "content": "Exception classified as material-and-credit",
+  "recordedAt": "2026-06-18T17:01:00Z"
+}

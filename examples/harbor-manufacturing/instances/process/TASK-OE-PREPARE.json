@@ -1,0 +1,19 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Task",
+  "id": "TASK-OE-PREPARE",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Prepare resolution",
+  "processId": "PROC-RESOLVE-ORDER-EXCEPTION",
+  "businessOutcome": "Evidenced resolution proposal prepared",
+  "accountableResponsibilityId": "RESP-COORDINATE-ORDER-EXCEPTION",
+  "permittedPerformerKinds": [
+    "human",
+    "agent"
+  ],
+  "permittedParticipation": [
+    "recommends",
+    "prepares"
+  ]
+}

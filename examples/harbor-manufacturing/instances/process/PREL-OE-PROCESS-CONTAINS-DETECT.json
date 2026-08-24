@@ -1,0 +1,16 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "ProcessRelationship",
+  "id": "PREL-OE-PROCESS-CONTAINS-DETECT",
+  "enterpriseId": "ENT-HARBOR",
+  "relationshipType": "parent-child",
+  "subject": {
+    "kind": "BusinessProcess",
+    "id": "PROC-RESOLVE-ORDER-EXCEPTION"
+  },
+  "object": {
+    "kind": "Task",
+    "id": "TASK-OE-DETECT"
+  }
+}

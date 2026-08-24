@@ -1,0 +1,21 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "TaskInstance",
+  "id": "TASKINST-OE-0042-APPROVE",
+  "enterpriseId": "ENT-HARBOR",
+  "processInstanceId": "PROCINST-OE-2026-0042",
+  "taskId": "TASK-OE-APPROVE",
+  "taskDefinitionVersion": "1",
+  "performer": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-ALEX-RIVERA"
+  },
+  "assignmentId": "ASGN-ALEX-CREDIT-APPROVAL",
+  "participation": "approves",
+  "state": "completed",
+  "createdAt": "2026-06-18T17:00:30Z",
+  "startedAt": "2026-06-18T17:05:00Z",
+  "endedAt": "2026-06-18T17:12:00Z",
+  "outcome": "approved"
+}

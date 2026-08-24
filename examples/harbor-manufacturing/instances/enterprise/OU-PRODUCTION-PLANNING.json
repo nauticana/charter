@@ -1,0 +1,10 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "OrganizationUnit",
+  "id": "OU-PRODUCTION-PLANNING",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Production Planning",
+  "lifecycleState": "active",
+  "parentUnitId": "OU-PRODUCTION"
+}

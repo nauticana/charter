@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Position",
+  "id": "POS-ORDER-SPECIALIST",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Order Specialist",
+  "organizationUnitId": "OU-ORDER-MANAGEMENT",
+  "lifecycleState": "active",
+  "validity": {
+    "from": "2024-01-01"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Assignment",
+  "id": "ASGN-ALEX-CREDIT-APPROVAL",
+  "enterpriseId": "ENT-HARBOR",
+  "subject": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-ALEX-RIVERA"
+  },
+  "target": {
+    "kind": "Responsibility",
+    "id": "RESP-APPROVE-CREDIT-EXCEPTION"
+  },
+  "participation": "approves",
+  "validity": {
+    "from": "2026-01-01"
+  },
+  "condition": "ASGN-ALEX-CREDIT-MANAGER is active"
+}

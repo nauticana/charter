@@ -1,0 +1,9 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "HumanIdentity",
+  "id": "HUMAN-PRIYA-SHAH",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Priya Shah",
+  "lifecycleState": "active"
+}

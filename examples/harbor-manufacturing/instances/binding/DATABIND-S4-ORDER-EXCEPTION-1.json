@@ -1,0 +1,42 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "DataBinding",
+  "id": "DATABIND-S4-ORDER-EXCEPTION-1",
+  "bindingVersion": "1",
+  "systemProfileId": "SYSPROFILE-HARBOR-S4-2602",
+  "informationDefinitionId": "INFO-ORDER-EXCEPTION",
+  "featureSupport": [
+    {
+      "feature": "order-identifier-mapping",
+      "support": "supported"
+    },
+    {
+      "feature": "reservation-expiry",
+      "support": "unsupported"
+    }
+  ],
+  "fieldMappings": [
+    {
+      "charterPath": "order.id",
+      "externalPath": "SalesOrder",
+      "transformation": "ORD-2026-0173 to 50000173"
+    },
+    {
+      "charterPath": "order.line.id",
+      "externalPath": "SalesOrderItem"
+    },
+    {
+      "charterPath": "reservation.quantity",
+      "externalPath": "_ReservationDocumentItem[].ResvnItmRequiredQtyInEntryUnit"
+    }
+  ],
+  "lossyTransformations": [
+    {
+      "transformation": "reservation.expiry omitted",
+      "effectOnValidation": "expiry validated by the Charter runtime only",
+      "effectOnDecisions": "runtime releases the reservation at expiry",
+      "effectOnEvidence": "expiry recorded in Charter evidence, absent from SAP"
+    }
+  ]
+}

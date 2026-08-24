@@ -1,0 +1,20 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Assignment",
+  "id": "ASGN-MORGAN-PP-MGR",
+  "enterpriseId": "ENT-HARBOR",
+  "subject": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-MORGAN-LEE"
+  },
+  "target": {
+    "kind": "Position",
+    "id": "PP-MGR-01"
+  },
+  "participation": "occupies",
+  "validity": {
+    "from": "2024-01-01"
+  },
+  "reason": "initial"
+}

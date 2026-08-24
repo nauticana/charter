@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "AgentIdentity",
+  "id": "AGENT-PLANNING-DATA-QUALITY",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Planning Data Quality Assistant",
+  "lifecycleState": "active",
+  "lifecycleAuthority": {
+    "kind": "Position",
+    "id": "PP-MGR-01"
+  }
+}

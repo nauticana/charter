@@ -1,0 +1,12 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "SodConstraint",
+  "id": "SOD-PREPARE-APPROVE-CREDIT",
+  "enterpriseId": "ENT-HARBOR",
+  "constrainedActions": [
+    "CAP-PROPOSE-ORDER-RESOLUTION",
+    "CAP-APPROVE-CREDIT-EXCEPTION"
+  ],
+  "scope": "the same order exception"
+}

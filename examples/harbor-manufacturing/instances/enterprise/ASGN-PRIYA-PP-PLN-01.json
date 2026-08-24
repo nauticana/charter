@@ -1,0 +1,21 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Assignment",
+  "id": "ASGN-PRIYA-PP-PLN-01",
+  "enterpriseId": "ENT-HARBOR",
+  "subject": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-PRIYA-SHAH"
+  },
+  "target": {
+    "kind": "Position",
+    "id": "PP-PLN-01"
+  },
+  "participation": "occupies",
+  "validity": {
+    "from": "2024-01-01",
+    "to": "2025-12-31"
+  },
+  "reason": "initial"
+}

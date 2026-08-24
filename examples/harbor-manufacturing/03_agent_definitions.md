@@ -17,7 +17,7 @@ This document designs one agent in enough detail to show how a downstream implem
 | Responsibility | `RESP-COORDINATE-ORDER-EXCEPTION` |
 | Assignment | `ASGN-OEC-ORDER-EXCEPTION-SUPPORT` |
 | Definition owner | Sales Operations Manager |
-| Technical operator | Harbor platform operations |
+| Runtime | `RT-OEC-PROD-01`, operated by `OU-PLATFORM-OPERATIONS` |
 
 The accountable position remains accountable for the outcome. The definition owner approves changes to purpose, policy, or capabilities. The technical operator can deploy and suspend runtime components but cannot create business authority through deployment configuration.
 
@@ -60,16 +60,12 @@ The agent needs enterprise, order, customer, exception, process-instance, and ta
 | Capability | Class | Use | Constraint |
 |---|---|---|---|
 | `CAP-READ-ORDER-EXCEPTION` | Read | Allowed | Assigned instance; minimum necessary fields |
-| `CAP-READ-FULFILLMENT-OPTIONS` | Read | Allowed | Data relevant to the assigned order |
-| `CAP-READ-CREDIT-STATUS` | Read | Allowed | Summary only; no unrelated financial data |
 | `CAP-PROPOSE-ORDER-RESOLUTION` | Propose | Allowed | Cite facts, policy, assumptions, and alternatives |
 | `CAP-REQUEST-EXCEPTION-APPROVAL` | Propose | Allowed | Bind approver, action, material inputs, limits, and validity |
 | `CAP-RESERVE-ORDER-STOCK` | Execute | Conditional | Valid grant, limits, checks, and idempotency key |
-| `CAP-APPROVE-CREDIT-EXCEPTION` | Approve | Not allowed | Credit Manager decision |
-| `CAP-OVERRIDE-COMPLIANCE-HOLD` | Execute | Not allowed | Human escalation required |
-| `CAP-CHANGE-MASTER-DATA` | Execute | Not allowed | Outside purpose and assignment |
+| `CAP-APPROVE-CREDIT-EXCEPTION` | Approve | Not allowed | Credit Manager decision; `SOD-PREPARE-APPROVE-CREDIT` |
 
-Observe, recommend, prepare, approve, and execute remain distinct. Preparing a proposal does not approve it; receiving approval does not itself execute it. Connectivity to an operation does not make it permitted.
+Overriding a compliance hold or changing master data is outside the definition and therefore not permitted. Observe, recommend, prepare, approve, and execute remain distinct. Preparing a proposal does not approve it; receiving approval does not itself execute it. Connectivity to an operation does not make it permitted.
 
 ## Bounded authority
 

@@ -1,0 +1,47 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "CapabilityContract",
+  "id": "CAP-PROPOSE-ORDER-RESOLUTION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Propose order resolution",
+  "purpose": "Produce evidenced alternatives and a recommended disposition",
+  "operationClass": "propose",
+  "contractVersion": "1",
+  "inputs": [
+    "exception facts",
+    "policy constraints"
+  ],
+  "outputs": [
+    "alternatives",
+    "recommendation",
+    "assumptions"
+  ],
+  "preconditions": [
+    "facts complete and current"
+  ],
+  "outcomes": [
+    "proposal-prepared",
+    "insufficient-information"
+  ],
+  "businessErrors": [
+    "no permitted alternative"
+  ],
+  "requiredAuthority": "active assignment to the exception",
+  "constraints": {
+    "approvalRequired": false,
+    "sodConstraintIds": [
+      "SOD-PREPARE-APPROVE-CREDIT"
+    ],
+    "limits": []
+  },
+  "idempotency": {
+    "mutating": false,
+    "retrySemantics": "a repeated proposal supersedes the previous one"
+  },
+  "evidenceRequirements": [
+    "cited facts",
+    "alternatives considered",
+    "recommendation rationale"
+  ]
+}

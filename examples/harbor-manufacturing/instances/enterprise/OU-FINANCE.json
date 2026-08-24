@@ -1,0 +1,10 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "OrganizationUnit",
+  "id": "OU-FINANCE",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Finance",
+  "lifecycleState": "active",
+  "parentUnitId": "OU-HARBOR"
+}

@@ -1,0 +1,19 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Task",
+  "id": "TASK-OE-GATHER",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Gather required facts",
+  "processId": "PROC-RESOLVE-ORDER-EXCEPTION",
+  "businessOutcome": "Minimum facts for the exception class gathered",
+  "accountableResponsibilityId": "RESP-INVESTIGATE-ORDER-EXCEPTION",
+  "permittedPerformerKinds": [
+    "human",
+    "agent"
+  ],
+  "permittedParticipation": [
+    "observes",
+    "prepares"
+  ]
+}

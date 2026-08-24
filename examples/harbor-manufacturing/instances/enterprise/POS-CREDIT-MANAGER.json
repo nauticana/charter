@@ -1,0 +1,14 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Position",
+  "id": "POS-CREDIT-MANAGER",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Credit Manager",
+  "organizationUnitId": "OU-CREDIT-CONTROL",
+  "lifecycleState": "active",
+  "validity": {
+    "from": "2024-01-01"
+  },
+  "positionTypeId": "PT-FUNCTIONAL-MANAGER"
+}

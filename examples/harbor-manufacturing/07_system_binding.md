@@ -20,7 +20,7 @@ The process task contains no SAP URL. It references the stable Charter capabilit
 
 ## System profile
 
-`SYSPROFILE-HARBOR-S4-2602` identifies SAP S/4HANA Cloud Public Edition release 2602, Harbor's tenant configuration, the Reservation Document OData V4 service version `0001`, its authentication arrangement, and its verified operational constraints. A different SAP release or deployment receives a different or explicitly compatible profile.
+`SYS-HARBOR-S4` is Harbor's SAP system. `SYSPROFILE-HARBOR-S4-2602` identifies SAP S/4HANA Cloud Public Edition release 2602, Harbor's tenant configuration, the Reservation Document OData V4 service version `0001`, its authentication arrangement, and its verified operational constraints. A different SAP release or deployment receives a different or explicitly compatible profile.
 
 ## Capability binding
 
@@ -44,7 +44,7 @@ Content-Type: application/json
       "Product": "<product>",
       "MatlCompRequirementDate": "2026-06-20",
       "EntryUnit": "PC",
-      "ResvnItmRequiredQtyInEntryUnit": 40
+      "ResvnItmRequiredQtyInEntryUnit": 30
     }
   ]
 }
@@ -52,7 +52,7 @@ Content-Type: application/json
 
 SAP documents the Reservation Document API as supporting reservation creation with this OData V4 resource. See [SAP Reservation Document operations](https://help.sap.com/docs/SAP_S4HANA_CLOUD/3f57e7df4a114edabffe8b2d581a59ed/778f4803e1f64675a5430de153dd6ddb.html?locale=en-US&state=PRODUCTION&version=2602.500).
 
-The DataBinding maps Charter order `ORD-2026-0173` and its example line to SAP sales order `50000173`, item `10`. Movement type `231` makes the sales-order fields applicable in this example; SAP documents `SalesOrder` and `SalesOrderItem` as mandatory header properties for movement types 231 and 232. See [SAP Reservation Document Header](https://help.sap.com/docs/SAP_S4HANA_CLOUD/3f57e7df4a114edabffe8b2d581a59ed/03a55f57017647368bfb386e41573ff7.html).
+`DATABIND-S4-ORDER-EXCEPTION-1` maps Charter order `ORD-2026-0173` and its example line to SAP sales order `50000173`, item `10`. Movement type `231` makes the sales-order fields applicable in this example; SAP documents `SalesOrder` and `SalesOrderItem` as mandatory header properties for movement types 231 and 232. See [SAP Reservation Document Header](https://help.sap.com/docs/SAP_S4HANA_CLOUD/3f57e7df4a114edabffe8b2d581a59ed/03a55f57017647368bfb386e41573ff7.html).
 
 This example does not claim that every SAP reservation has the same business meaning as Charter's order-stock reservation. The binding is usable only where Harbor's configured SAP operation preserves the capability's outcome, resource scope, and limits.
 
@@ -68,7 +68,7 @@ This example does not claim that every SAP reservation has the same business mea
 | Evidence | Link the task instance, capability invocation, binding and profile versions, request digest, SAP response, and reservation identifier |
 | Support | Declare reservation expiry and any other unmapped contract feature partial or unsupported |
 
-Before the call, a trusted action boundary verifies the active identity and assignment, `AUTH-OEC-STOCK-RESERVATION-2026`, value and duration limits, approvals, separation of duties, information permissions, and binding support. SAP authorization is an additional enforcement layer and cannot broaden that grant.
+Before the call, `AUTHBIND-S4-RESERVE-ORDER-STOCK-1` places SAP authorization behind a trusted action boundary that verifies the active identity and assignment, `AUTH-OEC-STOCK-RESERVATION-2026`, value and duration limits, approvals, separation of duties, information permissions, and binding support. SAP authorization is an additional enforcement layer and cannot broaden that grant.
 
 An HTTP success alone is not a successful Charter outcome. The adapter must obtain the expected SAP reservation identifier and verify that the result preserves the requested business quantities. Any lossy or missing decision-relevant mapping is declared and causes denial or escalation when it affects authority or outcome.
 
@@ -87,4 +87,4 @@ PROCINST-OE-2026-0042
   → SAP reservation identifier
 ```
 
-This provides one complete example of the Task-to-Capability-to-Binding-to-API pattern. Other Harbor process steps intentionally remain conceptual rather than documenting every SAP endpoint.
+`EVTBIND-S4-ORDER-BLOCKED-1` delivers the blocked-order business event to the agent's `order-blocked` trigger at least once. This provides one complete example of the Task-to-Capability-to-Binding-to-API pattern. Other Harbor process steps intentionally remain conceptual rather than documenting every SAP endpoint.

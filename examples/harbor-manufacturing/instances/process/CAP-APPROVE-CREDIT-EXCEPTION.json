@@ -1,0 +1,48 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "CapabilityContract",
+  "id": "CAP-APPROVE-CREDIT-EXCEPTION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Approve credit exception",
+  "purpose": "Record an authorized credit decision bound to material inputs",
+  "operationClass": "approve",
+  "contractVersion": "1",
+  "inputs": [
+    "proposal digest",
+    "credit observation",
+    "exposure"
+  ],
+  "outputs": [
+    "approval record"
+  ],
+  "preconditions": [
+    "approver holds the credit approval responsibility",
+    "proposal not prepared by the approver"
+  ],
+  "outcomes": [
+    "approved",
+    "rejected"
+  ],
+  "businessErrors": [
+    "exposure above approver limit",
+    "stale proposal"
+  ],
+  "requiredAuthority": "RESP-APPROVE-CREDIT-EXCEPTION assignment",
+  "constraints": {
+    "approvalRequired": false,
+    "sodConstraintIds": [
+      "SOD-PREPARE-APPROVE-CREDIT"
+    ],
+    "limits": []
+  },
+  "idempotency": {
+    "mutating": true,
+    "retrySemantics": "a decision for the same digest is returned, not duplicated"
+  },
+  "evidenceRequirements": [
+    "approver identity",
+    "material inputs digest",
+    "limits and expiry"
+  ]
+}

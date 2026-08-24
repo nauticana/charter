@@ -1,0 +1,14 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "ArchitectureState",
+  "id": "ARCH-BASELINE-2026-Q1",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Manually coordinated exceptions",
+  "stateType": "baseline",
+  "validity": {
+    "from": "2026-01-01",
+    "to": "2026-03-31"
+  },
+  "description": "Sales Operations coordinates exceptions through messages and SAP screens; approval evidence is inconsistently linked to execution; retries after timeouts are manual"
+}

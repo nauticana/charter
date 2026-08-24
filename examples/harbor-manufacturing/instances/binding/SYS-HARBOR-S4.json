@@ -1,0 +1,8 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "EnterpriseSystem",
+  "id": "SYS-HARBOR-S4",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Harbor SAP S/4HANA Cloud Public Edition"
+}

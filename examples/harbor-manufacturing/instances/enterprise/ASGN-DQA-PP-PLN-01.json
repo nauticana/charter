@@ -1,0 +1,11 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Assignment",
+  "id": "ASGN-DQA-PP-PLN-01",
+  "enterpriseId": "ENT-HARBOR",
+  "subject": {"kind": "AgentIdentity", "id": "AGENT-PLANNING-DATA-QUALITY"},
+  "target": {"kind": "Position", "id": "PP-PLN-01"},
+  "participation": "supports",
+  "validity": {"from": "2026-04-01"}
+}

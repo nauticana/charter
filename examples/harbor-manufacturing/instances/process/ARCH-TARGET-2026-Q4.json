@@ -1,0 +1,17 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "ArchitectureState",
+  "id": "ARCH-TARGET-2026-Q4",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Governed agent-supported exceptions",
+  "stateType": "target",
+  "validity": {
+    "from": "2026-10-01"
+  },
+  "decisionAuthority": {
+    "kind": "Position",
+    "id": "POS-SALES-OPERATIONS-MANAGER"
+  },
+  "description": "Governed Order Exception Coordinator with stable capability contracts, explicit authority evaluation, bound approvals, idempotent execution, and linked evidence"
+}

@@ -1,0 +1,9 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "OrganizationUnit",
+  "id": "OU-HARBOR",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Harbor Manufacturing Organization",
+  "lifecycleState": "active"
+}

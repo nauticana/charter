@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Responsibility",
+  "id": "RESP-CONFIRM-FULFILLMENT-FEASIBILITY",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Confirm fulfillment feasibility",
+  "expectedOutcome": "Material and capacity feasibility is current and evidenced",
+  "accountable": {
+    "kind": "Position",
+    "id": "PP-PLN-01"
+  }
+}

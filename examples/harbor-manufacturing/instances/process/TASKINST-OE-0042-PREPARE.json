@@ -1,0 +1,21 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "TaskInstance",
+  "id": "TASKINST-OE-0042-PREPARE",
+  "enterpriseId": "ENT-HARBOR",
+  "processInstanceId": "PROCINST-OE-2026-0042",
+  "taskId": "TASK-OE-PREPARE",
+  "taskDefinitionVersion": "1",
+  "performer": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "assignmentId": "ASGN-OEC-ORDER-EXCEPTION-SUPPORT",
+  "participation": "prepares",
+  "state": "completed",
+  "createdAt": "2026-06-18T17:00:30Z",
+  "startedAt": "2026-06-18T17:03:30Z",
+  "endedAt": "2026-06-18T17:05:00Z",
+  "outcome": "proposal prepared"
+}

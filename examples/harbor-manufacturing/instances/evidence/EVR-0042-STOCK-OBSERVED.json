@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-0042-STOCK-OBSERVED",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "observed-fact",
+  "content": "SAP S/4HANA Cloud reported 40 eligible units for the order line",
+  "recordedAt": "2026-06-18T17:03:12Z",
+  "sources": [
+    "SYSPROFILE-HARBOR-S4-2602 reservation-document-read at 17:03:12Z"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "EventBinding",
+  "id": "EVTBIND-S4-ORDER-BLOCKED-1",
+  "bindingVersion": "1",
+  "systemProfileId": "SYSPROFILE-HARBOR-S4-2602",
+  "externalEvent": "sales order blocked business event",
+  "charterTrigger": "order-blocked event mapped to a known order",
+  "featureSupport": [
+    {
+      "feature": "event-delivery",
+      "support": "supported"
+    }
+  ],
+  "deliverySemantics": "at-least-once"
+}

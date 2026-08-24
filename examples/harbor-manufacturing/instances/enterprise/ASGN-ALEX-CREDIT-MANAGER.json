@@ -1,0 +1,19 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Assignment",
+  "id": "ASGN-ALEX-CREDIT-MANAGER",
+  "enterpriseId": "ENT-HARBOR",
+  "subject": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-ALEX-RIVERA"
+  },
+  "target": {
+    "kind": "Position",
+    "id": "POS-CREDIT-MANAGER"
+  },
+  "participation": "occupies",
+  "validity": {
+    "from": "2026-01-01"
+  }
+}

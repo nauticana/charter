@@ -1,0 +1,14 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-0042-STOCK-CORRECTED",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "observed-fact",
+  "content": "SAP S/4HANA Cloud reported 38 eligible units after a late goods issue posting",
+  "recordedAt": "2026-06-18T17:14:00Z",
+  "sources": [
+    "SYSPROFILE-HARBOR-S4-2602 reservation-document-read at 17:14:00Z"
+  ],
+  "supersedes": "EVR-0042-STOCK-OBSERVED"
+}

@@ -1,0 +1,46 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "InformationGovernancePolicy",
+  "id": "POL-ORDER-EXCEPTION-INFORMATION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Order exception information policy",
+  "scope": [
+    {
+      "kind": "InformationDefinition",
+      "id": "INFO-ORDER-EXCEPTION"
+    },
+    {
+      "kind": "InformationDefinition",
+      "id": "INFO-CREDIT-STATUS-SUMMARY"
+    }
+  ],
+  "permittedUses": [
+    "resolve the identified order exception",
+    "governed approval and execution",
+    "audit"
+  ],
+  "accessConstraints": [
+    "minimum fields for the assigned exception",
+    "no unrelated customer or employee information"
+  ],
+  "retentionAndDeletion": [
+    {
+      "artifactKind": "action-evidence",
+      "retentionRule": "7 years",
+      "deletionRule": "after retention, unless on legal hold"
+    },
+    {
+      "artifactKind": "prompt",
+      "retentionRule": "90 days",
+      "deletionRule": "purge; evidence is retained separately"
+    },
+    {
+      "artifactKind": "cache",
+      "retentionRule": "24 hours",
+      "deletionRule": "purge; never a substitute for evidence"
+    }
+  ],
+  "precedence": 10,
+  "conflictBehavior": "fail-closed"
+}

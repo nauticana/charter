@@ -1,0 +1,14 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Position",
+  "id": "POS-SALES-OPERATIONS-MANAGER",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Sales Operations Manager",
+  "organizationUnitId": "OU-SALES-OPERATIONS",
+  "lifecycleState": "active",
+  "validity": {
+    "from": "2024-01-01"
+  },
+  "positionTypeId": "PT-FUNCTIONAL-MANAGER"
+}

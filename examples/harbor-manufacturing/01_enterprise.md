@@ -1,171 +1,96 @@
 # Harbor Manufacturing Enterprise
 
-Harbor Manufacturing contains four primary functional organization units beneath its root organization unit:
+Harbor Manufacturing (`ENT-HARBOR`) contains three functional organization units and one supporting unit beneath its root organization unit `OU-HARBOR`:
 
-- Sales Operations owns customer-order intake and exception coordination.
-- Production owns planning, assembly, quality, and fulfillment readiness.
-- Procurement owns supplier sourcing and component purchasing.
-- Finance owns credit policy, invoicing, receivables, and financial control.
+- Sales Operations (`OU-SALES-OPERATIONS`) owns customer-order intake and exception coordination; Order Management is its child unit.
+- Production (`OU-PRODUCTION`) owns planning and fulfillment readiness; Production Planning is its child unit.
+- Finance (`OU-FINANCE`) owns credit policy and financial control; Credit Control is its child unit.
+- Platform Operations (`OU-PLATFORM-OPERATIONS`) operates agent runtimes without holding business authority.
 
 ```mermaid
 flowchart TB
-    Enterprise["Harbor Manufacturing<br/>Enterprise"]
+    Enterprise["Harbor Manufacturing<br/>Enterprise ENT-HARBOR"]
 
-    subgraph HarborGroup["Harbor Manufacturing Organization"]
-        direction LR
+    subgraph HarborGroup["OU-HARBOR"]
         Harbor["Harbor Manufacturing Organization<br/>OrganizationUnit"]
-        GeneralManager["General Manager<br/>Position"]
-        Harbor --> GeneralManager
     end
 
-    subgraph SalesGroup["Sales Operations"]
+    subgraph SalesGroup["OU-SALES-OPERATIONS"]
         direction LR
         Sales["Sales Operations<br/>OrganizationUnit"]
-        SalesManager["Sales Operations Manager<br/>Position"]
-        SalesCoordinator["Sales Coordinator<br/>Position"]
+        SalesManager["Sales Operations Manager<br/>Position POS-SALES-OPERATIONS-MANAGER"]
         Sales --> SalesManager
-        Sales --> SalesCoordinator
     end
 
-    subgraph OrderManagementGroup["Order Management"]
+    subgraph OrderManagementGroup["OU-ORDER-MANAGEMENT"]
         direction LR
         OrderManagement["Order Management<br/>OrganizationUnit"]
-        OrderManager["Order Management Manager<br/>Position"]
-        OrderSpecialist["Order Specialist<br/>Position"]
-        PricingSpecialist["Pricing Specialist<br/>Position"]
-        OrderManagement --> OrderManager
+        OrderSpecialist["Order Specialist<br/>Position POS-ORDER-SPECIALIST"]
         OrderManagement --> OrderSpecialist
-        OrderManagement --> PricingSpecialist
     end
 
-    subgraph SalesSupportGroup["Sales Support"]
-        SalesSupport["Sales Support<br/>OrganizationUnit"]
-    end
-
-    subgraph ProductionGroup["Production"]
-        direction LR
+    subgraph ProductionGroup["OU-PRODUCTION"]
         Production["Production<br/>OrganizationUnit"]
-        ProductionManager["Production Manager<br/>Position"]
-        Production --> ProductionManager
     end
 
-    subgraph ProductionPlanningGroup["Production Planning"]
+    subgraph ProductionPlanningGroup["OU-PRODUCTION-PLANNING"]
         direction LR
         ProductionPlanning["Production Planning<br/>OrganizationUnit"]
-        PlanningManager["Production Planning Manager<br/>Position"]
-        ProductionPlanner["Production Planner<br/>Position"]
+        PlanningManager["Production Planning Manager<br/>Position PP-MGR-01"]
+        PlannerOne["Production Planner<br/>Position PP-PLN-01"]
+        PlannerTwo["Production Planner<br/>Position PP-PLN-02"]
         ProductionPlanning --> PlanningManager
-        ProductionPlanning --> ProductionPlanner
+        ProductionPlanning --> PlannerOne
+        ProductionPlanning --> PlannerTwo
     end
 
-    subgraph AssemblyGroup["Assembly"]
-        direction LR
-        Assembly["Assembly<br/>OrganizationUnit"]
-        AssemblySupervisor["Assembly Supervisor<br/>Position"]
-        Assembly --> AssemblySupervisor
-    end
-
-    subgraph QualityGroup["Quality"]
-        direction LR
-        Quality["Quality<br/>OrganizationUnit"]
-        QualityManager["Quality Manager<br/>Position"]
-        Quality --> QualityManager
-    end
-
-    subgraph ProcurementGroup["Procurement"]
-        direction LR
-        Procurement["Procurement<br/>OrganizationUnit"]
-        ProcurementManager["Procurement Manager<br/>Position"]
-        Procurement --> ProcurementManager
-    end
-
-    subgraph SupplierManagementGroup["Supplier Management"]
-        SupplierManagement["Supplier Management<br/>OrganizationUnit"]
-    end
-
-    subgraph PurchasingGroup["Purchasing"]
-        direction LR
-        Purchasing["Purchasing<br/>OrganizationUnit"]
-        Buyer["Buyer<br/>Position"]
-        Purchasing --> Buyer
-    end
-
-    subgraph FinanceGroup["Finance"]
-        direction LR
+    subgraph FinanceGroup["OU-FINANCE"]
         Finance["Finance<br/>OrganizationUnit"]
-        FinanceDirector["Finance Director<br/>Position"]
-        Finance --> FinanceDirector
     end
 
-    subgraph CreditControlGroup["Credit Control"]
+    subgraph CreditControlGroup["OU-CREDIT-CONTROL"]
         direction LR
         CreditControl["Credit Control<br/>OrganizationUnit"]
-        CreditManager["Credit Manager<br/>Position"]
-        CreditAnalyst["Credit Analyst<br/>Position"]
+        CreditManager["Credit Manager<br/>Position POS-CREDIT-MANAGER"]
         CreditControl --> CreditManager
-        CreditControl --> CreditAnalyst
     end
 
-    subgraph ReceivablesGroup["Receivables"]
-        direction LR
-        Receivables["Receivables<br/>OrganizationUnit"]
-        ReceivablesSpecialist["Receivables Specialist<br/>Position"]
-        Receivables --> ReceivablesSpecialist
-    end
-
-    subgraph FinancialControlGroup["Financial Control"]
-        FinancialControl["Financial Control<br/>OrganizationUnit"]
+    subgraph PlatformGroup["OU-PLATFORM-OPERATIONS"]
+        Platform["Platform Operations<br/>OrganizationUnit"]
     end
 
     Enterprise ==> HarborGroup
     HarborGroup ==> SalesGroup
     HarborGroup ==> ProductionGroup
-    HarborGroup ==> ProcurementGroup
     HarborGroup ==> FinanceGroup
+    HarborGroup ==> PlatformGroup
     SalesGroup ==> OrderManagementGroup
-    SalesGroup ==> SalesSupportGroup
     ProductionGroup ==> ProductionPlanningGroup
-    ProductionGroup ==> AssemblyGroup
-    ProductionGroup ==> QualityGroup
-    ProcurementGroup ==> SupplierManagementGroup
-    ProcurementGroup ==> PurchasingGroup
     FinanceGroup ==> CreditControlGroup
-    FinanceGroup ==> ReceivablesGroup
-    FinanceGroup ==> FinancialControlGroup
 
     classDef enterprise fill:#eceff1,stroke:#455a64,stroke-width:2px
     classDef organizationUnit fill:#e8f1ff,stroke:#245b8a,stroke-width:2px
     classDef position fill:#fff3d6,stroke:#9a6700,stroke-width:1px
     class Enterprise enterprise
-    class Harbor,Sales,Production,Procurement,Finance,OrderManagement,SalesSupport,ProductionPlanning,Assembly,Quality,SupplierManagement,Purchasing,CreditControl,Receivables,FinancialControl organizationUnit
-    class GeneralManager,SalesManager,SalesCoordinator,OrderManager,OrderSpecialist,PricingSpecialist,ProductionManager,PlanningManager,ProductionPlanner,AssemblySupervisor,QualityManager,ProcurementManager,Buyer,FinanceDirector,CreditManager,CreditAnalyst,ReceivablesSpecialist position
+    class Harbor,Sales,OrderManagement,Production,ProductionPlanning,Finance,CreditControl,Platform organizationUnit
+    class SalesManager,OrderSpecialist,PlanningManager,PlannerOne,PlannerTwo,CreditManager position
 ```
 
-Each subgraph represents one `OrganizationUnit` and contains the `Position` objects that belong to it. The global flow is top-to-bottom, so edges between subgraph containers display the organization-unit tree vertically. Inside each subgraph, `direction LR` displays its organization unit and positions horizontally. The tree edges target subgraph IDs rather than internal organization-unit nodes because Mermaid ignores a subgraph's local direction when one of its internal nodes has an external edge.
+Each subgraph represents one `OrganizationUnit` and contains the `Position` objects that belong to it. Thick edges are the `parentUnitId` tree; thin edges are `organizationUnitId` placement. The tree edges target subgraph IDs rather than internal organization-unit nodes because Mermaid ignores a subgraph's local direction when one of its internal nodes has an external edge.
 
-Each position belongs to an organization unit but remains a different type of Charter object. For example:
-
-- Sales Operations Manager and Sales Coordinator both belong to Sales Operations.
-- Order Management Manager, Order Specialist, and Pricing Specialist all belong to Order Management.
-- Production Planning Manager and Production Planner both belong to Production Planning.
-- Credit Manager and Credit Analyst both belong to Credit Control.
-- Buyer belongs to Purchasing.
+Each position belongs to exactly one organization unit but remains a different type of Charter object. The two Production Planner positions share a display name and keep distinct identifiers.
 
 ## Position types across organization units
 
-`PT-FUNCTIONAL-MANAGER` is a `PositionType` used to classify the Sales Operations Manager, Production Manager, Procurement Manager, and Credit Manager positions. Those position objects belong to different organization units and retain different identifiers.
+`PT-FUNCTIONAL-MANAGER` is a `PositionType` that classifies the Sales Operations Manager and Credit Manager positions. Those positions belong to different organization units and retain different identifiers.
 
 ```mermaid
 flowchart TB
     PositionType["Functional Manager<br/>PositionType PT-FUNCTIONAL-MANAGER"]
-    SalesManager["Sales Operations Manager<br/>Position"]
-    ProductionManager["Production Manager<br/>Position"]
-    ProcurementManager["Procurement Manager<br/>Position"]
-    CreditManager["Credit Manager<br/>Position"]
+    SalesManager["Sales Operations Manager<br/>Position POS-SALES-OPERATIONS-MANAGER"]
+    CreditManager["Credit Manager<br/>Position POS-CREDIT-MANAGER"]
 
     PositionType -.->|classifies| SalesManager
-    PositionType -.->|classifies| ProductionManager
-    PositionType -.->|classifies| ProcurementManager
     PositionType -.->|classifies| CreditManager
 ```
 
@@ -173,49 +98,34 @@ The shared type means the positions have the same broad organizational nature. I
 
 ## Production Planning position assignments
 
-The following focused example distinguishes stable positions from the human and agent identities assigned to support them. It shows human succession, concurrent agent support, and a position that is currently unfilled.
+The following focused example distinguishes stable positions from the human and agent identities assigned to support them. It shows human succession, an agent supporting two positions, and a position that is currently unfilled. `REL-PP-PLN-01-REPORTS-TO-PP-MGR-01` records the reporting line as a separate `OrganizationRelationship`.
 
 ```mermaid
 flowchart LR
-    subgraph ProductionPlanningOrganization["Production Planning"]
-        direction LR
-        ProductionPlanningUnit["Production Planning<br/>OrganizationUnit"]
-        PlanningManagerPosition["Production Planning Manager<br/>Position PP-MGR-01"]
-        PlannerPositionOne["Production Planner<br/>Position PP-PLN-01"]
-        PlannerPositionTwo["Production Planner<br/>Position PP-PLN-02"]
+    direction LR
+    ProductionPlanningUnit["Production Planning<br/>OrganizationUnit"]
+    PlanningManagerPosition["Production Planning Manager<br/>Position PP-MGR-01"]
+    PlannerPositionOne["Production Planner<br/>Position PP-PLN-01"]
+    PlannerPositionTwo["Production Planner<br/>Position PP-PLN-02"]
 
-        ProductionPlanningUnit ==> PlanningManagerPosition
-        ProductionPlanningUnit ==> PlannerPositionOne
-        ProductionPlanningUnit ==> PlannerPositionTwo
-    end
+    ProductionPlanningUnit ==> PlanningManagerPosition
+    ProductionPlanningUnit ==> PlannerPositionOne
+    ProductionPlanningUnit ==> PlannerPositionTwo
 
-    subgraph Identities["Human and agent identities"]
-        Morgan["Morgan Lee<br/>Human identity"]
-        Priya["Priya Shah<br/>Human identity"]
-        Jordan["Jordan Kim<br/>Human identity"]
-        PlanningAgent["Material Planning Assistant<br/>Agent identity"]
-        CapacityAgent["Capacity Planning Assistant<br/>Agent identity"]
-        ComplianceAgent["Planning Compliance Monitor<br/>Agent identity"]
-        DataQualityAgent["Planning Data Quality Assistant<br/>Agent identity"]
-    end
+    Morgan["Morgan Lee<br/>HUMAN-MORGAN-LEE"]
+    Priya["Priya Shah<br/>HUMAN-PRIYA-SHAH"]
+    Jordan["Jordan Kim<br/>HUMAN-JORDAN-KIM"]
+    DataQualityAgent["Planning Data Quality Assistant<br/>AGENT-PLANNING-DATA-QUALITY"]
 
-    subgraph PositionAssignments["Effective-dated assignments"]
-        MorganAssignment["Assignment<br/>2024-01-01 onward"]
-        PriyaAssignment["Assignment<br/>2024-01-01 to 2025-12-31"]
-        JordanAssignment["Assignment<br/>2026-01-01 onward"]
-        MaterialAgentAssignment["Material-support assignment<br/>2026-02-01 onward"]
-        CapacityAgentAssignment["Capacity-support assignment<br/>2026-03-01 onward"]
-        ComplianceAgentAssignment["Compliance-support assignment<br/>2026-03-01 onward"]
-        DataQualityAssignmentOne["Data-quality support<br/>PP-PLN-01 · 2026-04-01 onward"]
-        DataQualityAssignmentTwo["Data-quality support<br/>PP-PLN-02 · 2026-04-01 onward"]
-    end
+    MorganAssignment["ASGN-MORGAN-PP-MGR<br/>occupies · 2024-01-01 onward"]
+    PriyaAssignment["ASGN-PRIYA-PP-PLN-01<br/>occupies · 2024-01-01 to 2025-12-31"]
+    JordanAssignment["ASGN-JORDAN-PP-PLN-01<br/>occupies · 2026-01-01 onward"]
+    DataQualityAssignmentOne["ASGN-DQA-PP-PLN-01<br/>supports · 2026-04-01 onward"]
+    DataQualityAssignmentTwo["ASGN-DQA-PP-PLN-02<br/>supports · 2026-04-01 onward"]
 
     PlanningManagerPosition --- MorganAssignment --- Morgan
     PlannerPositionOne --- PriyaAssignment --- Priya
     PlannerPositionOne --- JordanAssignment --- Jordan
-    PlannerPositionOne --- MaterialAgentAssignment --- PlanningAgent
-    PlannerPositionOne --- CapacityAgentAssignment --- CapacityAgent
-    PlanningManagerPosition --- ComplianceAgentAssignment --- ComplianceAgent
     PlannerPositionOne --- DataQualityAssignmentOne --- DataQualityAgent
     PlannerPositionTwo --- DataQualityAssignmentTwo --- DataQualityAgent
 
@@ -227,17 +137,13 @@ flowchart LR
     class ProductionPlanningUnit organizationUnit
     class PlanningManagerPosition,PlannerPositionOne,PlannerPositionTwo position
     class Morgan,Priya,Jordan humanIdentity
-    class PlanningAgent,CapacityAgent,ComplianceAgent,DataQualityAgent agentIdentity
-    class MorganAssignment,PriyaAssignment,JordanAssignment,MaterialAgentAssignment,CapacityAgentAssignment,ComplianceAgentAssignment,DataQualityAssignmentOne,DataQualityAssignmentTwo assignment
+    class DataQualityAgent agentIdentity
+    class MorganAssignment,PriyaAssignment,JordanAssignment,DataQualityAssignmentOne,DataQualityAssignmentTwo assignment
 ```
 
-`PP-PLN-01` remains the same position while its human occupant changes from Priya Shah to Jordan Kim. The Material Planning Assistant and Capacity Planning Assistant have separate supporting assignments to that position. The Planning Compliance Monitor separately supports `PP-MGR-01`. The Planning Data Quality Assistant supports both planner positions through two distinct assignments, preserving separate context and authority for each position. Each agent retains its own identity, purpose, assignments, and authority boundaries; none becomes a position, displaces a human occupant, or inherits a position's authority. `PP-PLN-02` has no human occupant and is therefore vacant for human occupancy even though it has an agent-support assignment. Assignment validity prevents identities from becoming part of the stable organization-unit or position structure.
+`PP-PLN-01` remains the same position while its human occupant changes from Priya Shah to Jordan Kim. The Planning Data Quality Assistant supports both planner positions through two distinct assignments, preserving separate context and authority for each position; it never becomes a position, displaces a human occupant, or inherits a position's authority. `PP-PLN-02` has no human occupant and is vacant for human occupancy even though it has an agent-support assignment. Because assignments are separate, effective-dated objects, identities never become part of the stable organization-unit or position structure.
 
-People fill positions through effective-dated assignments. Agent and responsibility assignments are also modeled separately and do not rewrite the organization-unit tree.
-
-The Sales Operations Manager position is accountable for resolving blocked customer orders. The Order Specialist position investigates individual exceptions. The Credit Manager position owns credit-policy decisions. The Production Planner position confirms material and capacity feasibility.
-
-The responsibilities remain attached to positions when the assigned people change. Human and agent assignments identify who performs or supports the work during an effective period without rewriting the organization model.
+The Sales Operations Manager position is accountable for resolving blocked customer orders. The Order Specialist position investigates individual exceptions. The Credit Manager position owns credit-policy decisions. The Production Planner position `PP-PLN-01` confirms material and capacity feasibility. Responsibilities remain attached to positions when the assigned people change.
 
 ## Roles and responsibilities
 

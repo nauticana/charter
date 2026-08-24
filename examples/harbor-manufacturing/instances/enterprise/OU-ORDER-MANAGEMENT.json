@@ -1,0 +1,10 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "OrganizationUnit",
+  "id": "OU-ORDER-MANAGEMENT",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Order Management",
+  "lifecycleState": "active",
+  "parentUnitId": "OU-SALES-OPERATIONS"
+}

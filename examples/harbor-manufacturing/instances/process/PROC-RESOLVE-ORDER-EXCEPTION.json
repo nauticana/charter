@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "BusinessProcess",
+  "id": "PROC-RESOLVE-ORDER-EXCEPTION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Resolve Order Exception",
+  "valueStreamId": "VS-FULFILL-CUSTOMER-ORDER",
+  "businessOutcome": "A blocked order is safely released, explicitly rejected, or escalated to an accountable authority",
+  "aliases": [
+    "order exception handling"
+  ]
+}

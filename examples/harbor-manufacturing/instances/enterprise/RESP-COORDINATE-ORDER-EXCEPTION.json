@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Responsibility",
+  "id": "RESP-COORDINATE-ORDER-EXCEPTION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Coordinate order exception",
+  "expectedOutcome": "A blocked order reaches an authorized disposition or documented escalation",
+  "accountable": {
+    "kind": "Position",
+    "id": "POS-SALES-OPERATIONS-MANAGER"
+  }
+}

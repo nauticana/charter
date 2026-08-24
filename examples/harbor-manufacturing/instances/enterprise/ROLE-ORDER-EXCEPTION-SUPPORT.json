@@ -1,0 +1,12 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Role",
+  "id": "ROLE-ORDER-EXCEPTION-SUPPORT",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Order exception support",
+  "responsibilityIds": [
+    "RESP-COORDINATE-ORDER-EXCEPTION",
+    "RESP-INVESTIGATE-ORDER-EXCEPTION"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "OrganizationUnit",
+  "id": "OU-PLATFORM-OPERATIONS",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Platform Operations",
+  "lifecycleState": "active",
+  "parentUnitId": "OU-HARBOR"
+}

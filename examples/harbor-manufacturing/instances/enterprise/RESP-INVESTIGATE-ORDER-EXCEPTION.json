@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Responsibility",
+  "id": "RESP-INVESTIGATE-ORDER-EXCEPTION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Investigate order exception",
+  "expectedOutcome": "Required facts and feasible alternatives are identified",
+  "accountable": {
+    "kind": "Position",
+    "id": "POS-ORDER-SPECIALIST"
+  }
+}

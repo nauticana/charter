@@ -1,0 +1,17 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Gap",
+  "id": "GAP-ORDER-EXCEPTION-EVIDENCE",
+  "enterpriseId": "ENT-HARBOR",
+  "baselineStateId": "ARCH-BASELINE-2026-Q1",
+  "targetStateId": "ARCH-TARGET-2026-Q4",
+  "classification": "missing",
+  "description": "Consistent links among facts, proposals, approvals, executions, and outcomes are missing",
+  "comparedElements": [
+    {
+      "kind": "BusinessProcess",
+      "id": "PROC-RESOLVE-ORDER-EXCEPTION"
+    }
+  ]
+}

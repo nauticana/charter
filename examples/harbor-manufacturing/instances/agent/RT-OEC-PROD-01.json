@@ -1,0 +1,16 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "AgentRuntime",
+  "id": "RT-OEC-PROD-01",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Order Exception Coordinator runtime, production",
+  "agentIdentityId": "AGENT-ORDER-EXCEPTION-COORDINATOR",
+  "agentDefinitionId": "AGENTDEF-ORDER-EXCEPTION-COORDINATOR-1",
+  "definitionVersion": "1",
+  "lifecycleState": "active",
+  "operator": {
+    "kind": "OrganizationUnit",
+    "id": "OU-PLATFORM-OPERATIONS"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Task",
+  "id": "TASK-OE-DETECT",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Detect and classify",
+  "processId": "PROC-RESOLVE-ORDER-EXCEPTION",
+  "businessOutcome": "Exception detected and classified",
+  "accountableResponsibilityId": "RESP-COORDINATE-ORDER-EXCEPTION",
+  "permittedPerformerKinds": [
+    "human",
+    "agent"
+  ],
+  "permittedParticipation": [
+    "observes"
+  ]
+}

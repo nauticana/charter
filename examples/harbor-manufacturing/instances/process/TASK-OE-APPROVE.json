@@ -1,0 +1,17 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Task",
+  "id": "TASK-OE-APPROVE",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Obtain approval",
+  "processId": "PROC-RESOLVE-ORDER-EXCEPTION",
+  "businessOutcome": "Credit disposition approved or rejected",
+  "accountableResponsibilityId": "RESP-APPROVE-CREDIT-EXCEPTION",
+  "permittedPerformerKinds": [
+    "human"
+  ],
+  "permittedParticipation": [
+    "approves"
+  ]
+}

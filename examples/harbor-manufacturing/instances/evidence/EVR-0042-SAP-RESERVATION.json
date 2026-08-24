@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-0042-SAP-RESERVATION",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "external-response",
+  "content": "SAP returned reservation 0000088421 during reconciliation",
+  "recordedAt": "2026-06-18T17:15:40Z",
+  "sources": [
+    "BIND-S4-RESERVE-ORDER-STOCK-1 reconciliation query"
+  ]
+}

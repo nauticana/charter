@@ -1,0 +1,34 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Approval",
+  "id": "APPR-OE-2026-0042-CREDIT-01",
+  "enterpriseId": "ENT-HARBOR",
+  "approver": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-ALEX-RIVERA"
+  },
+  "responsibilityId": "RESP-APPROVE-CREDIT-EXCEPTION",
+  "approvedAction": "CAP-APPROVE-CREDIT-EXCEPTION",
+  "subjectRefs": [
+    {
+      "kind": "ProcessInstance",
+      "id": "PROCINST-OE-2026-0042"
+    }
+  ],
+  "materialInputsDigest": "sha256:4f1d2a9c7b3e5d6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f",
+  "limits": [
+    {
+      "limitKind": "credit-exposure",
+      "operator": "lte",
+      "value": 18500,
+      "currency": "USD"
+    }
+  ],
+  "conditions": [
+    "order value and credit observation unchanged from the approved digest"
+  ],
+  "issuedAt": "2026-06-18T16:00:00Z",
+  "validityMode": "expires-at",
+  "expiresAt": "2026-06-19T16:00:00Z"
+}

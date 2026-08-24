@@ -1,0 +1,8 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Enterprise",
+  "id": "ENT-HARBOR",
+  "name": "Harbor Manufacturing",
+  "lifecycleState": "active"
+}

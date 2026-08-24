@@ -1,0 +1,41 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "ActionRecord",
+  "id": "ACT-0042-EXECUTE-1",
+  "enterpriseId": "ENT-HARBOR",
+  "actor": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "runtimeContext": {
+    "runtimeInstanceId": "RT-OEC-PROD-01",
+    "executionContextId": "EXEC-OE-0042-05"
+  },
+  "assignmentId": "ASGN-OEC-ORDER-EXCEPTION-SUPPORT",
+  "capabilityId": "CAP-RESERVE-ORDER-STOCK",
+  "operationClass": "execute",
+  "actionTime": "2026-06-18T17:12:30Z",
+  "outcome": "already-reserved",
+  "authorityEvaluations": [
+    {
+      "authorityGrantId": "AUTH-OEC-STOCK-RESERVATION-2026",
+      "result": "allowed",
+      "reason": "grant active; USD 18,500 within USD 25,000 and 48 hours within 72 hours"
+    }
+  ],
+  "approvalEvaluations": [
+    {
+      "approvalId": "APPR-OE-2026-0042-CREDIT-01",
+      "result": "approved",
+      "reason": "material inputs digest matches; approval not expired"
+    }
+  ],
+  "approvalIds": [
+    "APPR-OE-2026-0042-CREDIT-01"
+  ],
+  "evidenceRecordIds": [
+    "EVR-0042-SAP-RESERVATION",
+    "EVR-0042-COVERAGE"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "TaskInstance",
+  "id": "TASKINST-OE-0042-EXECUTE",
+  "enterpriseId": "ENT-HARBOR",
+  "processInstanceId": "PROCINST-OE-2026-0042",
+  "taskId": "TASK-OE-EXECUTE",
+  "taskDefinitionVersion": "1",
+  "performer": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "assignmentId": "ASGN-OEC-ORDER-EXCEPTION-SUPPORT",
+  "participation": "executes",
+  "state": "completed",
+  "createdAt": "2026-06-18T17:00:30Z",
+  "startedAt": "2026-06-18T17:12:30Z",
+  "endedAt": "2026-06-18T17:16:00Z",
+  "outcome": "already-reserved after reconciliation"
+}

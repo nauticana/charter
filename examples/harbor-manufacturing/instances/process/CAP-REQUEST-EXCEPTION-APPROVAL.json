@@ -1,0 +1,20 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "CapabilityContract",
+  "id": "CAP-REQUEST-EXCEPTION-APPROVAL",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Request exception approval",
+  "purpose": "Route a prepared proposal to the accountable approver as a bound approval request",
+  "operationClass": "propose",
+  "contractVersion": "1",
+  "inputs": ["proposal digest", "approver responsibility", "requested limits", "validity conditions"],
+  "outputs": ["approval request reference"],
+  "preconditions": ["proposal prepared", "approver holds the applicable responsibility"],
+  "outcomes": ["request-delivered", "no-eligible-approver"],
+  "businessErrors": ["approver is the proposal preparer"],
+  "requiredAuthority": "active assignment to the exception",
+  "constraints": {"approvalRequired": false, "sodConstraintIds": ["SOD-PREPARE-APPROVE-CREDIT"], "limits": []},
+  "idempotency": {"mutating": true, "retrySemantics": "a repeated request for the same digest returns the existing request"},
+  "evidenceRequirements": ["request reference", "approver identity", "proposal digest"]
+}

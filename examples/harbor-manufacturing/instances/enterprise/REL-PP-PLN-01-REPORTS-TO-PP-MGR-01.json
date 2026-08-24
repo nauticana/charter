@@ -1,0 +1,19 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "OrganizationRelationship",
+  "id": "REL-PP-PLN-01-REPORTS-TO-PP-MGR-01",
+  "enterpriseId": "ENT-HARBOR",
+  "relationshipType": "reports-to",
+  "subject": {
+    "kind": "Position",
+    "id": "PP-PLN-01"
+  },
+  "object": {
+    "kind": "Position",
+    "id": "PP-MGR-01"
+  },
+  "validity": {
+    "from": "2024-01-01"
+  }
+}

@@ -34,5 +34,6 @@ All documents use the same fictional order-exception scenario and stable example
 12. [Architecture roadmap](11_architecture_roadmap.md)
 13. [Security scenarios](12_security_scenarios.md)
 14. [Conformance walkthrough](13_conformance_walkthrough.md)
+15. [Instance documents](instances/README.md)
 
 Start with the object catalogue, then read the detailed agent design and execution walkthrough together. The remaining pages define the organizational, process, authority, information, integration, and assurance context used by that execution.

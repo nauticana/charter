@@ -1,0 +1,18 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "AuthorityBinding",
+  "id": "AUTHBIND-S4-RESERVE-ORDER-STOCK-1",
+  "bindingVersion": "1",
+  "systemProfileId": "SYSPROFILE-HARBOR-S4-2602",
+  "capabilityId": "CAP-RESERVE-ORDER-STOCK",
+  "featureSupport": [
+    {
+      "feature": "value-limit",
+      "support": "supported",
+      "notes": "enforced at the Charter action boundary"
+    }
+  ],
+  "externalEnforcement": "technical user with reservation-create authorization; value and duration limits are not expressible in SAP authorization and are enforced before invocation",
+  "unpreservableConstraintBehavior": "fail-closed"
+}

@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "AgentIdentity",
+  "id": "AGENT-ORDER-EXCEPTION-COORDINATOR",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Order Exception Coordinator",
+  "lifecycleState": "active",
+  "lifecycleAuthority": {
+    "kind": "Position",
+    "id": "POS-SALES-OPERATIONS-MANAGER"
+  }
+}

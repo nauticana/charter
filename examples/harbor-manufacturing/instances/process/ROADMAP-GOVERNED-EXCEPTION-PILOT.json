@@ -1,0 +1,24 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "RoadmapItem",
+  "id": "ROADMAP-GOVERNED-EXCEPTION-PILOT",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Governed exception pilot",
+  "addressesGapIds": [
+    "GAP-ORDER-EXCEPTION-EVIDENCE"
+  ],
+  "owner": {
+    "kind": "OrganizationUnit",
+    "id": "OU-SALES-OPERATIONS"
+  },
+  "status": "approved",
+  "dependencies": [
+    "approved agent definition",
+    "identity controls",
+    "capability and binding review",
+    "evidence retention",
+    "security tests",
+    "operational suspension procedures"
+  ]
+}

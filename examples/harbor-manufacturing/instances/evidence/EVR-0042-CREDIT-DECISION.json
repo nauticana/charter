@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-0042-CREDIT-DECISION",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "human-decision",
+  "content": "Credit Manager approved exposure up to USD 18,500 until 2026-06-19T16:00:00Z",
+  "recordedAt": "2026-06-18T17:12:00Z",
+  "sources": [
+    "APPR-OE-2026-0042-CREDIT-01"
+  ]
+}

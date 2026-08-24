@@ -1,0 +1,19 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Assignment",
+  "id": "ASGN-ELENA-SALES-MANAGER",
+  "enterpriseId": "ENT-HARBOR",
+  "subject": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-ELENA-TORRES"
+  },
+  "target": {
+    "kind": "Position",
+    "id": "POS-SALES-OPERATIONS-MANAGER"
+  },
+  "participation": "occupies",
+  "validity": {
+    "from": "2025-07-01"
+  }
+}

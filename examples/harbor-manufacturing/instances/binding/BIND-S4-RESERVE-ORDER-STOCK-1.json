@@ -1,0 +1,40 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "CapabilityBinding",
+  "id": "BIND-S4-RESERVE-ORDER-STOCK-1",
+  "bindingVersion": "1",
+  "systemProfileId": "SYSPROFILE-HARBOR-S4-2602",
+  "capabilityId": "CAP-RESERVE-ORDER-STOCK",
+  "operation": "POST /sap/opu/odata4/sap/api_reservation_document/srvd_a2x/sap/apireservationdocument/0001/ReservationDocument",
+  "featureSupport": [
+    {
+      "feature": "reservation-create",
+      "support": "supported"
+    },
+    {
+      "feature": "reservation-expiry",
+      "support": "unsupported",
+      "notes": "expiry enforced by the Charter runtime"
+    },
+    {
+      "feature": "native-idempotency-key",
+      "support": "unsupported",
+      "notes": "adapter invocation ledger"
+    }
+  ],
+  "mappings": {
+    "inputs": "order and line to SalesOrder and SalesOrderItem; product, quantity, unit, plant, storage location, requirement date to reservation item fields; movement type 231",
+    "outputs": "Reservation document number to reservation reference; item quantities verified against request",
+    "businessErrors": "SAP business messages mapped to insufficient stock, invalid order state, policy conflict; transport and OData failures kept separate",
+    "authorityChecks": "Charter grant, limits, approval, and separation of duties evaluated before invocation; SAP authorization is an additional layer",
+    "idempotency": "adapter invocation ledger keyed by the Charter idempotency key; reconcile by ledger and SAP references before retry",
+    "evidence": "task instance, capability invocation, binding and profile versions, request digest, SAP response, reservation number"
+  },
+  "lossyMappings": [
+    {
+      "mapping": "reservation expiry",
+      "effect": "not transmitted; expiry enforced and evidenced by the Charter runtime"
+    }
+  ]
+}

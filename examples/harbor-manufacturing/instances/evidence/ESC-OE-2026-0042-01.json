@@ -1,0 +1,15 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Escalation",
+  "id": "ESC-OE-2026-0042-01",
+  "enterpriseId": "ENT-HARBOR",
+  "reason": "reservation outcome unknown after timeout",
+  "recipient": {
+    "kind": "Position",
+    "id": "POS-SALES-OPERATIONS-MANAGER"
+  },
+  "requestedDecision": "confirm reconciliation result before closing",
+  "urgency": "high",
+  "resultingDisposition": "reconciled; reservation 0000088421 confirmed"
+}

@@ -1,0 +1,19 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Task",
+  "id": "TASK-OE-EXECUTE",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Execute resolution",
+  "processId": "PROC-RESOLVE-ORDER-EXCEPTION",
+  "businessOutcome": "Approved, bounded capability executed",
+  "accountableResponsibilityId": "RESP-COORDINATE-ORDER-EXCEPTION",
+  "permittedPerformerKinds": [
+    "human",
+    "agent",
+    "system"
+  ],
+  "permittedParticipation": [
+    "executes"
+  ]
+}

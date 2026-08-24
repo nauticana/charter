@@ -18,8 +18,8 @@ Revocation or expiry prevents new reservations but does not invalidate evidence 
 - Process instance `PROCINST-OE-2026-0042`
 - The proposed credit disposition and customer/order identifiers
 - Material values, currency, credit observation, and proposal digest
-- Maximum exposure and any conditions
-- Issued and expiry times
+- Maximum exposure of USD 18,500 and the condition that order value and credit observation are unchanged
+- Issued 2026-06-18T16:00:00Z, expiring 2026-06-19T16:00:00Z
 
 Changing a material input makes this approval stale. Approval is a decision record; it does not execute a release.
 
@@ -31,7 +31,7 @@ Changing a material input makes this approval stale. Approval is a decision reco
 | No grant can be established | Deny |
 | Grant expired one minute before execution | Deny and escalate |
 | USD 27,000 reservation | Deny or request separately authorized action |
-| Agent prepared and attempts to approve credit proposal | Reject separation-of-duties conflict |
+| Agent prepared and attempts to approve credit proposal | Reject `SOD-PREPARE-APPROVE-CREDIT` conflict |
 | Approval exists but order value changed | Reject stale approval |
 | External permission exists but Charter grant does not | Deny |
 

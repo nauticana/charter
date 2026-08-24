@@ -2,12 +2,13 @@
 
 Status: Conceptual, non-normative example
 
-The four contracts below demonstrate the operation classes without binding their business meanings to a protocol or product.
+The contracts below demonstrate the operation classes without binding their business meanings to a protocol or product.
 
 | Capability | Class | Business outcome |
 |---|---|---|
 | `CAP-READ-ORDER-EXCEPTION` | Read | Return the minimum current facts needed to coordinate one exception |
 | `CAP-PROPOSE-ORDER-RESOLUTION` | Propose | Produce evidenced alternatives and a recommended disposition |
+| `CAP-REQUEST-EXCEPTION-APPROVAL` | Propose | Route a prepared proposal to the accountable approver as a bound request |
 | `CAP-APPROVE-CREDIT-EXCEPTION` | Approve | Record an authorized credit decision bound to material inputs |
 | `CAP-RESERVE-ORDER-STOCK` | Execute | Create or confirm a bounded stock reservation |
 

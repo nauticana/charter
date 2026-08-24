@@ -1,0 +1,16 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "ProcessRelationship",
+  "id": "PREL-OE-APPROVE-PRECEDES-EXECUTE",
+  "enterpriseId": "ENT-HARBOR",
+  "relationshipType": "precedes",
+  "subject": {
+    "kind": "Task",
+    "id": "TASK-OE-APPROVE"
+  },
+  "object": {
+    "kind": "Task",
+    "id": "TASK-OE-EXECUTE"
+  }
+}

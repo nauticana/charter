@@ -1,0 +1,17 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "InformationDefinition",
+  "id": "INFO-CREDIT-STATUS-SUMMARY",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Credit-status summary",
+  "businessMeaning": "Current decision-relevant credit state, not the full customer file",
+  "ownerOrSteward": {
+    "kind": "OrganizationUnit",
+    "id": "OU-CREDIT-CONTROL"
+  },
+  "classification": "confidential",
+  "governancePolicyIds": [
+    "POL-ORDER-EXCEPTION-INFORMATION"
+  ]
+}

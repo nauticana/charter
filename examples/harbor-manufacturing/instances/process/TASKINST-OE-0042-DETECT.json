@@ -1,0 +1,21 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "TaskInstance",
+  "id": "TASKINST-OE-0042-DETECT",
+  "enterpriseId": "ENT-HARBOR",
+  "processInstanceId": "PROCINST-OE-2026-0042",
+  "taskId": "TASK-OE-DETECT",
+  "taskDefinitionVersion": "1",
+  "performer": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "assignmentId": "ASGN-OEC-ORDER-EXCEPTION-SUPPORT",
+  "participation": "observes",
+  "state": "completed",
+  "createdAt": "2026-06-18T17:00:30Z",
+  "startedAt": "2026-06-18T17:00:30Z",
+  "endedAt": "2026-06-18T17:01:00Z",
+  "outcome": "classified material-and-credit"
+}

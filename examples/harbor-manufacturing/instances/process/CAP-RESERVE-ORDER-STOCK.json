@@ -1,0 +1,68 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "CapabilityContract",
+  "id": "CAP-RESERVE-ORDER-STOCK",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Reserve order stock",
+  "purpose": "Create or confirm a bounded stock reservation for an order",
+  "operationClass": "execute",
+  "contractVersion": "1",
+  "inputs": [
+    "order and eligible lines",
+    "quantities",
+    "location scope",
+    "expiry",
+    "authority reference",
+    "approval reference",
+    "idempotency key"
+  ],
+  "outputs": [
+    "reservation reference",
+    "reserved quantities"
+  ],
+  "preconditions": [
+    "current order state",
+    "available stock",
+    "active authority within limits",
+    "separation of duties satisfied",
+    "binding supports the operation"
+  ],
+  "outcomes": [
+    "reserved",
+    "already-reserved",
+    "rejected",
+    "unknown-pending-reconciliation"
+  ],
+  "businessErrors": [
+    "insufficient eligible stock",
+    "invalid order state",
+    "authority denied",
+    "limit exceeded",
+    "approval invalid",
+    "policy conflict"
+  ],
+  "requiredAuthority": "AuthorityGrant for CAP-RESERVE-ORDER-STOCK covering the order",
+  "constraints": {
+    "approvalRequired": true,
+    "sodConstraintIds": [],
+    "limits": [
+      {
+        "limitKind": "reservation-value",
+        "operator": "lte",
+        "value": 25000,
+        "currency": "USD"
+      }
+    ]
+  },
+  "idempotency": {
+    "mutating": true,
+    "retrySemantics": "reconcile by idempotency key before any retry; timeout is an unknown outcome"
+  },
+  "evidenceRequirements": [
+    "invocation and input provenance",
+    "authority and approval decisions",
+    "execution reference",
+    "verified outcome"
+  ]
+}

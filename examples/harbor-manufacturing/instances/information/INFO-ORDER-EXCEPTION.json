@@ -1,0 +1,17 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "InformationDefinition",
+  "id": "INFO-ORDER-EXCEPTION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Order exception",
+  "businessMeaning": "Condition preventing an accepted order from proceeding",
+  "ownerOrSteward": {
+    "kind": "OrganizationUnit",
+    "id": "OU-SALES-OPERATIONS"
+  },
+  "classification": "internal",
+  "governancePolicyIds": [
+    "POL-ORDER-EXCEPTION-INFORMATION"
+  ]
+}

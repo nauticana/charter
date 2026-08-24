@@ -1,0 +1,16 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-0042-COVERAGE",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "derived-conclusion",
+  "content": "Requested quantity of 30 is covered after subtracting existing allocations",
+  "recordedAt": "2026-06-18T17:04:00Z",
+  "sources": [
+    "EVR-0042-STOCK-OBSERVED"
+  ],
+  "transformations": [
+    "subtract 8 units of existing allocations from 40 observed units"
+  ]
+}

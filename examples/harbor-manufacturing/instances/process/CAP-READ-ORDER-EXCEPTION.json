@@ -1,0 +1,44 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "CapabilityContract",
+  "id": "CAP-READ-ORDER-EXCEPTION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Read order exception",
+  "purpose": "Return the minimum current facts needed to coordinate one exception",
+  "operationClass": "read",
+  "contractVersion": "1",
+  "inputs": [
+    "exception identifier"
+  ],
+  "outputs": [
+    "order state",
+    "blocking conditions",
+    "eligible stock",
+    "credit summary"
+  ],
+  "preconditions": [
+    "assigned exception"
+  ],
+  "outcomes": [
+    "facts-returned",
+    "not-found"
+  ],
+  "businessErrors": [
+    "exception not assigned to requester"
+  ],
+  "requiredAuthority": "active assignment to the exception",
+  "constraints": {
+    "approvalRequired": false,
+    "sodConstraintIds": [],
+    "limits": []
+  },
+  "idempotency": {
+    "mutating": false,
+    "retrySemantics": "safe to repeat"
+  },
+  "evidenceRequirements": [
+    "invocation",
+    "observation time and source"
+  ]
+}

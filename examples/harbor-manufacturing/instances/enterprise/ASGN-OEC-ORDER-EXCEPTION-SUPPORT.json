@@ -1,0 +1,20 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Assignment",
+  "id": "ASGN-OEC-ORDER-EXCEPTION-SUPPORT",
+  "enterpriseId": "ENT-HARBOR",
+  "subject": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "target": {
+    "kind": "WorkContext",
+    "id": "PROC-RESOLVE-ORDER-EXCEPTION"
+  },
+  "participation": "supports",
+  "validity": {
+    "from": "2026-04-01",
+    "to": "2026-12-31"
+  }
+}

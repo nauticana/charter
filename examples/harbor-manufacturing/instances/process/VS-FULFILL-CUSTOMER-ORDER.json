@@ -1,0 +1,9 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "ValueStream",
+  "id": "VS-FULFILL-CUSTOMER-ORDER",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Fulfill Customer Order",
+  "businessOutcome": "Accepted customer orders are produced and fulfilled"
+}

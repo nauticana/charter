@@ -1,0 +1,20 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Assignment",
+  "id": "ASGN-JORDAN-PP-PLN-01",
+  "enterpriseId": "ENT-HARBOR",
+  "subject": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-JORDAN-KIM"
+  },
+  "target": {
+    "kind": "Position",
+    "id": "PP-PLN-01"
+  },
+  "participation": "occupies",
+  "validity": {
+    "from": "2026-01-01"
+  },
+  "reason": "succession"
+}

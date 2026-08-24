@@ -1,0 +1,21 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "SystemProfile",
+  "id": "SYSPROFILE-HARBOR-S4-2602",
+  "name": "Harbor SAP S/4HANA Cloud 2602",
+  "enterpriseSystemId": "SYS-HARBOR-S4",
+  "systemVersion": "2602",
+  "supportedFeatures": [
+    "reservation-document-create",
+    "reservation-document-read",
+    "sales-order-read",
+    "business-event-delivery"
+  ],
+  "constraints": [
+    "reservation expiry is not represented",
+    "no native idempotency key on reservation create",
+    "tenant communication arrangement required per API"
+  ],
+  "authenticationMethod": "oauth2-client-credentials"
+}

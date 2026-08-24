@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "harbor.example",
+  "kind": "Position",
+  "id": "PP-PLN-02",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Production Planner",
+  "organizationUnitId": "OU-PRODUCTION-PLANNING",
+  "lifecycleState": "active",
+  "validity": {
+    "from": "2024-01-01"
+  }
+}
