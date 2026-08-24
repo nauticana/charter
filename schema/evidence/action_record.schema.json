@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/evidence/action_record.schema.json",
+  "title": "ActionRecord",
+  "description": "Evidence for one governed action, attributable to identity and runtime context.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-EVID-001",
+    "CHR-EVID-002",
+    "CHR-AGENT-006"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "ActionRecord"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "actor": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "HumanIdentity",
+            "AgentIdentity"
+          ]
+        }
+      }
+    },
+    "runtimeContext": {
+      "type": "object",
+      "properties": {
+        "runtimeInstanceId": {
+          "$ref": "../common.schema.json#/$defs/idRef"
+        },
+        "executionContextId": {
+          "$ref": "../common.schema.json#/$defs/idRef"
+        }
+      },
+      "required": [
+        "runtimeInstanceId",
+        "executionContextId"
+      ],
+      "additionalProperties": false
+    },
+    "assignmentId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "responsibilityId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "capabilityId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "operationClass": {
+      "type": "string",
+      "enum": [
+        "read",
+        "propose",
+        "approve",
+        "execute"
+      ]
+    },
+    "actionTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outcome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "authorityEvaluations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "authorityGrantId": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "result": {
+            "enum": [
+              "allowed",
+              "denied",
+              "missing",
+              "error"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "result",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "approvalEvaluations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "approvalId": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "result": {
+            "enum": [
+              "approved",
+              "rejected",
+              "not-required",
+              "missing",
+              "stale"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "result",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "approvalIds": {
+      "type": "array",
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "uniqueItems": true
+    },
+    "evidenceRecordIds": {
+      "type": "array",
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "actor",
+    "runtimeContext",
+    "capabilityId",
+    "operationClass",
+    "actionTime",
+    "outcome"
+  ],
+  "unevaluatedProperties": false,
+  "anyOf": [
+    {
+      "required": [
+        "assignmentId"
+      ]
+    },
+    {
+      "required": [
+        "responsibilityId"
+      ]
+    }
+  ],
+  "if": {
+    "properties": {
+      "operationClass": {
+        "const": "execute"
+      }
+    },
+    "required": [
+      "operationClass"
+    ]
+  },
+  "then": {
+    "required": [
+      "authorityEvaluations",
+      "approvalEvaluations"
+    ]
+  }
+}

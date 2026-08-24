@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/process/roadmap_item.schema.json",
+  "title": "RoadmapItem",
+  "description": "Addresses gaps with declared ownership, dependencies, and status.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-ARCH-005",
+    "CHR-ARCH-007"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "RoadmapItem"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "addressesGapIds": {
+      "type": "array",
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "owner": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ]
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proposed",
+        "approved",
+        "implementing",
+        "validating",
+        "completed",
+        "cancelled"
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId",
+    "addressesGapIds",
+    "owner",
+    "status"
+  ],
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/evidence/evidence_bundle.schema.json",
+  "title": "EvidenceBundle",
+  "description": "Links the records that evidence one process instance or case.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-EVID-001",
+    "CHR-EVID-005"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "EvidenceBundle"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "subject": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ]
+    },
+    "recordIds": {
+      "type": "array",
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "assuranceProfile": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "integrity": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "method"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "subject",
+    "recordIds",
+    "assuranceProfile",
+    "integrity"
+  ],
+  "unevaluatedProperties": false
+}

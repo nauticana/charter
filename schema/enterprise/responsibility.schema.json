@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/enterprise/responsibility.schema.json",
+  "title": "Responsibility",
+  "description": "An accountable obligation with an expected outcome.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-ENT-001",
+    "CHR-ENT-002",
+    "CHR-ENT-004",
+    "CHR-ENT-005"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "Responsibility"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "expectedOutcome": {
+      "description": "The outcome this responsibility is accountable for.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "accountable": {
+      "description": "Accountable position, or organization unit as equivalent authority.",
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "Position",
+            "OrganizationUnit"
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId",
+    "expectedOutcome",
+    "accountable"
+  ],
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/enterprise/role.schema.json",
+  "title": "Role",
+  "description": "Groups related responsibilities; not a position, identity, or external permission set.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-ENT-001",
+    "CHR-ENT-004",
+    "CHR-ENT-005",
+    "CHR-ENT-007"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "Role"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "responsibilityIds": {
+      "description": "Responsibilities this role groups; membership transfers no accountability or authority.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId"
+  ],
+  "unevaluatedProperties": false
+}

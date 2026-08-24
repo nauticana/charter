@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/evidence/exception.schema.json",
+  "title": "ExceptionRecord",
+  "description": "A violated expectation with affected context, disposition, and escalation target.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-EVID-006"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "ExceptionRecord"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "violatedExpectation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "affected": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ]
+    },
+    "disposition": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "escalationTarget": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "violatedExpectation",
+    "affected",
+    "disposition",
+    "escalationTarget"
+  ],
+  "unevaluatedProperties": false
+}

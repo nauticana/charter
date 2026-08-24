@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/agent/approval.schema.json",
+  "title": "Approval",
+  "description": "A decision record binding approver, action, material inputs, limits, and validity; it does not execute anything.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-AUTH-006",
+    "CHR-AUTH-009"
+  ],
+  "type": "object",
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "Approval"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "approver": {
+      "description": "The approving identity. An AgentIdentity is valid only when applicable governance explicitly permits non-human approval for this action.",
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "HumanIdentity",
+            "AgentIdentity"
+          ]
+        }
+      }
+    },
+    "responsibilityId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "approvedAction": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Capability id or action class."
+    },
+    "subjectRefs": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {
+            "$ref": "../common.schema.json#/$defs/objectRef"
+          }
+        ]
+      }
+    },
+    "materialInputsDigest": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Digest or reference binding the approved material inputs."
+    },
+    "limits": {
+      "type": "array",
+      "description": "Explicit limits; an empty array means no additional approval-specific limits.",
+      "items": {
+        "$ref": "../common.schema.json#/$defs/limit"
+      }
+    },
+    "conditions": {
+      "type": "array",
+      "description": "Explicit validity conditions; an empty array means no conditions beyond the selected validity mode and its timestamps.",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validityMode": {
+      "enum": [
+        "expires-at",
+        "open-ended"
+      ]
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "openEndedJustification": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "approver",
+    "approvedAction",
+    "materialInputsDigest",
+    "limits",
+    "conditions",
+    "issuedAt",
+    "validityMode"
+  ],
+  "unevaluatedProperties": false,
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    },
+    {
+      "if": {
+        "properties": {
+          "validityMode": {
+            "const": "expires-at"
+          }
+        },
+        "required": [
+          "validityMode"
+        ]
+      },
+      "then": {
+        "required": [
+          "expiresAt"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validityMode": {
+            "const": "open-ended"
+          }
+        },
+        "required": [
+          "validityMode"
+        ]
+      },
+      "then": {
+        "required": [
+          "openEndedJustification"
+        ],
+        "not": {
+          "required": [
+            "expiresAt"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,305 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/common.schema.json",
+  "title": "Charter Common Definitions",
+  "description": "Shared definitions for Charter domain schemas.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-CONF-001",
+    "CHR-CONF-002",
+    "CHR-CONF-004",
+    "CHR-ENT-005"
+  ],
+  "$defs": {
+    "identifier": {
+      "description": "Stable identifier within its declared namespace.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "namespace": {
+      "description": "Scopes identifiers; a URI or dot-separated token.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "specVersion": {
+      "description": "Charter specification version this document targets.",
+      "type": "string",
+      "minLength": 1,
+      "examples": [
+        "draft"
+      ]
+    },
+    "displayName": {
+      "description": "Human-readable name; not an identifier.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "lifecycleState": {
+      "description": "Identities use proposed/active/suspended/retired; structural objects use planned/active/retired.",
+      "type": "string",
+      "enum": [
+        "proposed",
+        "planned",
+        "active",
+        "suspended",
+        "retired"
+      ]
+    },
+    "identityLifecycleState": {
+      "description": "Lifecycle state for a human or agent identity.",
+      "type": "string",
+      "enum": [
+        "proposed",
+        "active",
+        "suspended",
+        "retired"
+      ]
+    },
+    "validity": {
+      "description": "Effective-dated validity; absent `to` means open-ended.",
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date"
+        },
+        "to": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "from"
+      ],
+      "additionalProperties": false
+    },
+    "objectRef": {
+      "description": "Reference by kind and identifier; `namespace` required for cross-namespace targets.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "namespace": {
+          "$ref": "#/$defs/namespace"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "idRef": {
+      "description": "A same-namespace identifier string or an explicitly namespaced identifier. A string resolves in the referring document's namespace.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/identifier"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "namespace": {
+              "$ref": "#/$defs/namespace"
+            },
+            "id": {
+              "$ref": "#/$defs/identifier"
+            }
+          },
+          "required": [
+            "namespace",
+            "id"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "featureSupport": {
+      "description": "Declared support for one or more contract features.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "support": {
+            "type": "string",
+            "enum": [
+              "supported",
+              "partial",
+              "unsupported"
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "feature",
+          "support"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "limit": {
+      "description": "A machine-comparable authority, approval, or capability limit.",
+      "type": "object",
+      "properties": {
+        "limitKind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "operator": {
+          "enum": [
+            "lt",
+            "lte",
+            "eq",
+            "gte",
+            "gt"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "boolean"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      },
+      "required": [
+        "limitKind",
+        "operator",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "conformanceClaimEnvelope": {
+      "description": "Fields shared by general and domain-specific conformance claims.",
+      "type": "object",
+      "properties": {
+        "conformanceProfile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "implementationVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "testedRuleIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^CHR-RULE-[A-Z]+-[0-9]{3}$"
+          }
+        },
+        "verificationTypes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "structural",
+              "semantic",
+              "runtime-behavioral"
+            ]
+          }
+        },
+        "result": {
+          "enum": [
+            "conforming",
+            "partial",
+            "nonconforming"
+          ]
+        },
+        "resultDate": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "conformanceProfile",
+        "implementationVersion",
+        "testedRuleIds",
+        "verificationTypes",
+        "result",
+        "resultDate"
+      ]
+    },
+    "extensions": {
+      "description": "Namespaced extension properties; opaque to the core and unable to redefine Charter-defined meanings.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^([a-zA-Z][a-zA-Z0-9+.-]*:|https?://).+"
+      }
+    },
+    "documentBase": {
+      "description": "Properties every Charter instance document carries.",
+      "type": "object",
+      "properties": {
+        "charterSpecVersion": {
+          "$ref": "#/$defs/specVersion"
+        },
+        "namespace": {
+          "$ref": "#/$defs/namespace"
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "name": {
+          "$ref": "#/$defs/displayName"
+        },
+        "description": {
+          "$ref": "#/$defs/description"
+        },
+        "lifecycleState": {
+          "$ref": "#/$defs/lifecycleState"
+        },
+        "validity": {
+          "$ref": "#/$defs/validity"
+        },
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
+      },
+      "required": [
+        "charterSpecVersion",
+        "namespace",
+        "id"
+      ]
+    }
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/evidence/evidence_record.schema.json",
+  "title": "EvidenceRecord",
+  "description": "One categorized record; corrections supersede rather than replace.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-EVID-003",
+    "CHR-EVID-004",
+    "CHR-INFO-004"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "EvidenceRecord"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "observed-fact",
+        "agent-assertion",
+        "human-decision",
+        "external-response",
+        "derived-conclusion"
+      ]
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "recordedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "description": "Provenance references for material sources and transformations."
+    },
+    "transformations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000
+      }
+    },
+    "supersedes": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "category",
+    "content",
+    "recordedAt"
+  ],
+  "unevaluatedProperties": false,
+  "if": {
+    "properties": {
+      "category": {
+        "const": "derived-conclusion"
+      }
+    },
+    "required": [
+      "category"
+    ]
+  },
+  "then": {
+    "required": [
+      "sources",
+      "transformations"
+    ]
+  }
+}

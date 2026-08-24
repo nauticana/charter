@@ -151,6 +151,26 @@ Each position belongs to an organization unit but remains a different type of Ch
 - Credit Manager and Credit Analyst both belong to Credit Control.
 - Buyer belongs to Purchasing.
 
+## Position types across organization units
+
+`PT-FUNCTIONAL-MANAGER` is a `PositionType` used to classify the Sales Operations Manager, Production Manager, Procurement Manager, and Credit Manager positions. Those position objects belong to different organization units and retain different identifiers.
+
+```mermaid
+flowchart TB
+    PositionType["Functional Manager<br/>PositionType PT-FUNCTIONAL-MANAGER"]
+    SalesManager["Sales Operations Manager<br/>Position"]
+    ProductionManager["Production Manager<br/>Position"]
+    ProcurementManager["Procurement Manager<br/>Position"]
+    CreditManager["Credit Manager<br/>Position"]
+
+    PositionType -.->|classifies| SalesManager
+    PositionType -.->|classifies| ProductionManager
+    PositionType -.->|classifies| ProcurementManager
+    PositionType -.->|classifies| CreditManager
+```
+
+The shared type means the positions have the same broad organizational nature. It does not place them in the same organization unit, make them report to one another, or copy roles, responsibilities, assignments, or authority between them. Those relationships remain explicit on the individual positions and related Charter objects.
+
 ## Production Planning position assignments
 
 The following focused example distinguishes stable positions from the human and agent identities assigned to support them. It shows human succession, concurrent agent support, and a position that is currently unfilled.

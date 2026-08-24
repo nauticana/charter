@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/binding/binding_conformance.schema.json",
+  "title": "BindingConformance",
+  "description": "Evaluation of a binding against its declared features; partial support is reported as partial.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-BIND-009",
+    "CHR-CONF-005",
+    "CHR-CONF-009",
+    "CHR-CONF-011"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    },
+    {
+      "$ref": "../common.schema.json#/$defs/conformanceClaimEnvelope"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "BindingConformance"
+    },
+    "bindingId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "evaluatedFeatures": {
+      "$ref": "../common.schema.json#/$defs/featureSupport"
+    }
+  },
+  "required": [
+    "kind",
+    "bindingId",
+    "evaluatedFeatures"
+  ],
+  "unevaluatedProperties": false
+}

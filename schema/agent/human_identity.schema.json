@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/agent/human_identity.schema.json",
+  "title": "HumanIdentity",
+  "description": "A human participant in Charter-governed activity; credentials, sessions, and assignments are separate.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-ID-001",
+    "CHR-ID-002",
+    "CHR-ID-003",
+    "CHR-ID-004",
+    "CHR-ID-008"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": {
+      "$ref": "../common.schema.json#/$defs/identityLifecycleState"
+    },
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "HumanIdentity"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "lifecycleAuthority": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "description": "Authority responsible for activation, suspension, and retirement."
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId",
+    "lifecycleState"
+  ],
+  "unevaluatedProperties": false
+}

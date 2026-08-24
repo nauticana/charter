@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/enterprise/position.schema.json",
+  "title": "Position",
+  "description": "A stable assignment point in exactly one organization unit, outside the unit tree; occupancy and support are separate Assignments.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-ENT-001",
+    "CHR-ENT-004",
+    "CHR-ENT-005",
+    "CHR-ENT-009",
+    "CHR-CONF-004"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "Position"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "organizationUnitId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "positionTypeId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId",
+    "organizationUnitId"
+  ],
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/binding/capability_binding.schema.json",
+  "title": "CapabilityBinding",
+  "description": "Maps one Charter capability to an external operation for a declared system profile.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-BIND-001",
+    "CHR-BIND-002",
+    "CHR-BIND-005",
+    "CHR-BIND-007"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "CapabilityBinding"
+    },
+    "bindingVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "systemProfileId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "capabilityId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "operation": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "External operation, such as an HTTP method and path."
+    },
+    "featureSupport": {
+      "$ref": "../common.schema.json#/$defs/featureSupport"
+    },
+    "mappings": {
+      "type": "object",
+      "properties": {
+        "inputs": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "outputs": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "businessErrors": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "authorityChecks": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "idempotency": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        }
+      },
+      "required": [
+        "inputs",
+        "outputs",
+        "businessErrors",
+        "authorityChecks",
+        "idempotency",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "lossyMappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "mapping": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "effect": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "mapping",
+          "effect"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "bindingVersion",
+    "systemProfileId",
+    "capabilityId",
+    "operation",
+    "featureSupport",
+    "mappings"
+  ],
+  "unevaluatedProperties": false
+}

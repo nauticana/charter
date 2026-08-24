@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/enterprise/organization_relationship.schema.json",
+  "title": "OrganizationRelationship",
+  "description": "A typed, directed, effective-dated relationship between organizational objects, separate from the unit tree.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-ENT-001",
+    "CHR-ENT-004",
+    "CHR-ENT-005",
+    "CHR-CONF-002"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "OrganizationRelationship"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "relationshipType": {
+      "description": "Charter-defined or namespaced custom type.",
+      "type": "string",
+      "anyOf": [
+        {
+          "enum": [
+            "reports-to",
+            "deputy-of",
+            "coordinates-with"
+          ]
+        },
+        {
+          "pattern": "^([a-zA-Z][a-zA-Z0-9+.-]*:|https?://).+"
+        }
+      ]
+    },
+    "subject": {
+      "$ref": "../common.schema.json#/$defs/objectRef"
+    },
+    "object": {
+      "$ref": "../common.schema.json#/$defs/objectRef"
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "relationshipType",
+    "subject",
+    "object"
+  ],
+  "unevaluatedProperties": false
+}

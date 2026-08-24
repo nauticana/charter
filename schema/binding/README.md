@@ -1,5 +1,5 @@
 # Binding Schemas
 
-Planned schemas cover `EnterpriseSystem`, `SystemProfile`, `CapabilityBinding`, `DataBinding`, `AuthorityBinding`, `EventBinding`, and `BindingConformance`.
+Draft schemas for the `CHR-BIND` domain: `enterprise_system`, `system_profile`, `capability_binding`, `data_binding`, `authority_binding`, `event_binding`, and `binding_conformance`.
 
-Bindings will declare their Charter specification version, target profile, supported features, error mappings, and namespaced extensions. Vendor-specific content is not defined in this directory.
+Binding documents are not enterprise-scoped; profiles and bindings may be shared catalogs. Every binding identifies its version, target profile, and feature support. `binding_conformance` uses the shared `conformanceClaimEnvelope` in `schema/common.schema.json` and adds binding-specific feature evaluation. Capability bindings map inputs, outputs, business errors, authority checks, idempotency, and evidence. Vendor-specific bindings may appear as non-normative examples but do not enter Charter core semantics.

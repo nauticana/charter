@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/agent/authority_grant.schema.json",
+  "title": "AuthorityGrant",
+  "description": "Explicit authority scoped to actor, capability, resource scope, organizational context, and validity; absence of a grant is denial.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-AUTH-001",
+    "CHR-AUTH-002",
+    "CHR-AUTH-003",
+    "CHR-AUTH-004"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "AuthorityGrant"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "actor": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "HumanIdentity",
+            "AgentIdentity"
+          ]
+        }
+      }
+    },
+    "capabilityId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "resourceScope": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "organizationalContext": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "limits": {
+      "type": "array",
+      "items": {
+        "$ref": "../common.schema.json#/$defs/limit"
+      }
+    },
+    "delegation": {
+      "type": "object",
+      "properties": {
+        "delegator": {
+          "allOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/objectRef"
+            }
+          ]
+        },
+        "redelegationPermitted": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "delegator",
+        "redelegationPermitted"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "actor",
+    "capabilityId",
+    "resourceScope",
+    "organizationalContext",
+    "limits",
+    "validity"
+  ],
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/enterprise/assignment.schema.json",
+  "title": "Assignment",
+  "description": "Connects a human or agent identity to a position, responsibility, role, or work context for an effective period.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-ENT-003",
+    "CHR-ENT-005",
+    "CHR-ENT-006",
+    "CHR-AGENT-007",
+    "CHR-PROC-006"
+  ],
+  "type": "object",
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "Assignment"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "subject": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "HumanIdentity",
+            "AgentIdentity"
+          ]
+        }
+      }
+    },
+    "target": {
+      "description": "WorkContext targets scope work without placing the identity in a position.",
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "Position",
+            "Responsibility",
+            "Role",
+            "WorkContext"
+          ]
+        }
+      }
+    },
+    "participation": {
+      "description": "'occupies' is reserved for human position occupancy.",
+      "type": "string",
+      "enum": [
+        "occupies",
+        "supports",
+        "observes",
+        "recommends",
+        "prepares",
+        "approves",
+        "performs",
+        "executes"
+      ]
+    },
+    "condition": {
+      "description": "Dependency on another object, such as an assignment that must be active.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "reason": {
+      "description": "Transition reason such as initial, succession, delegation.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "subject",
+    "target",
+    "participation",
+    "validity"
+  ],
+  "unevaluatedProperties": false,
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    },
+    {
+      "if": {
+        "properties": {
+          "participation": {
+            "const": "occupies"
+          }
+        },
+        "required": [
+          "participation"
+        ]
+      },
+      "then": {
+        "properties": {
+          "subject": {
+            "properties": {
+              "kind": {
+                "const": "HumanIdentity"
+              }
+            }
+          },
+          "target": {
+            "properties": {
+              "kind": {
+                "const": "Position"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

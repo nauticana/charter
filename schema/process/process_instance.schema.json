@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/process/process_instance.schema.json",
+  "title": "ProcessInstance",
+  "description": "Execution state for one business-process occurrence without modifying its process definition.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-PROC-005",
+    "CHR-PROC-007"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "ProcessInstance"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "processId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "processDefinitionVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "state": {
+      "enum": [
+        "proposed",
+        "running",
+        "suspended",
+        "completed",
+        "cancelled",
+        "failed"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "endedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contextRefs": {
+      "type": "array",
+      "items": {
+        "$ref": "../common.schema.json#/$defs/objectRef"
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "processId",
+    "processDefinitionVersion",
+    "state",
+    "createdAt"
+  ],
+  "unevaluatedProperties": false
+}

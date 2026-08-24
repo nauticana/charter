@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/information/information_governance_policy.schema.json",
+  "title": "InformationGovernancePolicy",
+  "description": "Permitted use, access, retention, deletion, and precedence rules for governed information.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-INFO-002",
+    "CHR-INFO-005",
+    "CHR-INFO-007",
+    "CHR-INFO-008"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "InformationGovernancePolicy"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "scope": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/objectRef"
+      }
+    },
+    "permittedUses": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "accessConstraints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "retentionAndDeletion": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "artifactKind": {
+            "enum": [
+              "source-data",
+              "action-evidence",
+              "prompt",
+              "intermediate-artifact",
+              "cache",
+              "external-reference"
+            ]
+          },
+          "retentionRule": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "deletionRule": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "artifactKind",
+          "retentionRule",
+          "deletionRule"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "precedence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "conflictBehavior": {
+      "enum": [
+        "fail-closed",
+        "apply-declared-precedence"
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId",
+    "scope",
+    "permittedUses",
+    "accessConstraints",
+    "retentionAndDeletion",
+    "precedence",
+    "conflictBehavior"
+  ],
+  "unevaluatedProperties": false
+}

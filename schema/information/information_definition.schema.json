@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/information/information_definition.schema.json",
+  "title": "InformationDefinition",
+  "description": "The business meaning, ownership, classification, and policy context of governed information.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-INFO-001",
+    "CHR-INFO-002"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "InformationDefinition"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "businessMeaning": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "ownerOrSteward": {
+      "$ref": "../common.schema.json#/$defs/objectRef"
+    },
+    "classification": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "governancePolicyIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId",
+    "businessMeaning",
+    "ownerOrSteward",
+    "classification",
+    "governancePolicyIds"
+  ],
+  "unevaluatedProperties": false
+}

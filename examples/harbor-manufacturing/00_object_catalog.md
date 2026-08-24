@@ -9,6 +9,7 @@ This catalogue gives the recurring Harbor Manufacturing objects stable example i
 | Enterprise | `ENT-HARBOR` | Harbor Manufacturing |
 | OrganizationUnit | `OU-SALES-OPERATIONS` | Sales Operations |
 | OrganizationUnit | `OU-PRODUCTION-PLANNING` | Production Planning |
+| PositionType | `PT-FUNCTIONAL-MANAGER` | Functional manager position classification |
 | Position | `POS-SALES-OPERATIONS-MANAGER` | Sales Operations Manager |
 | Position | `POS-ORDER-SPECIALIST` | Order Specialist |
 | Position | `POS-CREDIT-MANAGER` | Credit Manager |

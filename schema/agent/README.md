@@ -1,3 +1,5 @@
 # Agent Schemas
 
-Planned schemas cover human and agent identity, agent definition, lifecycle, authority grants, delegations, approvals, separation-of-duties constraints, and escalations. They will implement structural requirements from the `ID`, `AGENT`, `AUTH`, and `SEC` requirement areas.
+Draft schemas for the `CHR-ID`, `CHR-AGENT`, and `CHR-AUTH` domains: `human_identity`, `agent_identity`, `agent_definition`, `agent_runtime`, `authority_grant`, `approval`, and `sod_constraint`.
+
+Identity, definition, grant, and approval are separate documents; an agent definition must declare purpose, triggers, inputs, outcomes, capabilities, policies, and escalation conditions.

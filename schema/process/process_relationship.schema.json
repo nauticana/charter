@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/process/process_relationship.schema.json",
+  "title": "ProcessRelationship",
+  "description": "One explicit hierarchy, sequence, or dependency relationship between process or task definitions.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-PROC-003"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "ProcessRelationship"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "relationshipType": {
+      "enum": [
+        "parent-child",
+        "precedes",
+        "depends-on"
+      ]
+    },
+    "subject": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "BusinessProcess",
+            "Task"
+          ]
+        }
+      }
+    },
+    "object": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "BusinessProcess",
+            "Task"
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "relationshipType",
+    "subject",
+    "object"
+  ],
+  "unevaluatedProperties": false
+}

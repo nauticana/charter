@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/agent/agent_definition.schema.json",
+  "title": "AgentDefinition",
+  "description": "The governed design of an agent: purpose, triggers, inputs, outcomes, capabilities, policies, and escalation conditions.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-AGENT-001",
+    "CHR-AGENT-002",
+    "CHR-ENT-003"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "AgentDefinition"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "agentIdentityId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "accountable": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "Position",
+            "OrganizationUnit"
+          ]
+        }
+      }
+    },
+    "responsibilityIds": {
+      "type": "array",
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "minItems": 1
+    },
+    "requiredInputs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "minItems": 1
+    },
+    "expectedOutcomes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "minItems": 1
+    },
+    "capabilityIds": {
+      "type": "array",
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "minItems": 1
+    },
+    "escalationConditions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "agentIdentityId",
+    "purpose",
+    "accountable",
+    "responsibilityIds",
+    "triggers",
+    "requiredInputs",
+    "expectedOutcomes",
+    "capabilityIds",
+    "policies",
+    "escalationConditions"
+  ],
+  "unevaluatedProperties": false
+}

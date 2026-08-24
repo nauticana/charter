@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/enterprise/organization_unit.schema.json",
+  "title": "OrganizationUnit",
+  "description": "A structural node in the enterprise's organization-unit tree; `parentUnitId` defines the single rooted hierarchy.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-ENT-001",
+    "CHR-ENT-004",
+    "CHR-ENT-005",
+    "CHR-ENT-008"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "OrganizationUnit"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "parentUnitId": {
+      "description": "Absent only for the root unit.",
+      "$ref": "../common.schema.json#/$defs/idRef"
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId"
+  ],
+  "unevaluatedProperties": false
+}

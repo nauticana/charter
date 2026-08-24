@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/binding/event_binding.schema.json",
+  "title": "EventBinding",
+  "description": "Maps an external event and its delivery semantics to a declared Charter trigger.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-BIND-001",
+    "CHR-BIND-002",
+    "CHR-BIND-005"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "EventBinding"
+    },
+    "bindingVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "featureSupport": {
+      "$ref": "../common.schema.json#/$defs/featureSupport"
+    },
+    "systemProfileId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "externalEvent": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "charterTrigger": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "deliverySemantics": {
+      "type": "string",
+      "enum": [
+        "at-most-once",
+        "at-least-once",
+        "exactly-once"
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "bindingVersion",
+    "featureSupport",
+    "systemProfileId",
+    "externalEvent",
+    "charterTrigger",
+    "deliverySemantics"
+  ],
+  "unevaluatedProperties": false
+}

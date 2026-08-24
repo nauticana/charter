@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/process/task.schema.json",
+  "title": "Task",
+  "description": "An assignable unit of work with an accountable responsibility and permitted performer kinds.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-PROC-001",
+    "CHR-PROC-002",
+    "CHR-PROC-006"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "Task"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "processId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "businessOutcome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "accountableResponsibilityId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "permittedPerformerKinds": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "human",
+          "agent",
+          "system"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "permittedParticipation": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "observes",
+          "recommends",
+          "prepares",
+          "approves",
+          "executes"
+        ]
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId",
+    "processId",
+    "businessOutcome",
+    "accountableResponsibilityId",
+    "permittedPerformerKinds"
+  ],
+  "unevaluatedProperties": false
+}

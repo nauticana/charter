@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/process/task_instance.schema.json",
+  "title": "TaskInstance",
+  "description": "Execution state and performer context for one task occurrence.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-PROC-005",
+    "CHR-PROC-006",
+    "CHR-PROC-007"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "TaskInstance"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "processInstanceId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "taskId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "taskDefinitionVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "performer": {
+      "$ref": "../common.schema.json#/$defs/objectRef"
+    },
+    "assignmentId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "participation": {
+      "enum": [
+        "observes",
+        "recommends",
+        "prepares",
+        "approves",
+        "executes"
+      ]
+    },
+    "state": {
+      "enum": [
+        "pending",
+        "running",
+        "suspended",
+        "completed",
+        "cancelled",
+        "failed",
+        "escalated"
+      ]
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "endedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "outcome": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "processInstanceId",
+    "taskId",
+    "taskDefinitionVersion",
+    "performer",
+    "assignmentId",
+    "participation",
+    "state",
+    "createdAt"
+  ],
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/conformance/conformance_claim.schema.json",
+  "title": "ConformanceClaim",
+  "description": "A bounded conformance claim against one Charter specification version, profile, implementation, and tested rule set.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-CONF-001",
+    "CHR-CONF-005",
+    "CHR-CONF-008",
+    "CHR-CONF-009",
+    "CHR-CONF-011"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    },
+    {
+      "$ref": "../common.schema.json#/$defs/conformanceClaimEnvelope"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "ConformanceClaim"
+    },
+    "implementation": {
+      "$ref": "../common.schema.json#/$defs/objectRef"
+    },
+    "results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "ruleId": {
+            "type": "string",
+            "pattern": "^CHR-RULE-[A-Z]+-[0-9]{3}$"
+          },
+          "verificationType": {
+            "enum": [
+              "structural",
+              "semantic",
+              "runtime-behavioral"
+            ]
+          },
+          "result": {
+            "enum": [
+              "pass",
+              "fail",
+              "not-tested"
+            ]
+          },
+          "details": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "ruleId",
+          "verificationType",
+          "result"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "kind",
+    "implementation",
+    "results"
+  ],
+  "unevaluatedProperties": false
+}

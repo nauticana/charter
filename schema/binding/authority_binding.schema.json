@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/binding/authority_binding.schema.json",
+  "title": "AuthorityBinding",
+  "description": "Maps Charter authority to external enforcement; unpreservable constraints fail closed.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-BIND-001",
+    "CHR-BIND-002",
+    "CHR-BIND-006"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "AuthorityBinding"
+    },
+    "bindingVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "featureSupport": {
+      "$ref": "../common.schema.json#/$defs/featureSupport"
+    },
+    "systemProfileId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "capabilityId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "externalEnforcement": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "unpreservableConstraintBehavior": {
+      "const": "fail-closed"
+    }
+  },
+  "required": [
+    "kind",
+    "bindingVersion",
+    "featureSupport",
+    "systemProfileId",
+    "capabilityId",
+    "externalEnforcement",
+    "unpreservableConstraintBehavior"
+  ],
+  "unevaluatedProperties": false
+}

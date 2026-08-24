@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/evidence/escalation.schema.json",
+  "title": "Escalation",
+  "description": "A request for decision with reason, recipient, urgency, and resulting disposition when known.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-EVID-007"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "Escalation"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "recipient": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ]
+    },
+    "requestedDecision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "urgency": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "resultingDisposition": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "reason",
+    "recipient",
+    "requestedDecision",
+    "urgency"
+  ],
+  "unevaluatedProperties": false
+}
