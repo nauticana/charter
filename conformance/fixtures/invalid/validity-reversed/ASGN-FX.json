@@ -1,0 +1,20 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "Assignment",
+  "id": "ASGN-FX",
+  "subject": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-FX"
+  },
+  "target": {
+    "kind": "Position",
+    "id": "POS-X"
+  },
+  "participation": "occupies",
+  "validity": {
+    "from": "2026-06-01",
+    "to": "2026-01-01"
+  }
+}

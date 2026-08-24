@@ -1,0 +1,4 @@
+rules: [CHR-RULE-AUTH-001]
+specification_version: draft
+expected: fail
+reason: Authority evaluation says allowed, but the cited grant expired before the action

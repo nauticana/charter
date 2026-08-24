@@ -1,0 +1,11 @@
+id: CHR-RULE-AUTH-002
+title: Approved approval evaluations cite an approval valid at action time
+requirements: [CHR-AUTH-009]
+profile: core-model
+verification: semantic
+applies_to: [ActionRecord]
+check: >-
+  For every ActionRecord approvalEvaluation with result approved, approvalId resolves to an Approval issued no later than actionTime and, when validityMode is expires-at, expiring no earlier than actionTime.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/stale-approval

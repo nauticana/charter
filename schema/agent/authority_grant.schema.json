@@ -76,13 +76,15 @@
             }
           ]
         },
-        "redelegationPermitted": {
-          "type": "boolean"
+        "maxRedelegationDepth": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0 means the recipient may not delegate further."
         }
       },
       "required": [
         "delegator",
-        "redelegationPermitted"
+        "maxRedelegationDepth"
       ],
       "additionalProperties": false
     }

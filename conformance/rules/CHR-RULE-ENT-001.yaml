@@ -1,0 +1,11 @@
+id: CHR-RULE-ENT-001
+title: Organization units form one rooted acyclic tree per enterprise
+requirements: [CHR-ENT-008]
+profile: core-model
+verification: semantic
+applies_to: [OrganizationUnit]
+check: >-
+  Within each enterprise, exactly one OrganizationUnit has no parentUnitId, every parentUnitId resolves to an OrganizationUnit of the same enterprise, and following parentUnitId never revisits a unit.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/cyclic-unit-tree

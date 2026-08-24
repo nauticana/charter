@@ -1,0 +1,11 @@
+id: CHR-RULE-CONF-001
+title: References resolve to documents of the declared kind
+requirements: [CHR-CONF-012]
+profile: core-model
+verification: semantic
+applies_to: ["*"]
+check: >-
+  Every idRef resolves to a document in the set, and every objectRef whose kind is a Charter kind resolves to a document of that kind. objectRefs with non-Charter kinds are external and exempt.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/dangling-reference

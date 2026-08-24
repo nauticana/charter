@@ -1,0 +1,11 @@
+id: CHR-RULE-ENT-002
+title: Positions are placed in units and never act as tree nodes
+requirements: [CHR-ENT-009]
+profile: core-model
+verification: semantic
+applies_to: [Position, OrganizationUnit]
+check: >-
+  Every Position.organizationUnitId resolves to an OrganizationUnit, and no OrganizationUnit.parentUnitId resolves to a Position.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/position-as-tree-node

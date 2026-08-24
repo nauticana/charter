@@ -1,0 +1,4 @@
+rules: [CHR-RULE-ENT-001, CHR-RULE-ENT-002, CHR-RULE-ENT-003, CHR-RULE-ENT-004, CHR-RULE-CONF-001, CHR-RULE-ID-001, CHR-RULE-AUTH-001, CHR-RULE-AUTH-002]
+specification_version: draft
+expected: pass
+documents: ../../../../examples/harbor-manufacturing/instances

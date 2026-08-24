@@ -8,7 +8,7 @@ Authority determines which actor may perform which operation, on which resources
 
 - **CHR-AUTH-001:** Authority MUST be explicitly scoped to an actor, operation or capability, resource scope, organizational context, and validity period.
 - **CHR-AUTH-002:** Absence of a grant MUST be treated as denial for governed execution.
-- **CHR-AUTH-003:** Delegation MUST identify the delegating authority, recipient, delegated scope, validity period, and whether further delegation is permitted.
+- **CHR-AUTH-003:** Delegation MUST identify the delegating authority, recipient, delegated scope, validity period, and the permitted redelegation depth.
 - **CHR-AUTH-004:** A delegate MUST NOT exercise or redelegate authority beyond the delegator's effective authority.
 - **CHR-AUTH-005:** Revocation or expiry MUST prevent new actions and MUST NOT alter evidence for actions completed while authority was valid.
 - **CHR-AUTH-006:** Proposal, approval, and execution MUST be distinct operations even when one actor is permitted to perform more than one of them.

@@ -11,7 +11,7 @@ A `ValueStream` describes how value is realized. A `BusinessProcess` organizes w
 ## Requirements
 
 - **CHR-PROC-001:** Every process and task MUST have a stable identifier and declared business outcome.
-- **CHR-PROC-002:** Every governed task MUST identify its accountable responsibility and permitted performer kinds.
+- **CHR-PROC-002:** Every governed task MUST identify its accountable responsibility and permitted performer kinds. Performers are human or agent identities; an external system acts only through a binding invoked by a performer and is never itself accountable.
 - **CHR-PROC-003:** Process hierarchy, sequence, dependency, and responsibility assignment MUST be modeled as distinct relationships.
 - **CHR-PROC-004:** An implementation MUST support customer-defined process names, aliases, and hierarchies without requiring adoption of a vendor taxonomy.
 - **CHR-PROC-005:** Execution state MUST NOT silently modify the normative definition of a process or task.

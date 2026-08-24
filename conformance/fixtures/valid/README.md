@@ -1,3 +1,3 @@
 # Valid Fixtures
 
-Each file in this directory will demonstrate an instance that must pass a specific active conformance rule. Fixture metadata must identify the applicable `CHR-RULE-*` IDs, specification version, and expected result.
+Each directory holds a `fixture.yaml` naming the rules it must pass and either instance documents or a `documents` path to a shared set. `harbor/` points at the Harbor instance documents, which pass every active rule.

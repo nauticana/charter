@@ -21,7 +21,7 @@ flowchart LR
 | `TASK-OE-GATHER` | Coordinate order exception | Human or agent observes and prepares |
 | `TASK-OE-PREPARE` | Coordinate order exception | Human or agent recommends and prepares |
 | `TASK-OE-APPROVE` | Applicable approval responsibility | Authorized human approves or rejects |
-| `TASK-OE-EXECUTE` | Coordinate order exception | Authorized human, agent, or system executes |
+| `TASK-OE-EXECUTE` | Coordinate order exception | Authorized human or agent executes; systems act only through a binding invoked by the performer |
 | `TASK-OE-VERIFY` | Coordinate order exception | Human or agent verifies and closes or escalates |
 
 The definition and its running instances are separate. `PROCINST-OE-2026-0042` concerns order `ORD-2026-0173`; its task instances carry execution state without changing the process definition. Dependencies, sequence, hierarchy, and responsibility assignments are modeled as separate `ProcessRelationship` documents rather than inferred from this display order; `PREL-OE-PROCESS-CONTAINS-DETECT` and `PREL-OE-APPROVE-PRECEDES-EXECUTE` are the instantiated examples. Task instances `TASKINST-OE-0042-DETECT` through `TASKINST-OE-0042-VERIFY` record the June 18 execution.

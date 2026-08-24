@@ -1,0 +1,18 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "Approval",
+  "id": "APPR-FX",
+  "approver": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-FX"
+  },
+  "approvedAction": "CAP-FX",
+  "materialInputsDigest": "sha256:fx",
+  "limits": [],
+  "conditions": [],
+  "issuedAt": "2026-06-01T00:00:00Z",
+  "validityMode": "expires-at",
+  "expiresAt": "2026-06-02T00:00:00Z"
+}

@@ -1,0 +1,19 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "AuthorityGrant",
+  "id": "AUTH-FX",
+  "actor": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-FX"
+  },
+  "capabilityId": "CAP-FX",
+  "resourceScope": "fixture",
+  "organizationalContext": "OU-ROOT",
+  "validity": {
+    "from": "2026-01-01",
+    "to": "2026-12-31"
+  },
+  "limits": []
+}

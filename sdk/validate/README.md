@@ -1,3 +1,3 @@
 # Validation Package
 
-The future `validate` package will expose structural and semantic validation. It will consume the same schemas, conformance manifest, and fixtures available to every independent implementer and will return typed, requirement-linked validation errors.
+Interfaces and optional foundations for structural validation, semantic rules, fixture execution, and `ConformanceClaim` generation. Results carry stable rule ids, normative requirement ids, verification classes, and document paths.

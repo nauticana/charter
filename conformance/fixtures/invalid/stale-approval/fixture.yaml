@@ -1,0 +1,4 @@
+rules: [CHR-RULE-AUTH-002]
+specification_version: draft
+expected: fail
+reason: Approval evaluation says approved, but the cited approval expired before the action

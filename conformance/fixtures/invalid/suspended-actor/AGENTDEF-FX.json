@@ -1,0 +1,34 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "AgentDefinition",
+  "id": "AGENTDEF-FX",
+  "agentIdentityId": "AGENT-FX",
+  "purpose": "fixture",
+  "accountable": {
+    "kind": "OrganizationUnit",
+    "id": "OU-ROOT"
+  },
+  "responsibilityIds": [
+    "RESP-FX"
+  ],
+  "triggers": [
+    "t"
+  ],
+  "requiredInputs": [
+    "i"
+  ],
+  "expectedOutcomes": [
+    "o"
+  ],
+  "capabilityIds": [
+    "CAP-FX"
+  ],
+  "policies": [
+    "p"
+  ],
+  "escalationConditions": [
+    "e"
+  ]
+}

@@ -1,0 +1,11 @@
+id: CHR-RULE-ENT-003
+title: Validity periods are ordered
+requirements: [CHR-ENT-005]
+profile: core-model
+verification: semantic
+applies_to: ["*"]
+check: >-
+  Wherever validity.to is present, validity.to is not earlier than validity.from.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/validity-reversed

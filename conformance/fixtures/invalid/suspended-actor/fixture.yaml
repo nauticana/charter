@@ -1,0 +1,4 @@
+rules: [CHR-RULE-ID-001]
+specification_version: draft
+expected: fail
+reason: The acting agent identity is suspended

@@ -2,7 +2,7 @@
 
 Status: Illustrative only; not a conformance claim
 
-Charter profiles are inactive until the conformance manifest activates their rules. This page shows what a future result for the Harbor example would contain without claiming that the current Markdown conforms.
+The core-model profile is active with eight semantic rules; the Harbor instance documents are their valid fixture. This page shows what a result for the Harbor example would contain without making a conformance claim.
 
 ## Illustrative claim envelope
 

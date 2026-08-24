@@ -1,0 +1,11 @@
+id: CHR-RULE-ENT-004
+title: Only humans occupy positions
+requirements: [CHR-ENT-011]
+profile: core-model
+verification: semantic
+applies_to: [Assignment]
+check: >-
+  For every Assignment with participation occupies, subject resolves to a HumanIdentity document and target resolves to a Position document.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/agent-occupies-position

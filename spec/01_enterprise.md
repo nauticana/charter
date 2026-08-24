@@ -20,6 +20,7 @@ An `Enterprise` is the root governance boundary. An `OrganizationUnit` is a stru
 - **CHR-ENT-008:** Within an enterprise, organization units MUST form a rooted, acyclic tree in which every non-root organization unit has exactly one parent organization unit.
 - **CHR-ENT-009:** A position MUST belong to exactly one organization unit and MUST NOT participate as a parent or child node in the organization-unit tree.
 - **CHR-ENT-010:** A position type MAY classify positions in multiple organization units but MUST NOT by itself determine organization membership, reporting, role, responsibility, assignment, or authority.
+- **CHR-ENT-011:** Position occupancy MUST connect a human identity to a position. An agent MAY support, observe, recommend, prepare, approve, perform, or execute work in a position context but MUST NOT occupy the position.
 
 ## Relationships
 

@@ -1,3 +1,3 @@
 # Invalid Fixtures
 
-Each file in this directory will isolate a condition that must fail a specific active conformance rule. Fixture metadata must identify the applicable `CHR-RULE-*` IDs, specification version, expected failure, and why the document is invalid.
+Each directory isolates one condition that must fail one active rule. Every document is schema-valid, so the failure comes from the semantic rule alone; `fixture.yaml` names the rule, the expected result, and why the set is invalid.
