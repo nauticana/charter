@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/common.schema.json",
   "title": "Charter Common Definitions",
   "description": "Shared definitions for Charter domain schemas.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-CONF-001",
     "CHR-CONF-002",
@@ -31,7 +31,7 @@
       "type": "string",
       "minLength": 1,
       "examples": [
-        "draft"
+        "1.0.0"
       ]
     },
     "displayName": {
@@ -135,7 +135,7 @@
       "additionalProperties": false
     },
     "idRef": {
-      "description": "A same-namespace identifier string or an explicitly namespaced identifier. A string resolves in the referring document's namespace.",
+      "description": "A same-namespace identifier string or an explicitly namespaced identifier. A string resolves in the referring document's namespace. The property carrying it declares the document kinds it may name in x-charter-ref-kinds (CHR-CONF-012).",
       "oneOf": [
         {
           "$ref": "#/$defs/identifier"

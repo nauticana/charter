@@ -1,0 +1,72 @@
+{
+  "charterSpecVersion": "1.0.0",
+  "namespace": "nauticana.charter",
+  "id": "CLAIM-1.0.0-agent-runtime",
+  "kind": "ConformanceClaim",
+  "name": "Reference SDK agent-runtime claim 1.0.0",
+  "conformanceProfile": "agent-runtime",
+  "implementationVersion": "1.0.0",
+  "testedRuleIds": [
+    "CHR-RULE-RT-001",
+    "CHR-RULE-RT-002",
+    "CHR-RULE-RT-003",
+    "CHR-RULE-RT-004",
+    "CHR-RULE-RT-005",
+    "CHR-RULE-RT-006",
+    "CHR-RULE-RT-007",
+    "CHR-RULE-RT-008"
+  ],
+  "verificationTypes": [
+    "structural",
+    "runtime-behavioral"
+  ],
+  "result": "conforming",
+  "resultDate": "2026-08-25",
+  "implementation": {
+    "kind": "GoModule",
+    "id": "github.com-nauticana-charter",
+    "external": true
+  },
+  "results": [
+    {
+      "ruleId": "CHR-RULE-RT-001",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-RT-002",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-RT-003",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-RT-004",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-RT-005",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-RT-006",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-RT-007",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-RT-008",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "charterSpecVersion": "1.0.0",
+  "namespace": "nauticana.charter",
+  "id": "CLAIM-1.0.0-core-model",
+  "kind": "ConformanceClaim",
+  "name": "Reference SDK core-model claim 1.0.0",
+  "conformanceProfile": "core-model",
+  "implementationVersion": "1.0.0",
+  "testedRuleIds": [
+    "CHR-RULE-AGENT-001",
+    "CHR-RULE-AGENT-002",
+    "CHR-RULE-ARCH-001",
+    "CHR-RULE-AUTH-001",
+    "CHR-RULE-AUTH-002",
+    "CHR-RULE-AUTH-003",
+    "CHR-RULE-CAP-001",
+    "CHR-RULE-CONF-001",
+    "CHR-RULE-CONF-002",
+    "CHR-RULE-ENT-001",
+    "CHR-RULE-ENT-002",
+    "CHR-RULE-ENT-003",
+    "CHR-RULE-ENT-004",
+    "CHR-RULE-ENT-005",
+    "CHR-RULE-EVID-001",
+    "CHR-RULE-ID-001",
+    "CHR-RULE-INFO-001",
+    "CHR-RULE-PROC-001",
+    "CHR-RULE-PROC-002",
+    "CHR-RULE-PROC-003"
+  ],
+  "verificationTypes": [
+    "structural",
+    "semantic"
+  ],
+  "result": "conforming",
+  "resultDate": "2026-08-25",
+  "implementation": {
+    "kind": "GoModule",
+    "id": "github.com-nauticana-charter",
+    "external": true
+  },
+  "results": [
+    {
+      "ruleId": "CHR-RULE-ENT-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-ENT-002",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-ENT-003",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-ENT-004",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-CONF-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-ID-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-AUTH-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-AUTH-002",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-CONF-002",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-ENT-005",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-PROC-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-PROC-002",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-PROC-003",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-ARCH-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-INFO-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-EVID-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-AGENT-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-AGENT-002",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-AUTH-003",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-CAP-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    }
+  ]
+}

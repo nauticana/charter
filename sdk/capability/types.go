@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/nauticana/charter/sdk/authority"
+	"github.com/nauticana/charter/sdk/information"
 	"github.com/nauticana/charter/sdk/model"
 )
 
@@ -17,6 +18,12 @@ const (
 	StatusFailed        Status = "failed"
 	StatusUnknown       Status = "unknown"
 )
+
+// InformationUse declares information an invocation reads or produces and the purpose it serves (CHR-INFO-007).
+type InformationUse struct {
+	Information model.Ref
+	Purpose     string
+}
 
 // Invocation is one governed request to use a capability within an execution and assignment context.
 type Invocation struct {
@@ -39,10 +46,12 @@ type Invocation struct {
 	MaterialInputsDigest string
 	SubjectRefs          []model.ObjectRef
 	IdempotencyKey       string
+	InformationUses      []InformationUse
 	At                   time.Time
 }
 
-// Result is the structured outcome of a governed invocation; Action is the evidence appended for it.
+// Result is the structured outcome of a governed invocation; Action is the evidence appended for it, and Exception
+// and Escalation the records appended when the invocation had to stop.
 type Result struct {
 	Status            Status
 	Outcome           string
@@ -53,9 +62,12 @@ type Result struct {
 	Requirement       string
 	Authority         authority.Decision
 	Approval          authority.ApprovalDecision
+	Information       []information.Decision
 	SodConflict       *model.Ref
 	Binding           *model.Ref
 	Action            *model.ActionRecord
+	Exception         *model.Ref
+	Escalation        *model.Ref
 	Err               error
 }
 

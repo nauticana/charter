@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "draft",
+  "charterSpecVersion": "1.0.0",
   "namespace": "harbor.example",
   "kind": "Responsibility",
   "id": "RESP-APPROVE-CREDIT-EXCEPTION",

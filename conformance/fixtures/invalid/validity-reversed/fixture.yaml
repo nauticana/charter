@@ -1,4 +1,4 @@
 rules: [CHR-RULE-ENT-003]
-specification_version: draft
+specification_version: 1.0.0
 expected: fail
 reason: Assignment validity ends before it begins

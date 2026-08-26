@@ -14,7 +14,7 @@ type ReferencesResolveRule struct {
 	Meta *SchemaMeta
 }
 
-// ReferenceKindsRule checks that every resolved idRef names a document of the kind its property implies.
+// ReferenceKindsRule checks that every resolved idRef names one of the kinds its property declares in x-charter-ref-kinds.
 type ReferenceKindsRule struct {
 	AbstractRule
 	Meta *SchemaMeta
@@ -31,44 +31,6 @@ var (
 	_ Rule = ReferenceKindsRule{}
 	_ Rule = EnterpriseBoundaryRule{}
 )
-
-// idRefKinds is the document kind each idRef property implies; the schemas type these properties only as idRef.
-var idRefKinds = map[string][]model.Kind{
-	"enterpriseId":                {model.KindEnterprise},
-	"parentUnitId":                {model.KindOrganizationUnit},
-	"organizationUnitId":          {model.KindOrganizationUnit},
-	"positionTypeId":              {model.KindPositionType},
-	"responsibilityIds":           {model.KindResponsibility},
-	"responsibilityId":            {model.KindResponsibility},
-	"accountableResponsibilityId": {model.KindResponsibility},
-	"agentIdentityId":             {model.KindAgentIdentity},
-	"agentDefinitionId":           {model.KindAgentDefinition},
-	"runtimeInstanceId":           {model.KindAgentRuntime},
-	"capabilityId":                {model.KindCapabilityContract},
-	"capabilityIds":               {model.KindCapabilityContract},
-	"constrainedActions":          {model.KindCapabilityContract, model.KindResponsibility},
-	"sodConstraintIds":            {model.KindSodConstraint},
-	"authorityGrantId":            {model.KindAuthorityGrant},
-	"approvalId":                  {model.KindApproval},
-	"approvalIds":                 {model.KindApproval},
-	"valueStreamId":               {model.KindValueStream},
-	"parentProcessId":             {model.KindBusinessProcess},
-	"processId":                   {model.KindBusinessProcess},
-	"processInstanceId":           {model.KindProcessInstance},
-	"taskId":                      {model.KindTask},
-	"assignmentId":                {model.KindAssignment},
-	"baselineStateId":             {model.KindArchitectureState},
-	"targetStateId":               {model.KindArchitectureState},
-	"addressesGapIds":             {model.KindGap},
-	"enterpriseSystemId":          {model.KindEnterpriseSystem},
-	"systemProfileId":             {model.KindSystemProfile},
-	"informationDefinitionId":     {model.KindInformationDefinition},
-	"governancePolicyIds":         {model.KindInformationGovernancePolicy},
-	"bindingId":                   {model.KindCapabilityBinding, model.KindDataBinding, model.KindAuthorityBinding, model.KindEventBinding},
-	"evidenceRecordIds":           {model.KindEvidenceRecord},
-	"recordIds":                   {model.KindEvidenceRecord, model.KindActionRecord, model.KindExceptionRecord, model.KindEscalation},
-	"supersedes":                  {model.KindEvidenceRecord},
-}
 
 func (r ReferencesResolveRule) Validate(c *corpus.Corpus) []Finding {
 	var out []Finding
@@ -109,9 +71,9 @@ func (r ReferenceKindsRule) Validate(c *corpus.Corpus) []Finding {
 			if !found {
 				return
 			}
-			kinds, known := idRefKinds[key]
+			kinds, known := r.Meta.RefKinds[key]
 			if !known {
-				out = append(out, r.finding(d.Namespace, d.ID, fmt.Sprintf("%s has no implied document kind", key)))
+				out = append(out, r.finding(d.Namespace, d.ID, fmt.Sprintf("%s declares no x-charter-ref-kinds", key)))
 				return
 			}
 			if !slices.Contains(kinds, target.Kind) {

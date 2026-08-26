@@ -42,10 +42,10 @@ func TestHarborGovernance(t *testing.T) {
 
 func policies(t *testing.T, behavior string, precedenceA, precedenceB int) *BaseEvaluator {
 	policy := func(id string, precedence int, uses string) string {
-		return fmt.Sprintf(`{"charterSpecVersion":"draft","namespace":"t","kind":"InformationGovernancePolicy","id":"%s","name":"%s","scope":[{"kind":"InformationDefinition","id":"I"}],"permittedUses":[%s],"accessConstraints":["c"],"retentionAndDeletion":[{"artifactKind":"prompt","retentionRule":"%s","deletionRule":"purge"}],"precedence":%d,"conflictBehavior":"%s"}`, id, id, uses, id, precedence, behavior)
+		return fmt.Sprintf(`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"InformationGovernancePolicy","id":"%s","name":"%s","scope":[{"kind":"InformationDefinition","id":"I"}],"permittedUses":[%s],"accessConstraints":["c"],"retentionAndDeletion":[{"artifactKind":"prompt","retentionRule":"%s","deletionRule":"purge"}],"precedence":%d,"conflictBehavior":"%s"}`, id, id, uses, id, precedence, behavior)
 	}
 	docs := []string{
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"InformationDefinition","id":"I","name":"i","businessMeaning":"m","ownerOrSteward":{"kind":"OrganizationUnit","id":"OU"},"classification":"internal","governancePolicyIds":["A","B"]}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"InformationDefinition","id":"I","name":"i","businessMeaning":"m","ownerOrSteward":{"kind":"OrganizationUnit","id":"OU"},"classification":"internal","governancePolicyIds":["A","B"]}`,
 		policy("A", precedenceA, `"audit","export"`),
 		policy("B", precedenceB, `"audit"`),
 	}

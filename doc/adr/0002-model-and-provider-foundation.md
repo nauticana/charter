@@ -1,6 +1,6 @@
 # 0002: Model and provider foundation
 
-Status: Proposed
+Status: Accepted
 Date: 2026-08-25
 
 ## Context
@@ -18,7 +18,7 @@ The SDK needs typed structs for forty document kinds, a way to resolve reference
 
 ## Consequences
 
-A downstream store implements one small interface and inherits every provider and view. Adding a kind is a struct plus a catalog entry, covered automatically by the round-trip test. Open-ended validity semantics must be kept in mind when a document carries a lifecycle state instead of an end date. The target kind an `idRef` property implies is not in the schemas; ADR 0004 records where it lives.
+A downstream store implements one small interface and inherits every provider and view. Adding a kind is a struct plus a catalog entry, covered automatically by the round-trip test. Open-ended validity semantics must be kept in mind when a document carries a lifecycle state instead of an end date. The target kinds for an `idRef` property live in schema annotations, as recorded in ADR 0004.
 
 ## Specification impact
 

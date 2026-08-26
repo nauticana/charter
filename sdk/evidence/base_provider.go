@@ -45,3 +45,11 @@ func (p *BaseProvider) Actions(ctx context.Context) ([]model.ActionRecord, error
 func (p *BaseProvider) Records(ctx context.Context) ([]model.EvidenceRecord, error) {
 	return corpus.ListAs[model.EvidenceRecord](ctx, &p.AbstractDocumentProvider, model.KindEvidenceRecord)
 }
+
+func (p *BaseProvider) Exceptions(ctx context.Context) ([]model.ExceptionRecord, error) {
+	return corpus.ListAs[model.ExceptionRecord](ctx, &p.AbstractDocumentProvider, model.KindExceptionRecord)
+}
+
+func (p *BaseProvider) Escalations(ctx context.Context) ([]model.Escalation, error) {
+	return corpus.ListAs[model.Escalation](ctx, &p.AbstractDocumentProvider, model.KindEscalation)
+}

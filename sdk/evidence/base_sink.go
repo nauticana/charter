@@ -8,5 +8,5 @@ type BaseMemorySink struct {
 var _ Sink = (*BaseMemorySink)(nil)
 
 func NewBaseMemorySink() *BaseMemorySink {
-	return &BaseMemorySink{AbstractSink{Store: NewBaseMemoryStore(), Digester: BaseSHA256Digester{}}}
+	return &BaseMemorySink{AbstractSink{Store: NewBaseMemoryStore(), Digester: BaseSHA256Digester{}, Redactor: BaseRedactor{}}}
 }

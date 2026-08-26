@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "draft",
+  "charterSpecVersion": "1.0.0",
   "namespace": "fixture.example",
   "enterpriseId": "ENT-FX",
   "kind": "ActionRecord",
@@ -24,6 +24,7 @@
   "operationClass": "execute",
   "actionTime": "2026-06-18T17:00:00Z",
   "outcome": "done",
+  "disposition": "executed",
   "authorityEvaluations": [
     {
       "authorityGrantId": "AUTH-FX",

@@ -2,8 +2,12 @@ package keel
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -107,6 +111,12 @@ type checker map[string]bool
 
 func (c checker) CheckActionPermission(_ context.Context, userID int, authObject, action, scope string) (bool, bool) {
 	return c[fmt.Sprintf("%d:%s:%s:%s", userID, authObject, action, scope)], false
+}
+
+type broadGrantSource []model.AuthorityGrant
+
+func (s broadGrantSource) Grants(context.Context, authority.Request) ([]model.AuthorityGrant, error) {
+	return s, nil
 }
 
 func TestPermissionGateLayersKeelBehindCharter(t *testing.T) {
@@ -230,7 +240,7 @@ func (l *memoryLogger) Close() {}
 
 func record(id string, supersedes *model.Ref) model.EvidenceRecord {
 	r := model.EvidenceRecord{Category: model.CategoryObservedFact, Content: "40 units", RecordedAt: at, Supersedes: supersedes}
-	r.CharterSpecVersion, r.Namespace, r.ID = "draft", ns, id
+	r.CharterSpecVersion, r.Namespace, r.ID = "1.0.0", ns, id
 	r.EnterpriseID = &model.Ref{ID: "ENT-HARBOR"}
 	return r
 }
@@ -239,6 +249,9 @@ func TestTableLogStoreIsAppendOnlyAndVerifiable(t *testing.T) {
 	ctx := context.Background()
 	logger := &memoryLogger{}
 	store := &TableLogStore{Logger: logger, PartnerID: 7, OwnerUserID: 42, CreatedBy: 42}
+	if err := store.Append(ctx, nil); err == nil {
+		t.Error("nil evidence document was accepted")
+	}
 	sink := &evidence.AbstractSink{Store: store, Digester: evidence.BaseSHA256Digester{}}
 	if err := sink.Record(ctx, record("EVR-1", nil)); err != nil {
 		t.Fatal(err)
@@ -256,7 +269,7 @@ func TestTableLogStoreIsAppendOnlyAndVerifiable(t *testing.T) {
 		t.Errorf("read scope: partner=%d owner=%d", logger.lastPartner, logger.lastOwner)
 	}
 	bundle := model.EvidenceBundle{Subject: model.ObjectRef{Kind: model.KindProcessInstance, ID: "PI-1"}, RecordIDs: []model.Ref{{ID: "EVR-1"}, {ID: "EVR-2"}}, AssuranceProfile: "standard"}
-	bundle.CharterSpecVersion, bundle.Namespace, bundle.ID = "draft", ns, "EVID-1"
+	bundle.CharterSpecVersion, bundle.Namespace, bundle.ID = "1.0.0", ns, "EVID-1"
 	bundle.EnterpriseID = &model.Ref{ID: "ENT-HARBOR"}
 	if err := sink.Bundle(ctx, bundle); err != nil {
 		t.Fatal(err)
@@ -273,6 +286,11 @@ func TestTableLogStoreIsAppendOnlyAndVerifiable(t *testing.T) {
 	writeOnly := &memoryLogger{writeOnly: true}
 	if err := (&evidence.AbstractSink{Store: &TableLogStore{Logger: writeOnly, PartnerID: 7, OwnerUserID: 42}, Digester: evidence.BaseSHA256Digester{}}).Record(ctx, record("EVR-3", nil)); err == nil || len(writeOnly.rows) != 0 {
 		t.Errorf("write-only logger must fail closed: %v rows=%d", err, len(writeOnly.rows))
+	}
+	poisoned := &memoryLogger{rows: []*kmodel.TableChangeLog{{ID: 1, TableName: "charter_evidencerecord", RecordKey: "harbor.example:EVR-WANT",
+		Action: appendAction, OldData: map[string]any{"charterSpecVersion": "1.0.0", "namespace": "harbor.example", "kind": "EvidenceRecord", "id": "EVR-OTHER"}}}}
+	if _, err := (&TableLogStore{Logger: poisoned}).Fetch(ctx, corpus.DocumentKey{Namespace: ns, ID: "EVR-WANT"}); err == nil {
+		t.Error("table-log row whose payload does not match its key was accepted")
 	}
 }
 
@@ -296,12 +314,17 @@ func TestPublishingSink(t *testing.T) {
 	}
 	memory := evidence.NewBaseMemorySink()
 	pub := &publisher{}
-	sink := &PublishingSink{Next: memory, Publisher: pub, Topic: "charter.evidence"}
+	sink := &PublishingSink{Next: memory, Publisher: pub, Topic: "charter.evidence", Redactor: evidence.BaseRedactor{}}
 	if err := sink.Record(ctx, record("EVR-1", nil)); err != nil {
 		t.Fatal(err)
 	}
 	if pub.topic != "charter.evidence" || pub.attrs["kind"] != "EvidenceRecord" || pub.attrs["id"] != "EVR-1" || pub.attrs["request_id"] != "aB3dE5fG7hJ9" || !strings.Contains(string(pub.data), `"kind":"EvidenceRecord"`) {
 		t.Errorf("published event: %s %v", pub.topic, pub.attrs)
+	}
+	leaky := record("EVR-LEAK", nil)
+	leaky.Content = "token=s3cr3t"
+	if err := sink.Record(ctx, leaky); err != nil || strings.Contains(string(pub.data), "s3cr3t") || !strings.Contains(string(pub.data), "[redacted]") {
+		t.Errorf("published evidence must be redacted: %v %s", err, pub.data)
 	}
 	pub.err = errors.New("broker down")
 	err := sink.Record(ctx, record("EVR-2", nil))
@@ -332,7 +355,7 @@ func TestIDsAndMetrics(t *testing.T) {
 	if id := ids.NewID(model.KindActionRecord); id != "ACT-7000000000001" {
 		t.Errorf("id: %s", id)
 	}
-	if id := ids.NewID(model.KindEvidenceRecord); !strings.HasPrefix(id, "EVIDENCERECORD-") {
+	if id := ids.NewID(model.KindEvidenceRecord); !strings.HasPrefix(id, "EVR-") {
 		t.Errorf("id: %s", id)
 	}
 	rec := &metrics{}
@@ -344,4 +367,134 @@ func TestIDsAndMetrics(t *testing.T) {
 	if res := (&MetricsInvoker{}).Invoke(context.Background(), capability.Invocation{}); res.Status != capability.StatusDenied || res.Requirement != "CHR-AUTH-010" {
 		t.Errorf("incomplete metrics invoker: %+v", res)
 	}
+}
+
+func TestGateAtHTTPTableActionAndWorkerBoundaries(t *testing.T) {
+	c := harbor(t)
+	gate := &Gate{Caller: Caller{Identities: identity.NewBaseResolver(c), Map: BaseClaimIdentityMap{Namespace: ns}},
+		Grants: authority.NewDocumentGrantSource(c), Now: func() time.Time { return at }}
+	reserve := Gated{Namespace: ns, EnterpriseID: model.Ref{ID: "ENT-HARBOR"}, CapabilityID: model.Ref{ID: "CAP-RESERVE-ORDER-STOCK"}}
+	read := Gated{Namespace: ns, EnterpriseID: model.Ref{ID: "ENT-HARBOR"}, CapabilityID: model.Ref{ID: "CAP-READ-ORDER-EXCEPTION"}}
+	routes := BaseRouteTable{"POST /api/v1/order-exception/reserve": reserve, "GET /api/v1/order-exception/": read}
+	var seen Clearance
+	inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		seen, _ = ClearanceFromContext(r.Context())
+		w.WriteHeader(http.StatusOK)
+	})
+	serve := func(h http.Handler, method, path string, ctx context.Context) int {
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, httptest.NewRequest(method, path, nil).WithContext(ctx))
+		return rec.Code
+	}
+	handler := gate.Middleware(routes)(inner)
+	if code := serve(gate.Middleware(nil)(inner), http.MethodGet, "/", oauthContext(agentClaims())); code != http.StatusInternalServerError {
+		t.Errorf("missing routes: %d", code)
+	}
+	if code := serve(gate.Middleware(routes)(nil), http.MethodGet, "/", oauthContext(agentClaims())); code != http.StatusInternalServerError {
+		t.Errorf("missing downstream handler: %d", code)
+	}
+	if code := serve(handler, http.MethodPost, "/api/v1/order-exception/reserve", oauthContext(agentClaims())); code != http.StatusOK || seen.GrantRef.ID != "AUTH-OEC-STOCK-RESERVATION-2026" || seen.Actor.ID != agent {
+		t.Errorf("granted route: %d %+v", code, seen)
+	}
+	if code := serve(handler, http.MethodGet, "/api/v1/order-exception/OE-42", oauthContext(agentClaims())); code != http.StatusForbidden {
+		t.Errorf("read without a grant must be refused at the boundary: %d", code)
+	}
+	if code := serve(handler, http.MethodDelete, "/api/v1/order-exception/reserve", oauthContext(agentClaims())); code != http.StatusForbidden {
+		t.Errorf("unmapped route: %d", code)
+	}
+	if code := serve(handler, http.MethodPost, "/api/v1/order-exception/reserve", context.Background()); code != http.StatusUnauthorized {
+		t.Errorf("anonymous: %d", code)
+	}
+	if code := serve(handler, http.MethodPost, "/api/v1/order-exception/reserve", oauthContext(map[string]any{"sub": "x"})); code != http.StatusForbidden {
+		t.Errorf("unmapped identity: %d", code)
+	}
+	if code := serve(handler, http.MethodPost, "/api/v1/order-exception/reserve", oauthContext(map[string]any{DefaultKindClaim: "AgentIdentity", DefaultIDClaim: "AGENT-MISSING"})); code != http.StatusForbidden {
+		t.Errorf("identity absent from Charter corpus: %d", code)
+	}
+	action := gate.Handler(reserve, inner)
+	if code := serve(gate.Handler(reserve, nil), http.MethodPost, "/api/v1/order_exception/reserve", oauthContext(agentClaims())); code != http.StatusInternalServerError {
+		t.Errorf("table action without handler: %d", code)
+	}
+	if code := serve(action, http.MethodPost, "/api/v1/order_exception/reserve", oauthContext(agentClaims())); code != http.StatusOK {
+		t.Errorf("table action: %d", code)
+	}
+	gate.Now = func() time.Time { return time.Date(2027, 2, 1, 0, 0, 0, 0, time.UTC) }
+	if code := serve(action, http.MethodPost, "/api/v1/order_exception/reserve", oauthContext(agentClaims())); code != http.StatusForbidden {
+		t.Errorf("expired grant: %d", code)
+	}
+	gate.Now = func() time.Time { return at }
+
+	// A worker binds the principal it claimed with the job, then checks the gate before invoking.
+	job := JobContext(context.Background(), &port.Principal{Subject: "sub-42", Claims: agentClaims()}, 7, "aB3dE5fG7hJ9")
+	clearance, err := gate.Check(job, reserve)
+	if err != nil || clearance.Session.PartnerID != 7 || clearance.Session.RequestID != "aB3dE5fG7hJ9" {
+		t.Errorf("worker clearance: %+v %v", clearance, err)
+	}
+	if rc, err := RuntimeContext(job, model.Ref{ID: "RT-OEC-PROD-01"}); err != nil || rc.ExecutionContextID != "aB3dE5fG7hJ9" {
+		t.Errorf("worker runtime context: %+v %v", rc, err)
+	}
+	if _, err := gate.Check(JobContext(context.Background(), nil, 7, "x"), reserve); !errors.Is(err, ErrUnauthenticated) {
+		t.Errorf("job without principal: %v", err)
+	}
+	grants, err := authority.NewDocumentGrantSource(c).Grants(job, authority.Request{Namespace: ns, EnterpriseID: reserve.EnterpriseID,
+		Actor: model.ObjectRef{Kind: model.KindAgentIdentity, ID: agent}, CapabilityID: reserve.CapabilityID})
+	if err != nil || len(grants) != 1 {
+		t.Fatalf("fixture grant: %v %v", grants, err)
+	}
+	wrong := grants[0]
+	wrong.Actor.ID = "AGENT-SOMEONE-ELSE"
+	gate.Grants = broadGrantSource{wrong}
+	if _, err := gate.Check(job, reserve); !errors.Is(err, ErrNoAuthority) {
+		t.Errorf("gate trusted a source that returned another actor's grant: %v", err)
+	}
+}
+
+func TestTableLogStorePreservesNamespacesAndExtensions(t *testing.T) {
+	ctx := oauthContext(nil)
+	logger := &memoryLogger{}
+	store := &TableLogStore{Logger: logger}
+	pub := &publisher{}
+	sink := &PublishingSink{Next: &evidence.AbstractSink{Store: store, Digester: evidence.BaseSHA256Digester{}, Redactor: evidence.BaseRedactor{}}, Publisher: pub, Topic: "t", Redactor: evidence.BaseRedactor{}}
+	rec := record("EVR-X", nil)
+	rec.Kind = model.KindEvidenceRecord
+	rec.Namespace = "one.example"
+	rec.EnterpriseID = &model.Ref{Namespace: "other.example", ID: "ENT-O"}
+	rec.Sources = []string{"SYSPROFILE-HARBOR-S4-2602 reservation-document-read at 17:03:12Z"}
+	rec.Extensions = map[string]json.RawMessage{
+		"vendor:sap":            json.RawMessage(`{"reservation":"0000088421","nested":{"ratio":1.5,"list":["a","b"],"ok":true}}`),
+		"https://example.com/x": json.RawMessage(`"free text with token-like word"`),
+	}
+	if err := sink.Record(ctx, rec); err != nil {
+		t.Fatal(err)
+	}
+	want, err := json.Marshal(rec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	d, err := store.Fetch(ctx, corpus.DocumentKey{Namespace: "one.example", ID: "EVR-X"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !jsonEqual(t, want, d.Raw) || !jsonEqual(t, want, pub.data) {
+		t.Errorf("document changed across the store or the publisher:\n want %s\n store %s\n published %s", want, d.Raw, pub.data)
+	}
+	back, err := corpus.Decode[model.EvidenceRecord](d)
+	if err != nil || back.Namespace != "one.example" || back.EnterpriseID.Namespace != "other.example" || string(back.Extensions["vendor:sap"]) == "" {
+		t.Errorf("typed read-back: %+v %v", back, err)
+	}
+	if _, err := store.Fetch(ctx, corpus.DocumentKey{Namespace: "other.example", ID: "EVR-X"}); err == nil {
+		t.Error("namespace is part of the key")
+	}
+}
+
+func jsonEqual(t *testing.T, a, b []byte) bool {
+	t.Helper()
+	var x, y any
+	if err := json.Unmarshal(a, &x); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(b, &y); err != nil {
+		t.Fatal(err)
+	}
+	return reflect.DeepEqual(x, y)
 }

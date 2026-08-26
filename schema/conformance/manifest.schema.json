@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/conformance/manifest.schema.json",
   "title": "ConformanceManifest",
   "description": "Format of conformance/manifest.yaml: the inventory of profiles and rules and their activation status.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": ["CHR-CONF-001", "CHR-CONF-006", "CHR-CONF-007"],
   "type": "object",
   "$defs": {

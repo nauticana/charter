@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/sod_constraint.schema.json",
   "title": "SodConstraint",
   "description": "Separation-of-duties constraint identifying actions or responsibilities one actor may not combine.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-AUTH-007"
   ],
@@ -27,7 +27,10 @@
       "const": "SodConstraint"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "constrainedActions": {
       "type": "array",
@@ -36,7 +39,11 @@
       },
       "uniqueItems": true,
       "minItems": 2,
-      "description": "Capability or responsibility ids that must be performed by different actors."
+      "description": "Capability or responsibility ids that must be performed by different actors.",
+      "x-charter-ref-kinds": [
+        "CapabilityContract",
+        "Responsibility"
+      ]
     },
     "scope": {
       "type": "string",

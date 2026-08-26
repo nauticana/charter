@@ -10,10 +10,12 @@ import (
 	"github.com/nauticana/charter/sdk/model"
 )
 
-// AbstractSink implements append-only writes, supersession links, and bundle integrity over an abstract Store.
+// AbstractSink implements append-only writes, supersession links, bundle integrity, and secret redaction over an
+// abstract Store; a nil Redactor appends evidence verbatim.
 type AbstractSink struct {
 	Store    Store
 	Digester Digester
+	Redactor Redactor
 }
 
 var _ Sink = (*AbstractSink)(nil)
@@ -73,6 +75,36 @@ func (s *AbstractSink) Bundle(ctx context.Context, b model.EvidenceBundle) error
 	return s.append(ctx, b.Envelope, b)
 }
 
+// Assemble fills an empty bundle with every stored record about its subject, in order, and appends it with a computed
+// integrity value (CHR-EVID-005).
+func (s *AbstractSink) Assemble(ctx context.Context, b model.EvidenceBundle) (model.EvidenceBundle, error) {
+	if err := s.ready(); err != nil {
+		return b, err
+	}
+	if len(b.RecordIDs) == 0 {
+		refs, err := (Queries{Provider: NewBaseProvider(s.Store)}).RecordsAbout(ctx, b.Namespace, b.Subject)
+		if err != nil {
+			return b, err
+		}
+		if len(refs) == 0 {
+			return b, fmt.Errorf("%w: nothing recorded about %s %s", ErrBundleRecord, b.Subject.Kind, b.Subject.ID)
+		}
+		b.RecordIDs = refs
+	}
+	b.Kind = model.KindEvidenceBundle
+	if b.Integrity.Method == "" {
+		b.Integrity.Method = s.Digester.Method()
+	}
+	if b.Integrity.Value == "" {
+		value, err := (Verifier{Source: s.Store, Digester: s.Digester}).chain(ctx, b)
+		if err != nil {
+			return b, err
+		}
+		b.Integrity.Value = value
+	}
+	return b, s.Bundle(ctx, b)
+}
+
 func (s *AbstractSink) ready() error {
 	if s.Store == nil || s.Digester == nil {
 		return ErrNoStore
@@ -90,6 +122,11 @@ func (s *AbstractSink) append(ctx context.Context, env model.Envelope, v any) er
 	raw, err := json.Marshal(v)
 	if err != nil {
 		return err
+	}
+	if s.Redactor != nil {
+		if raw, err = s.Redactor.Redact(raw); err != nil {
+			return fmt.Errorf("redaction: %w", err)
+		}
 	}
 	d := &model.Document{Envelope: env, Raw: raw}
 	dec := json.NewDecoder(bytes.NewReader(raw))

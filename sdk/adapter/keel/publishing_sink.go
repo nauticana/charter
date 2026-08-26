@@ -15,12 +15,13 @@ import (
 
 var ErrPublish = errors.New("evidence appended but not published")
 
-// PublishingSink appends through the next sink, then publishes the document as an event with kind, namespace, id, and
-// request-id attributes. A publish failure surfaces as ErrPublish after the append already succeeded (CHR-SEC-007).
+// PublishingSink appends through the next sink, then publishes the document, redacted, as an event with kind, namespace,
+// id, and request-id attributes. A publish failure surfaces as ErrPublish after the append already succeeded (CHR-SEC-007).
 type PublishingSink struct {
 	Next      evidence.Sink
 	Publisher port.MessagePublisher
 	Topic     string
+	Redactor  evidence.Redactor
 }
 
 var _ evidence.Sink = (*PublishingSink)(nil)
@@ -75,6 +76,11 @@ func (s *PublishingSink) publish(ctx context.Context, appended error, env model.
 	data, err := json.Marshal(doc)
 	if err != nil {
 		return fmt.Errorf("%w: %v", ErrPublish, err)
+	}
+	if s.Redactor != nil {
+		if data, err = s.Redactor.Redact(data); err != nil {
+			return fmt.Errorf("%w: redaction: %v", ErrPublish, err)
+		}
 	}
 	attributes := map[string]string{"kind": string(env.Kind), "namespace": env.Namespace, "id": env.ID}
 	if requestID := common.RequestIDFromContext(ctx); requestID != "" {

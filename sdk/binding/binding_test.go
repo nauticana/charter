@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/model"
@@ -93,5 +95,69 @@ func TestHarborBinding(t *testing.T) {
 	}
 	if len(b.Lossy()) != 1 {
 		t.Error("lossy mappings not exposed")
+	}
+}
+
+type recordingHandler struct {
+	deliveries []Delivery
+	err        error
+}
+
+func (h *recordingHandler) Handle(_ context.Context, d Delivery) error {
+	h.deliveries = append(h.deliveries, d)
+	return h.err
+}
+
+func TestEventConsumerAppliesDeliverySemantics(t *testing.T) {
+	c, err := corpus.NewDirLoader("../../examples/harbor-manufacturing/instances").Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, raw := range []string{
+		`{"charterSpecVersion":"1.0.0","namespace":"harbor.example","kind":"EventBinding","id":"EVTBIND-ONCE","bindingVersion":"1","systemProfileId":"SYSPROFILE-HARBOR-S4-2602","externalEvent":"e","charterTrigger":"scheduled review of an open exception","featureSupport":[{"feature":"event-delivery","support":"supported"}],"deliverySemantics":"at-most-once"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"harbor.example","kind":"EventBinding","id":"EVTBIND-EXACTLY","bindingVersion":"1","systemProfileId":"SYSPROFILE-HARBOR-S4-2602","externalEvent":"e","charterTrigger":"scheduled review of an open exception","featureSupport":[{"feature":"event-delivery","support":"supported"}],"deliverySemantics":"exactly-once"}`,
+	} {
+		d, err := (corpus.Parser{}).Parse([]byte(raw))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := c.Add(d); err != nil {
+			t.Fatal(err)
+		}
+	}
+	ctx := context.Background()
+	at := time.Date(2026, 6, 18, 17, 0, 0, 0, time.UTC)
+	handler := &recordingHandler{}
+	consumer := &AbstractEventConsumer{Bindings: NewBaseProvider(c), Ledger: NewBaseMemoryDeliveryLedger(), Handler: handler}
+	blocked := model.Ref{ID: "EVTBIND-S4-ORDER-BLOCKED-1"}
+	if r, err := consumer.Deliver(ctx, "harbor.example", blocked, "evt-1", "payload", at); err != nil || r.Status != DeliveryAccepted || len(handler.deliveries) != 1 || handler.deliveries[0].Trigger != "order-blocked event mapped to a known order" {
+		t.Fatalf("first delivery: %+v %v", r, err)
+	}
+	if r, _ := consumer.Deliver(ctx, "harbor.example", blocked, "evt-1", "payload", at); r.Status != DeliveryDuplicate || len(handler.deliveries) != 1 {
+		t.Errorf("redelivery: %+v", r)
+	}
+	if r, _ := consumer.Deliver(ctx, "harbor.example", blocked, "", "payload", at); r.Status != DeliveryRejected {
+		t.Errorf("at-least-once without event id: %+v", r)
+	}
+	handler.err = errors.New("runtime busy")
+	if r, err := consumer.Deliver(ctx, "harbor.example", blocked, "evt-2", "payload", at); err == nil || r.Status != DeliveryRejected {
+		t.Errorf("handler failure: %+v %v", r, err)
+	}
+	handler.err = nil
+	if r, _ := consumer.Deliver(ctx, "harbor.example", blocked, "evt-2", "payload", at); r.Status != DeliveryAccepted {
+		t.Errorf("redelivery after failure must be handled: %+v", r)
+	}
+	once := &AbstractEventConsumer{Bindings: NewBaseProvider(c), Ledger: NewBaseMemoryDeliveryLedger(), Handler: handler}
+	if r, _ := once.Deliver(ctx, "harbor.example", model.Ref{ID: "EVTBIND-ONCE"}, "evt-3", nil, at); r.Status != DeliveryAccepted {
+		t.Errorf("first at-most-once delivery: %+v", r)
+	}
+	if r, _ := once.Deliver(ctx, "harbor.example", model.Ref{ID: "EVTBIND-ONCE"}, "evt-3", nil, at); r.Status != DeliveryDuplicate {
+		t.Errorf("duplicate at-most-once delivery: %+v", r)
+	}
+	if r, _ := once.Deliver(ctx, "harbor.example", model.Ref{ID: "EVTBIND-EXACTLY"}, "evt-4", nil, at); r.Status != DeliveryRejected || !strings.Contains(r.Reason, "atomic") {
+		t.Errorf("unimplementable exactly-once delivery: %+v", r)
+	}
+	if r, _ := consumer.Deliver(ctx, "harbor.example", model.Ref{ID: "EVTBIND-NOWHERE"}, "evt-4", nil, at); r.Status != DeliveryRejected {
+		t.Errorf("unknown binding: %+v", r)
 	}
 }

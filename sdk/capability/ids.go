@@ -31,8 +31,17 @@ func (g *BaseCounterIDs) NewID(kind model.Kind) string {
 
 // Prefix is the identifier prefix conventionally used for evidence of a kind.
 func Prefix(kind model.Kind) string {
-	if kind == model.KindActionRecord {
+	switch kind {
+	case model.KindActionRecord:
 		return "ACT"
+	case model.KindEvidenceRecord:
+		return "EVR"
+	case model.KindEvidenceBundle:
+		return "EVID"
+	case model.KindExceptionRecord:
+		return "EXC"
+	case model.KindEscalation:
+		return "ESC"
 	}
 	return strings.ToUpper(string(kind))
 }

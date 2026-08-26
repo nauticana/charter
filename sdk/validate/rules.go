@@ -28,6 +28,7 @@ func NewRuleSet() (RuleSet, error) {
 		RuntimeActorRule{AbstractRule{"CHR-RULE-AGENT-001", []string{"CHR-AGENT-006"}}},
 		DeclaredCapabilityRule{AbstractRule{"CHR-RULE-AGENT-002", []string{"CHR-AGENT-003"}}},
 		SodApprovalRule{AbstractRule{"CHR-RULE-AUTH-003", []string{"CHR-AUTH-007"}}},
+		RecordedOutcomeRule{AbstractRule{"CHR-RULE-CAP-001", []string{"CHR-CAP-001", "CHR-EVID-010"}}},
 	}
 	set := RuleSet{}
 	for _, r := range all {

@@ -1,5 +1,5 @@
 rules: [CHR-RULE-ENT-002]
 also_fails: [CHR-RULE-ENT-001, CHR-RULE-CONF-002]
-specification_version: draft
+specification_version: 1.0.0
 expected: fail
 reason: OU-CHILD names a Position as its parentUnitId

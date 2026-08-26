@@ -1,5 +1,5 @@
 rules: [CHR-RULE-SA-003]
-specification_version: draft
+specification_version: 1.0.0
 expected: fail
 reason: The vendor answers with a status the contract does not declare; a conforming adapter reports an unknown outcome instead of inventing one
 documents: ../../../../examples/harbor-manufacturing/instances

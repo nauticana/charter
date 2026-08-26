@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/process/gap.schema.json",
   "title": "Gap",
   "description": "Compares baseline and target elements and classifies the difference.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-ARCH-004"
   ],
@@ -27,13 +27,22 @@
       "const": "Gap"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "baselineStateId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "ArchitectureState"
+      ]
     },
     "targetStateId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "ArchitectureState"
+      ]
     },
     "classification": {
       "type": "string",

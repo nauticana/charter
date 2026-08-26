@@ -1,12 +1,12 @@
 # Conformance and Compatibility
 
-Status: Draft, unreleased
+Status: Version 1.0.0
 
 Conformance allows independent implementations to make bounded, testable claims about the parts of Charter they support.
 
 ## Profiles
 
-The initial planned profiles are:
+The profiles are:
 
 - Core model: structural and semantic support for Charter documents
 - Agent runtime: identity, lifecycle, authority evaluation, escalation, and evidence
@@ -28,6 +28,8 @@ Profiles are not active until their required rules are listed in `conformance/ma
 - **CHR-CONF-010:** A minor or patch release MUST NOT intentionally invalidate an artifact that conformed to the preceding release in the same major version.
 - **CHR-CONF-011:** Conformance results MUST distinguish structural validation, semantic validation, and runtime behavioral verification.
 - **CHR-CONF-012:** A reference to a Charter document MUST resolve within its declared namespace to a document of the required kind. A reference to a kind outside the Charter catalogue MUST be explicitly declared external; only such declared external references are exempt from Charter document resolution.
+- **CHR-CONF-013:** A runtime-behavioral rule MUST be defined by executable scenarios in which the verification harness scripts every external outcome and the implementation under test makes every governed decision. Its valid fixture is a scenario a conforming implementation MUST carry out and its invalid fixture one it MUST refuse, each stating the decision, the requirement identifier, and the evidence the implementation must produce.
+- **CHR-CONF-014:** A conformance claim covering runtime-behavioral rules MUST identify the implementation whose behavior was exercised. A rule whose implementation was not exercised MUST be reported as not tested, and a claim containing such a rule MUST be reported as partial.
 
 ## Compatibility
 

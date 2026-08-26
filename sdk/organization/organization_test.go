@@ -60,10 +60,10 @@ func TestHarborQueries(t *testing.T) {
 func TestCoverageClassPrecedence(t *testing.T) {
 	c := corpus.New()
 	for _, raw := range []string{
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"Responsibility","id":"R","name":"r","expectedOutcome":"o","accountable":{"kind":"Position","id":"P"}}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"Assignment","id":"A1","subject":{"kind":"HumanIdentity","id":"H"},"target":{"kind":"Responsibility","id":"R"},"participation":"performs","validity":{"from":"2026-01-01"}}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"Assignment","id":"A2","subject":{"kind":"AgentIdentity","id":"G"},"target":{"kind":"Responsibility","id":"R"},"participation":"executes","validity":{"from":"2026-01-01"},"lifecycleState":"retired"}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"Assignment","id":"A3","subject":{"kind":"AgentIdentity","id":"G"},"target":{"kind":"Responsibility","id":"R"},"participation":"prepares","validity":{"from":"2026-01-01"}}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Responsibility","id":"R","name":"r","expectedOutcome":"o","accountable":{"kind":"Position","id":"P"}}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Assignment","id":"A1","subject":{"kind":"HumanIdentity","id":"H"},"target":{"kind":"Responsibility","id":"R"},"participation":"performs","validity":{"from":"2026-01-01"}}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Assignment","id":"A2","subject":{"kind":"AgentIdentity","id":"G"},"target":{"kind":"Responsibility","id":"R"},"participation":"executes","validity":{"from":"2026-01-01"},"lifecycleState":"retired"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Assignment","id":"A3","subject":{"kind":"AgentIdentity","id":"G"},"target":{"kind":"Responsibility","id":"R"},"participation":"prepares","validity":{"from":"2026-01-01"}}`,
 	} {
 		d, err := (corpus.Parser{}).Parse([]byte(raw))
 		if err != nil {

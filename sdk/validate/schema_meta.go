@@ -2,18 +2,23 @@ package validate
 
 import (
 	"encoding/json"
+	"slices"
 	"strings"
+
+	"github.com/nauticana/charter/sdk/model"
 )
 
-// SchemaMeta derives the Charter kind set and every idRef-typed property name from the embedded schemas.
+// SchemaMeta derives the Charter kind set, every idRef- and objectRef-typed property name, and the document kinds each
+// idRef property may name (its x-charter-ref-kinds annotation) from the embedded schemas.
 type SchemaMeta struct {
 	Kinds         map[string]bool
 	IDRefKeys     map[string]bool
 	ObjectRefKeys map[string]bool
+	RefKinds      map[string][]model.Kind
 }
 
 func NewSchemaMeta() (*SchemaMeta, error) {
-	m := &SchemaMeta{Kinds: map[string]bool{}, IDRefKeys: map[string]bool{}, ObjectRefKeys: map[string]bool{}}
+	m := &SchemaMeta{Kinds: map[string]bool{}, IDRefKeys: map[string]bool{}, ObjectRefKeys: map[string]bool{}, RefKinds: map[string][]model.Kind{}}
 	var cat Catalog
 	entries, err := cat.Entries()
 	if err != nil {
@@ -80,6 +85,15 @@ func (m *SchemaMeta) collect(v any) {
 			for k, p := range props {
 				if m.isIDRef(p) {
 					m.IDRefKeys[k] = true
+					if annotated, ok := p.(map[string]any); ok {
+						if kinds, ok := annotated["x-charter-ref-kinds"].([]any); ok {
+							for _, kind := range kinds {
+								if name, ok := kind.(string); ok && !slices.Contains(m.RefKinds[k], model.Kind(name)) {
+									m.RefKinds[k] = append(m.RefKinds[k], model.Kind(name))
+								}
+							}
+						}
+					}
 				}
 				if m.isObjectRef(p) {
 					m.ObjectRefKeys[k] = true

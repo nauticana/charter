@@ -1,6 +1,6 @@
 # Harbor Manufacturing Example
 
-Status: Conceptual example for the draft specification
+Status: Conceptual example for specification 1.0.0
 
 Harbor Manufacturing is a fictional, vendor-neutral company used to exercise Charter end to end. It manufactures configured industrial pumps, purchases components, fulfills customer orders, and maintains installed equipment.
 

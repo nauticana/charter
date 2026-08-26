@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/evidence/evidence_record.schema.json",
   "title": "EvidenceRecord",
   "description": "One categorized record; corrections supersede rather than replace.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-EVID-003",
     "CHR-EVID-004",
@@ -29,7 +29,10 @@
       "const": "EvidenceRecord"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "category": {
       "type": "string",
@@ -70,7 +73,10 @@
       }
     },
     "supersedes": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "EvidenceRecord"
+      ]
     }
   },
   "required": [

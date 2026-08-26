@@ -32,7 +32,7 @@ func TestValidateHarbor(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &r); err != nil {
 		t.Fatal(err)
 	}
-	if r.Result != model.ResultConforming || r.Documents < 80 || r.Profile != "core-model" || len(r.Rules) < 19 || r.SpecVersion != "draft" {
+	if r.Result != model.ResultConforming || r.Documents < 80 || r.Profile != "core-model" || len(r.Rules) < 19 || r.SpecVersion != "1.0.0" {
 		t.Errorf("report: %+v", r)
 	}
 	if code, out, _ := exec(t, "validate", harbor); code != exitOK || !strings.Contains(out, "result: conforming") {
@@ -58,7 +58,7 @@ func TestValidateReportsFindingsWithRequirements(t *testing.T) {
 	if !found || r.Result != model.ResultNonconforming {
 		t.Errorf("findings: %+v", r.Findings)
 	}
-	code, out, _ = exec(t, "validate", "-spec-version", "1.0.0", harbor)
+	code, out, _ = exec(t, "validate", "-spec-version", "2.0.0", harbor)
 	if code != exitFailed || !strings.Contains(out, "spec-version") || !strings.Contains(out, "CHR-CONF-001") || !strings.Contains(out, "semantic rules skipped") {
 		t.Errorf("spec version mismatch: %d %s", code, out)
 	}
@@ -100,7 +100,7 @@ func TestConformanceAndClaim(t *testing.T) {
 	if code, out, _ := exec(t, "conformance", "-conformance", conf); code != exitOK || !strings.Contains(out, "PASS  fail") {
 		t.Errorf("text conformance: %d %s", code, out)
 	}
-	code, out, errOut = exec(t, "claim", "-conformance", conf, "-namespace", "sdk.example", "-id", "CLAIM-1", "-implementation", "github.com-nauticana-charter", "-implementation-version", "0.1.0-draft", "-date", "2026-08-25")
+	code, out, errOut = exec(t, "claim", "-conformance", conf, "-namespace", "sdk.example", "-id", "CLAIM-1", "-implementation", "github.com-nauticana-charter", "-implementation-version", "1.0.0", "-date", "2026-08-25")
 	if code != exitOK {
 		t.Fatalf("claim exit %d: %s%s", code, out, errOut)
 	}
@@ -132,7 +132,7 @@ func TestConformanceAndClaim(t *testing.T) {
 
 func TestVersion(t *testing.T) {
 	code, out, _ := exec(t, "version", "-conformance", conf)
-	if code != exitOK || !strings.Contains(out, "specification draft") || !strings.Contains(out, "active profiles core-model") {
+	if code != exitOK || !strings.Contains(out, "specification 1.0.0") || !strings.Contains(out, "active profiles core-model") {
 		t.Errorf("version: %d %s", code, out)
 	}
 	code, out, _ = exec(t, "version", "-format", "json")

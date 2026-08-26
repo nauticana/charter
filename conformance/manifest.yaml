@@ -1,7 +1,7 @@
 format_version: 1
 specification:
   name: Nauticana Charter
-  version: draft
+  version: 1.0.0
 profiles:
   - id: core-model
     status: active
@@ -25,6 +25,7 @@ profiles:
       - CHR-RULE-AGENT-001
       - CHR-RULE-AGENT-002
       - CHR-RULE-AUTH-003
+      - CHR-RULE-CAP-001
   - id: agent-runtime
     status: active
     rules:
@@ -34,6 +35,8 @@ profiles:
       - CHR-RULE-RT-004
       - CHR-RULE-RT-005
       - CHR-RULE-RT-006
+      - CHR-RULE-RT-007
+      - CHR-RULE-RT-008
   - id: system-adapter
     status: active
     rules:
@@ -129,3 +132,12 @@ rules:
   - id: CHR-RULE-SA-004
     status: active
     path: rules/CHR-RULE-SA-004.yaml
+  - id: CHR-RULE-RT-007
+    status: active
+    path: rules/CHR-RULE-RT-007.yaml
+  - id: CHR-RULE-RT-008
+    status: active
+    path: rules/CHR-RULE-RT-008.yaml
+  - id: CHR-RULE-CAP-001
+    status: active
+    path: rules/CHR-RULE-CAP-001.yaml

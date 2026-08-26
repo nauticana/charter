@@ -136,7 +136,13 @@ type InvocationSpec struct {
 	MaterialInputsDigest  string                 `yaml:"material_inputs_digest"`
 	Subjects              []ObjectRefSpec        `yaml:"subjects"`
 	IdempotencyKey        string                 `yaml:"idempotency_key"`
+	InformationUses       []InformationUseSpec   `yaml:"information_uses"`
 	At                    time.Time              `yaml:"at"`
+}
+
+type InformationUseSpec struct {
+	Information string `yaml:"information"`
+	Purpose     string `yaml:"purpose"`
 }
 
 // TransportSpec scripts the external outcome of one invocation; Error is unknown, not-executed, or text treated as unknown.
@@ -161,6 +167,8 @@ type Expectation struct {
 	TransportCalls *int   `yaml:"transport_calls"`
 	VendorCalls    *int   `yaml:"vendor_calls"`
 	Evidence       *bool  `yaml:"evidence"`
+	Escalated      *bool  `yaml:"escalated"`
+	Recipient      string `yaml:"recipient"`
 }
 
 // Step admits a context, invokes a capability, or sends a request to an adapter; absent ones are zero Nodes.
@@ -190,6 +198,8 @@ func NewBehavioralRuleSet() BehavioralRuleSet {
 		{AbstractRule{"CHR-RULE-RT-004", []string{"CHR-CAP-001", "CHR-CAP-005", "CHR-SEC-007"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-RT-005", []string{"CHR-AGENT-005", "CHR-AGENT-007"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-RT-006", []string{"CHR-ID-005", "CHR-SEC-009"}}, SubjectRuntime},
+		{AbstractRule{"CHR-RULE-RT-007", []string{"CHR-INFO-002", "CHR-INFO-007", "CHR-INFO-008"}}, SubjectRuntime},
+		{AbstractRule{"CHR-RULE-RT-008", []string{"CHR-AGENT-004", "CHR-EVID-006", "CHR-EVID-007"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-SA-001", []string{"CHR-BIND-002", "CHR-BIND-006", "CHR-BIND-009"}}, SubjectAdapter},
 		{AbstractRule{"CHR-RULE-SA-002", []string{"CHR-CAP-005", "CHR-BIND-005", "CHR-SEC-007", "CHR-SEC-008"}}, SubjectAdapter},
 		{AbstractRule{"CHR-RULE-SA-003", []string{"CHR-CAP-001", "CHR-CAP-007"}}, SubjectAdapter},
@@ -353,6 +363,20 @@ func (r BehavioralRule) runStep(ctx context.Context, rt Runtime, transport *scri
 				mismatches = append(mismatches, fmt.Sprintf("evidence recorded %v, want %v", recorded, *e.Evidence))
 			}
 		}
+		if e.Escalated != nil || e.Recipient != "" {
+			var escalation *model.Escalation
+			if res.Escalation != nil && rt.Evidence != nil {
+				if stored, err := rt.Evidence.Escalation(ctx, res.Escalation.Namespace, *res.Escalation); err == nil {
+					escalation = &stored
+				}
+			}
+			if e.Escalated != nil && (escalation != nil) != *e.Escalated {
+				mismatches = append(mismatches, fmt.Sprintf("escalation recorded %v, want %v", escalation != nil, *e.Escalated))
+			}
+			if e.Recipient != "" && (escalation == nil || escalation.Recipient.ID != e.Recipient) {
+				mismatches = append(mismatches, fmt.Sprintf("escalation recipient %v, want %s", escalation, e.Recipient))
+			}
+		}
 		if len(mismatches) > 0 && res.Reason != "" {
 			mismatches = append(mismatches, "runtime said: "+res.Reason)
 		}
@@ -382,6 +406,7 @@ func (s InvocationSpec) override(node *yaml.Node) (InvocationSpec, error) {
 	spec := s
 	spec.RequiredFeatures = slices.Clone(s.RequiredFeatures)
 	spec.Subjects = slices.Clone(s.Subjects)
+	spec.InformationUses = slices.Clone(s.InformationUses)
 	spec.Measures = maps.Clone(s.Measures)
 	var keys map[string]any
 	if err := node.Decode(&keys); err != nil {
@@ -442,6 +467,9 @@ func (s InvocationSpec) invocation(sc *Scenario) capability.Invocation {
 	}
 	for _, subject := range s.Subjects {
 		inv.SubjectRefs = append(inv.SubjectRefs, subject.ref())
+	}
+	for _, use := range s.InformationUses {
+		inv.InformationUses = append(inv.InformationUses, capability.InformationUse{Information: model.Ref{ID: use.Information}, Purpose: use.Purpose})
 	}
 	return inv
 }

@@ -1,6 +1,6 @@
 # Security Policy
 
-Nauticana Charter currently contains a draft specification and supporting documentation, not production software. Security reports may nevertheless concern unsafe normative requirements, schemas, examples, dependency choices, or future reference implementation code.
+Nauticana Charter contains a specification, schemas, a conformance corpus, and a reference SDK and CLI. Security reports may concern unsafe normative requirements, schemas, examples, dependency choices, or the reference implementation.
 
 ## Reporting a vulnerability
 

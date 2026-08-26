@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/authority_grant.schema.json",
   "title": "AuthorityGrant",
   "description": "Explicit authority scoped to actor, capability, resource scope, organizational context, and validity; absence of a grant is denial.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-AUTH-001",
     "CHR-AUTH-002",
@@ -30,7 +30,10 @@
       "const": "AuthorityGrant"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "actor": {
       "allOf": [
@@ -48,7 +51,10 @@
       }
     },
     "capabilityId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "CapabilityContract"
+      ]
     },
     "resourceScope": {
       "type": "string",

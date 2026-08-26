@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/process/task_instance.schema.json",
   "title": "TaskInstance",
   "description": "Execution state and performer context for one task occurrence.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-PROC-005",
     "CHR-PROC-006",
@@ -29,13 +29,22 @@
       "const": "TaskInstance"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "processInstanceId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "ProcessInstance"
+      ]
     },
     "taskId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Task"
+      ]
     },
     "taskDefinitionVersion": {
       "type": "string",
@@ -46,7 +55,10 @@
       "$ref": "../common.schema.json#/$defs/objectRef"
     },
     "assignmentId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Assignment"
+      ]
     },
     "participation": {
       "enum": [

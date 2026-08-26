@@ -59,8 +59,8 @@ func TestIdentityStateRequiresHistoryForActingIdentity(t *testing.T) {
 func TestApprovalMustBindEvaluatedActionInputsAndSubjects(t *testing.T) {
 	c := corpus.New()
 	for _, raw := range []string{
-		`{"charterSpecVersion":"draft","namespace":"test.example","kind":"Approval","id":"APPR-1","approvedAction":"CAP-1","materialInputsDigest":"sha256:approved","subjectRefs":[{"kind":"ProcessInstance","id":"PROC-1"}],"issuedAt":"2026-01-01T00:00:00Z","validityMode":"expires-at","expiresAt":"2026-12-31T00:00:00Z"}`,
-		`{"charterSpecVersion":"draft","namespace":"test.example","kind":"ActionRecord","id":"ACT-1","actor":{"kind":"HumanIdentity","id":"H-1"},"capabilityId":"CAP-1","materialInputsDigest":"sha256:changed","subjectRefs":[{"kind":"ProcessInstance","id":"PROC-2"}],"actionTime":"2026-06-01T00:00:00Z","approvalEvaluations":[{"approvalId":"APPR-1","approvedAction":"CAP-2","result":"approved","reason":"test"}]}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"test.example","kind":"Approval","id":"APPR-1","approvedAction":"CAP-1","materialInputsDigest":"sha256:approved","subjectRefs":[{"kind":"ProcessInstance","id":"PROC-1"}],"issuedAt":"2026-01-01T00:00:00Z","validityMode":"expires-at","expiresAt":"2026-12-31T00:00:00Z"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"test.example","kind":"ActionRecord","id":"ACT-1","actor":{"kind":"HumanIdentity","id":"H-1"},"capabilityId":"CAP-1","materialInputsDigest":"sha256:changed","subjectRefs":[{"kind":"ProcessInstance","id":"PROC-2"}],"actionTime":"2026-06-01T00:00:00Z","approvalEvaluations":[{"approvalId":"APPR-1","approvedAction":"CAP-2","result":"approved","reason":"test"}]}`,
 	} {
 		d, err := (corpus.Parser{}).Parse([]byte(raw))
 		if err != nil {
@@ -153,7 +153,7 @@ func TestStructuralRejectsUnknownProperty(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	d, err := (corpus.Parser{}).Parse([]byte(`{"charterSpecVersion":"draft","namespace":"t","kind":"Enterprise","id":"E1","name":"x","plantId":7}`))
+	d, err := (corpus.Parser{}).Parse([]byte(`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Enterprise","id":"E1","name":"x","plantId":7}`))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -162,21 +162,26 @@ func TestStructuralRejectsUnknownProperty(t *testing.T) {
 	}
 }
 
-func TestImpliedKindsCoverEveryIDRefProperty(t *testing.T) {
+func TestEveryIDRefPropertyDeclaresItsKinds(t *testing.T) {
 	meta, err := NewSchemaMeta()
 	if err != nil {
 		t.Fatal(err)
 	}
 	for key := range meta.IDRefKeys {
-		if _, ok := idRefKinds[key]; !ok {
-			t.Errorf("idRef property %q has no implied kind", key)
+		if len(meta.RefKinds[key]) == 0 {
+			t.Errorf("idRef property %q declares no x-charter-ref-kinds", key)
+		}
+		for _, kind := range meta.RefKinds[key] {
+			if !meta.Kinds[string(kind)] {
+				t.Errorf("idRef property %q names unknown kind %s", key, kind)
+			}
 		}
 	}
 }
 
 func TestCatalogMetaAndSpecVersion(t *testing.T) {
 	meta, err := (Catalog{}).Meta()
-	if err != nil || meta.SpecVersion != "draft" || meta.CatalogVersion == "" {
+	if err != nil || meta.SpecVersion != "1.0.0" || meta.CatalogVersion == "" {
 		t.Fatalf("meta: %+v %v", meta, err)
 	}
 	c, err := corpus.NewDirLoader(harbor).Load()
@@ -186,20 +191,20 @@ func TestCatalogMetaAndSpecVersion(t *testing.T) {
 	if f := (SpecVersion{Version: meta.SpecVersion}).Validate(c); len(f) != 0 {
 		t.Errorf("Harbor targets %s: %v", meta.SpecVersion, f)
 	}
-	if f := (SpecVersion{Version: "1.0.0"}).Validate(c); len(f) != c.Len() || f[0].Requirements[0] != "CHR-CONF-001" {
+	if f := (SpecVersion{Version: "2.0.0"}).Validate(c); len(f) != c.Len() || f[0].Requirements[0] != "CHR-CONF-001" {
 		t.Errorf("other version: %d findings", len(f))
 	}
 }
 
 func TestFormatSchemasRejectInvalidManifest(t *testing.T) {
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "manifest.yaml"), []byte("format_version: 2\nspecification: {name: x, version: draft}\nprofiles: []\nrules: []\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "manifest.yaml"), []byte("format_version: 2\nspecification: {name: x, version: 1.0.0}\nprofiles: []\nrules: []\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := (ManifestReader{Dir: dir}).Manifest(); err == nil || !strings.Contains(err.Error(), "format") {
 		t.Errorf("invalid manifest accepted: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "fixture.yaml"), []byte("rules: [CHR-RULE-RT-001]\nspecification_version: draft\nexpected: fail\nreason: r\nscenario: {namespace: n, enterprise: E, steps: [{expect: {status: denied}, invoke: {}, admit: {}}]}\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "fixture.yaml"), []byte("rules: [CHR-RULE-RT-001]\nspecification_version: 1.0.0\nexpected: fail\nreason: r\nscenario: {namespace: n, enterprise: E, steps: [{expect: {status: denied}, invoke: {}, admit: {}}]}\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := (ManifestReader{Dir: dir}).Fixture(dir); err == nil {
@@ -213,8 +218,18 @@ func TestBehavioralRulesNeedASubject(t *testing.T) {
 		t.Fatal(err)
 	}
 	spec := ClaimSpec{Namespace: "sdk.example", ID: "CLAIM-RT", Profile: "agent-runtime", Implementation: model.ObjectRef{Kind: "GoModule", ID: "x", External: true}, ImplementationVersion: "0", ResultDate: "2026-08-25"}
+	manifest, err := r.Manifest.Manifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	profileRules := 0
+	for _, p := range manifest.Profiles {
+		if p.ID == spec.Profile {
+			profileRules = len(p.Rules)
+		}
+	}
 	claim, err := r.Claim(spec)
-	if err != nil || claim.Result != model.ResultConforming || len(claim.TestedRuleIDs) != 6 || !slices.Contains(claim.VerificationTypes, model.VerificationBehavioral) {
+	if err != nil || claim.Result != model.ResultConforming || len(claim.TestedRuleIDs) != profileRules || !slices.Contains(claim.VerificationTypes, model.VerificationBehavioral) {
 		t.Fatalf("reference subject claim: %+v %v", claim, err)
 	}
 	r.Subject, r.Adapter = nil, nil

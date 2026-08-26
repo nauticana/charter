@@ -1,0 +1,4 @@
+rules: [CHR-RULE-CAP-001]
+specification_version: 1.0.0
+expected: fail
+reason: The action record claims an executed disposition with outcome finished, which CAP-FX does not declare

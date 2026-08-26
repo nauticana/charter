@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/enterprise/organization_relationship.schema.json",
   "title": "OrganizationRelationship",
   "description": "A typed, directed, effective-dated relationship between organizational objects, separate from the unit tree.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-ENT-001",
     "CHR-ENT-004",
@@ -30,7 +30,10 @@
       "const": "OrganizationRelationship"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "relationshipType": {
       "description": "Charter-defined or namespaced custom type.",

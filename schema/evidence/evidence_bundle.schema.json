@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/evidence/evidence_bundle.schema.json",
   "title": "EvidenceBundle",
   "description": "Links the records that evidence one process instance or case.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-EVID-001",
     "CHR-EVID-005"
@@ -28,7 +28,10 @@
       "const": "EvidenceBundle"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "subject": {
       "allOf": [
@@ -43,7 +46,13 @@
         "$ref": "../common.schema.json#/$defs/idRef"
       },
       "uniqueItems": true,
-      "minItems": 1
+      "minItems": 1,
+      "x-charter-ref-kinds": [
+        "EvidenceRecord",
+        "ActionRecord",
+        "ExceptionRecord",
+        "Escalation"
+      ]
     },
     "assuranceProfile": {
       "type": "string",

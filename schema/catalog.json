@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "0.1.0-draft",
+  "catalogVersion": "1.0.0",
   "entries": [
     { "name": "common", "id": "https://nauticana.github.io/charter/schema/common.schema.json", "path": "common.schema.json" },
     { "kind": "Enterprise", "id": "https://nauticana.github.io/charter/schema/enterprise/enterprise.schema.json", "path": "enterprise/enterprise.schema.json" },

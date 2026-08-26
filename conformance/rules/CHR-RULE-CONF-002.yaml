@@ -5,7 +5,7 @@ profile: core-model
 verification: semantic
 applies_to: ["*"]
 check: >-
-  Every idRef that resolves names a document of the kind its property implies: for example accountableResponsibilityId a Responsibility, taskId a Task, supersedes an EvidenceRecord.
+  Every idRef that resolves names one of the document kinds its property declares in x-charter-ref-kinds: for example accountableResponsibilityId a Responsibility, taskId a Task, supersedes an EvidenceRecord.
 fixtures:
   valid: fixtures/valid/harbor
   invalid: fixtures/invalid/wrong-reference-kind

@@ -1,8 +1,8 @@
 # Charter Schemas
 
-Status: Draft; schemas exist for the modeled domains, but no normative schema or conformance profile has been released.
+Status: Version 1.0.0; every catalogued schema is normative and every conformance profile is active.
 
-This directory will contain language-independent JSON Schemas for Charter instance documents. Schema structure mirrors the specification domains:
+This directory contains language-independent JSON Schemas for Charter instance documents. Schema structure mirrors the specification domains:
 
 - `enterprise/`: enterprises, organization-unit trees, position types, positions, roles, responsibilities, and assignments
 - `agent/`: identities, agent definitions and runtimes, authority, approval, and separation of duties
@@ -16,20 +16,22 @@ This directory will contain language-independent JSON Schemas for Charter instan
 
 Schemas and normative prose are jointly authoritative. Schemas determine structural instance validity but do not override behavioral requirements in `spec/`.
 
-Every current schema has a stable `$id`, draft specification version, draft schema artifact version, and requirement references. Before a normative release, each schema will also have:
+Every schema has a stable `$id`, the specification version it targets, its own artifact version, requirement references, and:
 
 - A versioned entry in the schema catalogue
 - Explicitly documented extension points
 - Valid and invalid fixtures for every active structural rule
 - Semantic rules for constraints that JSON Schema cannot establish across documents
 
-The current schemas remain draft until those fixtures and rules are active in `conformance/manifest.yaml`. Draft placeholder schemas that accept arbitrary content are intentionally avoided.
+Placeholder schemas that accept arbitrary content are intentionally avoided; a kind enters the catalogue only with its rules and fixtures active in `conformance/manifest.yaml`.
 
 ## References and validation
 
 A string-valued `idRef` resolves in the referring document's namespace. Cross-namespace references use `{ "namespace": "...", "id": "..." }`. Validators must not guess a namespace from an identifier prefix.
 
 Because each schema has an absolute `$id`, an offline validator must register the local schema file under that `$id` before resolving relative `$ref` values. `catalog.json` provides the mapping. Validation must use JSON Schema draft 2020-12, support `unevaluatedProperties`, enable `format` assertion for `date` and `date-time` values, and accept or register the `x-charter-*` annotation keywords.
+
+Every property typed as `idRef` carries `x-charter-ref-kinds`, the document kinds it may name; a semantic rule (CHR-RULE-CONF-002) checks resolved references against it, so the annotation is the single source of the target kind for CHR-CONF-012.
 
 Structural validation alone cannot establish graph acyclicity, reference existence or kind, date ordering, authority effectiveness, or runtime behavior. Those constraints require active semantic or behavioral conformance rules.
 

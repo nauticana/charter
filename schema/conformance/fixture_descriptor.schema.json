@@ -3,12 +3,13 @@
   "$id": "https://nauticana.github.io/charter/schema/conformance/fixture_descriptor.schema.json",
   "title": "ConformanceFixtureDescriptor",
   "description": "Format of fixture.yaml: the rules a fixture exercises, its expected result, its documents, and, for runtime-behavioral rules, the scenario driven against the implementation under test.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-CONF-007",
     "CHR-CONF-008",
-    "CHR-CONF-011"
+    "CHR-CONF-011",
+    "CHR-CONF-013"
   ],
   "type": "object",
   "$defs": {
@@ -184,6 +185,26 @@
         "at": {
           "type": "string",
           "format": "date-time"
+        },
+        "information_uses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "information": {
+                "$ref": "#/$defs/identifier"
+              },
+              "purpose": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "information",
+              "purpose"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false
@@ -278,6 +299,12 @@
         "vendor_calls": {
           "type": "integer",
           "minimum": 0
+        },
+        "escalated": {
+          "type": "boolean"
+        },
+        "recipient": {
+          "$ref": "#/$defs/identifier"
         }
       },
       "additionalProperties": false

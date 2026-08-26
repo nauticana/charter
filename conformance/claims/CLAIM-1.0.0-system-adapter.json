@@ -1,0 +1,48 @@
+{
+  "charterSpecVersion": "1.0.0",
+  "namespace": "nauticana.charter",
+  "id": "CLAIM-1.0.0-system-adapter",
+  "kind": "ConformanceClaim",
+  "name": "Reference SDK system-adapter claim 1.0.0",
+  "conformanceProfile": "system-adapter",
+  "implementationVersion": "1.0.0",
+  "testedRuleIds": [
+    "CHR-RULE-SA-001",
+    "CHR-RULE-SA-002",
+    "CHR-RULE-SA-003",
+    "CHR-RULE-SA-004"
+  ],
+  "verificationTypes": [
+    "structural",
+    "runtime-behavioral"
+  ],
+  "result": "conforming",
+  "resultDate": "2026-08-25",
+  "implementation": {
+    "kind": "GoModule",
+    "id": "github.com-nauticana-charter",
+    "external": true
+  },
+  "results": [
+    {
+      "ruleId": "CHR-RULE-SA-001",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-SA-002",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-SA-003",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-SA-004",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    }
+  ]
+}

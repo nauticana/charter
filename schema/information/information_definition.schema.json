@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/information/information_definition.schema.json",
   "title": "InformationDefinition",
   "description": "The business meaning, ownership, classification, and policy context of governed information.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-INFO-001",
     "CHR-INFO-002"
@@ -28,7 +28,10 @@
       "const": "InformationDefinition"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "businessMeaning": {
       "type": "string",
@@ -49,7 +52,10 @@
       "uniqueItems": true,
       "items": {
         "$ref": "../common.schema.json#/$defs/idRef"
-      }
+      },
+      "x-charter-ref-kinds": [
+        "InformationGovernancePolicy"
+      ]
     }
   },
   "required": [

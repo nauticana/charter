@@ -1,0 +1,32 @@
+rules: [CHR-RULE-RT-008]
+specification_version: 1.0.0
+expected: fail
+reason: The external outcome is unknown, so the agent must stop; a conforming runtime records an exception and escalates to the accountable authority of the agent's definition
+documents: ../../../../examples/harbor-manufacturing/instances
+scenario:
+  namespace: harbor.example
+  enterprise: ENT-HARBOR
+  invocation:
+    actor: {kind: AgentIdentity, id: AGENT-ORDER-EXCEPTION-COORDINATOR}
+    runtime: RT-OEC-PROD-01
+    execution_context_id: EXEC-OE-0042-05
+    assignment: ASGN-OEC-ORDER-EXCEPTION-SUPPORT
+    capability: CAP-RESERVE-ORDER-STOCK
+    contract_version: "1"
+    required_features: [reservation-create]
+    resource_scope: order exceptions assigned to the agent
+    organizational_context: OU-SALES-OPERATIONS
+    approved_action: CAP-APPROVE-CREDIT-EXCEPTION
+    material_inputs_digest: sha256:4f1d2a9c7b3e5d6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f
+    subjects: [{kind: ProcessInstance, id: PROCINST-OE-2026-0042}]
+    idempotency_key: IDEMP-0042-1
+    at: 2026-06-18T17:12:30Z
+    measures:
+      reservation-value: {value: 1850000, currency: USD, currency_exponent: 2}
+      reservation-duration: {value: 48, unit: hour}
+      credit-exposure: {value: 1850000, currency: USD, currency_exponent: 2}
+  steps:
+    - name: unknown outcome escalated to the accountable position
+      invoke: {}
+      transport: {error: unknown}
+      expect: {status: unknown, requirement: CHR-SEC-008, escalated: true, recipient: POS-SALES-OPERATIONS-MANAGER, evidence: true}

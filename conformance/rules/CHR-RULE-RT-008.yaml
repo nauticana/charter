@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-008
+title: Stopped actions are escalated to the accountable authority
+requirements: [CHR-AGENT-004, CHR-EVID-006, CHR-EVID-007]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  A successfully executed invocation records no escalation; an invocation whose external outcome is unknown records an exception naming the affected process instance and an escalation whose recipient is the accountable authority of the acting agent's definition.
+fixtures:
+  valid: fixtures/valid/no-escalation-on-success
+  invalid: fixtures/invalid/unknown-outcome-escalated

@@ -1,6 +1,6 @@
 # Evidence, Audit, Exceptions, and Escalation
 
-Status: Draft, unreleased
+Status: Version 1.0.0
 
 Evidence demonstrates what context, authority, decisions, and actions produced an outcome. An audit trail organizes evidence without requiring one storage technology.
 
@@ -15,5 +15,6 @@ Evidence demonstrates what context, authority, decisions, and actions produced a
 - **CHR-EVID-007:** An escalation MUST identify its reason, recipient, requested decision, urgency, and resulting disposition when known.
 - **CHR-EVID-008:** Evidence retention and access MUST follow the information-governance constraints attached to the underlying data and action.
 - **CHR-EVID-009:** An implementation or conformance profile MUST NOT require disclosure of sensitive reasoning details or model traces when a sufficient decision rationale and evidence record can be produced without them.
+- **CHR-EVID-010:** An attempt at a governed action that is denied, that fails, or whose external outcome is unknown MUST be evidenced with the same attribution as an executed action, MUST state that disposition explicitly rather than only in free text, and MUST record the authority, approval, and information-governance evaluations made before it stopped.
 
 Evidence formats may be centralized, distributed, signed, or externally referenced, provided their declared conformance requirements are met.

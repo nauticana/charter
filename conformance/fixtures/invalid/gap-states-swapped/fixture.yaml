@@ -1,4 +1,4 @@
 rules: [CHR-RULE-ARCH-001]
-specification_version: draft
+specification_version: 1.0.0
 expected: fail
 reason: The gap names the target state as its baseline and the baseline state as its target

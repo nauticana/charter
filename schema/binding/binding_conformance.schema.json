@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/binding/binding_conformance.schema.json",
   "title": "BindingConformance",
   "description": "Evaluation of a binding against its declared features; partial support is reported as partial.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-BIND-009",
     "CHR-CONF-005",
@@ -33,7 +33,13 @@
       "const": "BindingConformance"
     },
     "bindingId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "CapabilityBinding",
+        "DataBinding",
+        "AuthorityBinding",
+        "EventBinding"
+      ]
     },
     "evaluatedFeatures": {
       "$ref": "../common.schema.json#/$defs/featureSupport"

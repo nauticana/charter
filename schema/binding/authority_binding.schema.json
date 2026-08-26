@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/binding/authority_binding.schema.json",
   "title": "AuthorityBinding",
   "description": "Maps Charter authority to external enforcement; unpreservable constraints fail closed.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-BIND-001",
     "CHR-BIND-002",
@@ -37,10 +37,16 @@
       "$ref": "../common.schema.json#/$defs/featureSupport"
     },
     "systemProfileId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "SystemProfile"
+      ]
     },
     "capabilityId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "CapabilityContract"
+      ]
     },
     "externalEnforcement": {
       "type": "string",

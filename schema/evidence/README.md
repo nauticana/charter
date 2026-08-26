@@ -1,8 +1,8 @@
 # Evidence Schemas
 
-Draft schemas for the `CHR-EVID` domain: `evidence_record`, `action_record`, `exception`, `escalation`, and `evidence_bundle`.
+Schemas for the `CHR-EVID` domain: `evidence_record`, `action_record`, `exception`, `escalation`, and `evidence_bundle`.
 
-Records are categorized (observed fact, agent assertion, human decision, external response, derived conclusion), and corrections supersede rather than replace. Derived conclusions require sources and transformations. Executed-action records require structured runtime, authority, and approval evaluations; evidence bundles declare their assurance profile and integrity method.
+Records are categorized (observed fact, agent assertion, human decision, external response, derived conclusion), and corrections supersede rather than replace. Derived conclusions require sources and transformations. Every action record states its `disposition` (executed, business-error, denied, failed, unknown) so stopped attempts are evidenced like executed ones (CHR-EVID-010); executed-action records require structured runtime, authority, and approval evaluations, and `informationEvaluations` records information-governance decisions; evidence bundles declare their assurance profile and integrity method.
 
 ## Relations
 

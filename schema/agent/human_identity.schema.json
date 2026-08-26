@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/human_identity.schema.json",
   "title": "HumanIdentity",
   "description": "A human participant in Charter-governed activity; credentials, sessions, and assignments are separate.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-ID-001",
     "CHR-ID-002",
@@ -34,7 +34,10 @@
       "const": "HumanIdentity"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "lifecycleAuthority": {
       "allOf": [

@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/agent_definition.schema.json",
   "title": "AgentDefinition",
   "description": "The governed design of an agent: purpose, triggers, inputs, outcomes, capabilities, policies, and escalation conditions.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-AGENT-001",
     "CHR-AGENT-002",
@@ -30,10 +30,16 @@
       "const": "AgentDefinition"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "agentIdentityId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "AgentIdentity"
+      ]
     },
     "purpose": {
       "type": "string",
@@ -61,7 +67,10 @@
         "$ref": "../common.schema.json#/$defs/idRef"
       },
       "uniqueItems": true,
-      "minItems": 1
+      "minItems": 1,
+      "x-charter-ref-kinds": [
+        "Responsibility"
+      ]
     },
     "triggers": {
       "type": "array",
@@ -96,7 +105,10 @@
         "$ref": "../common.schema.json#/$defs/idRef"
       },
       "uniqueItems": true,
-      "minItems": 1
+      "minItems": 1,
+      "x-charter-ref-kinds": [
+        "CapabilityContract"
+      ]
     },
     "policies": {
       "type": "array",

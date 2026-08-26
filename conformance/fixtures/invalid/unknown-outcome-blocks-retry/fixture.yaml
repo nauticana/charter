@@ -1,5 +1,5 @@
 rules: [CHR-RULE-RT-003]
-specification_version: draft
+specification_version: 1.0.0
 expected: fail
 reason: The external call times out with an unknown outcome; a conforming runtime reports unknown and refuses to re-execute the same key until reconciled
 documents: ../../../../examples/harbor-manufacturing/instances

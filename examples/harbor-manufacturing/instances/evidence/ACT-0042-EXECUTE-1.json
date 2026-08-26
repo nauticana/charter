@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "draft",
+  "charterSpecVersion": "1.0.0",
   "namespace": "harbor.example",
   "kind": "ActionRecord",
   "id": "ACT-0042-EXECUTE-1",
@@ -24,6 +24,7 @@
   "operationClass": "execute",
   "actionTime": "2026-06-18T17:12:30Z",
   "outcome": "already-reserved",
+  "disposition": "executed",
   "authorityEvaluations": [
     {
       "authorityGrantId": "AUTH-OEC-STOCK-RESERVATION-2026",

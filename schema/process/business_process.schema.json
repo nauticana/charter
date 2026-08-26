@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/process/business_process.schema.json",
   "title": "BusinessProcess",
   "description": "Organizes work toward a declared business outcome; customer naming and hierarchy are preserved.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-PROC-001",
     "CHR-PROC-003",
@@ -29,7 +29,10 @@
       "const": "BusinessProcess"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "businessOutcome": {
       "type": "string",
@@ -37,10 +40,16 @@
       "maxLength": 500
     },
     "valueStreamId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "ValueStream"
+      ]
     },
     "parentProcessId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "BusinessProcess"
+      ]
     },
     "aliases": {
       "type": "array",

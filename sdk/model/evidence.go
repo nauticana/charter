@@ -28,6 +28,27 @@ const (
 	ApprovalStale       = "stale"
 )
 
+const (
+	DispositionExecuted      = "executed"
+	DispositionBusinessError = "business-error"
+	DispositionDenied        = "denied"
+	DispositionFailed        = "failed"
+	DispositionUnknown       = "unknown"
+)
+
+const (
+	InformationAllowed = "allowed"
+	InformationDenied  = "denied"
+	InformationError   = "error"
+)
+
+type InformationEvaluation struct {
+	InformationID Ref    `json:"informationId"`
+	Purpose       string `json:"purpose"`
+	Result        string `json:"result"`
+	Reason        string `json:"reason"`
+}
+
 type ApprovalEvaluation struct {
 	ApprovalID     *Ref   `json:"approvalId,omitempty"`
 	ApprovedAction string `json:"approvedAction,omitempty"`
@@ -37,20 +58,22 @@ type ApprovalEvaluation struct {
 
 type ActionRecord struct {
 	Envelope
-	Actor                ObjectRef             `json:"actor"`
-	RuntimeContext       RuntimeContext        `json:"runtimeContext"`
-	AssignmentID         *Ref                  `json:"assignmentId,omitempty"`
-	ResponsibilityID     *Ref                  `json:"responsibilityId,omitempty"`
-	CapabilityID         Ref                   `json:"capabilityId"`
-	MaterialInputsDigest string                `json:"materialInputsDigest,omitempty"`
-	SubjectRefs          []ObjectRef           `json:"subjectRefs,omitempty"`
-	OperationClass       string                `json:"operationClass"`
-	ActionTime           time.Time             `json:"actionTime"`
-	Outcome              string                `json:"outcome"`
-	AuthorityEvaluations []AuthorityEvaluation `json:"authorityEvaluations,omitempty"`
-	ApprovalEvaluations  []ApprovalEvaluation  `json:"approvalEvaluations,omitempty"`
-	ApprovalIDs          []Ref                 `json:"approvalIds,omitempty"`
-	EvidenceRecordIDs    []Ref                 `json:"evidenceRecordIds,omitempty"`
+	Actor                  ObjectRef               `json:"actor"`
+	RuntimeContext         RuntimeContext          `json:"runtimeContext"`
+	AssignmentID           *Ref                    `json:"assignmentId,omitempty"`
+	ResponsibilityID       *Ref                    `json:"responsibilityId,omitempty"`
+	CapabilityID           Ref                     `json:"capabilityId"`
+	MaterialInputsDigest   string                  `json:"materialInputsDigest,omitempty"`
+	SubjectRefs            []ObjectRef             `json:"subjectRefs,omitempty"`
+	OperationClass         string                  `json:"operationClass"`
+	ActionTime             time.Time               `json:"actionTime"`
+	Outcome                string                  `json:"outcome"`
+	Disposition            string                  `json:"disposition"`
+	AuthorityEvaluations   []AuthorityEvaluation   `json:"authorityEvaluations,omitempty"`
+	ApprovalEvaluations    []ApprovalEvaluation    `json:"approvalEvaluations,omitempty"`
+	InformationEvaluations []InformationEvaluation `json:"informationEvaluations,omitempty"`
+	ApprovalIDs            []Ref                   `json:"approvalIds,omitempty"`
+	EvidenceRecordIDs      []Ref                   `json:"evidenceRecordIds,omitempty"`
 }
 
 const (

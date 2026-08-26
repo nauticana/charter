@@ -14,4 +14,6 @@ type Provider interface {
 	Bundle(ctx context.Context, ownerNamespace string, ref model.Ref) (model.EvidenceBundle, error)
 	Actions(ctx context.Context) ([]model.ActionRecord, error)
 	Records(ctx context.Context) ([]model.EvidenceRecord, error)
+	Exceptions(ctx context.Context) ([]model.ExceptionRecord, error)
+	Escalations(ctx context.Context) ([]model.Escalation, error)
 }

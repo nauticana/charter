@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "draft",
+  "charterSpecVersion": "1.0.0",
   "namespace": "harbor.example",
   "kind": "Assignment",
   "id": "ASGN-ALEX-CREDIT-MANAGER",

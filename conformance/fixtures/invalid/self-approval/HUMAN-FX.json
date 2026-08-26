@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "draft",
+  "charterSpecVersion": "1.0.0",
   "namespace": "fixture.example",
   "enterpriseId": "ENT-FX",
   "kind": "HumanIdentity",

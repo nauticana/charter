@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/enterprise/assignment.schema.json",
   "title": "Assignment",
   "description": "Connects a human or agent identity to a position, responsibility, role, or work context for an effective period.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-ENT-003",
     "CHR-ENT-005",
@@ -27,7 +27,10 @@
       "const": "Assignment"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "subject": {
       "allOf": [

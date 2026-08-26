@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-007
+title: Information is used only for permitted purposes
+requirements: [CHR-INFO-002, CHR-INFO-007, CHR-INFO-008]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  An invocation declaring an information use whose purpose every applicable governance policy permits executes, with the decision evidenced; one declaring a purpose the policies do not permit is denied before any external call, and a declared use with no applicable policy or an unresolved conflict fails closed.
+fixtures:
+  valid: fixtures/valid/information-use-permitted
+  invalid: fixtures/invalid/information-use-undeclared-purpose

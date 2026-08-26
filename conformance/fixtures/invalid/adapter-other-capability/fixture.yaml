@@ -1,5 +1,5 @@
 rules: [CHR-RULE-SA-004]
-specification_version: draft
+specification_version: 1.0.0
 expected: fail
 reason: The request names a capability the binding does not realize; a conforming adapter refuses before calling the vendor
 documents: ../../../../examples/harbor-manufacturing/instances

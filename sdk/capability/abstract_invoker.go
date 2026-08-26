@@ -10,24 +10,28 @@ import (
 	"github.com/nauticana/charter/sdk/binding"
 	"github.com/nauticana/charter/sdk/evidence"
 	"github.com/nauticana/charter/sdk/identity"
+	"github.com/nauticana/charter/sdk/information"
 	"github.com/nauticana/charter/sdk/model"
 )
 
 // AbstractInvoker runs the governed invocation pipeline around an abstract binding.Executor: contract and version,
-// actor lifecycle, authority, approval, separation of duties, binding feature support, idempotency, execution, outcome
-// verification, and evidence. Every gate fails closed and every governed decision is recorded (CHR-AUTH-010, CHR-AGENT-008).
+// actor lifecycle, authority, approval, separation of duties, information governance, binding feature support,
+// idempotency, execution, outcome verification, evidence, and escalation of stopped actions. Every gate fails closed
+// and every governed decision is recorded (CHR-AUTH-010, CHR-AGENT-008).
 type AbstractInvoker struct {
-	Catalog    Catalog
-	Versions   VersionPolicy
-	Identities identity.Resolver
-	Authority  authority.Evaluator
-	Approvals  authority.ApprovalGate
-	Sod        SodChecker
-	Bindings   binding.Provider
-	Transport  binding.Executor
-	Ledger     Ledger
-	Evidence   evidence.Sink
-	IDs        IDGenerator
+	Catalog     Catalog
+	Versions    VersionPolicy
+	Identities  identity.Resolver
+	Authority   authority.Evaluator
+	Approvals   authority.ApprovalGate
+	Sod         SodChecker
+	Information information.Evaluator
+	Bindings    binding.Provider
+	Transport   binding.Executor
+	Ledger      Ledger
+	Evidence    evidence.Sink
+	Escalation  Escalator
+	IDs         IDGenerator
 	// ReadWithoutGrant lets a read-class contract proceed on its assignment when no grant exists; denials still deny.
 	ReadWithoutGrant bool
 }
@@ -111,6 +115,18 @@ func (r *run) execute(ctx context.Context) Result {
 		if conflict {
 			r.result.SodConflict = &ref
 			return r.deny(ctx, "separation of duties: conflicts with "+ref.ID, "CHR-AUTH-007")
+		}
+	}
+	if len(inv.InformationUses) > 0 {
+		if i.Information == nil {
+			return r.deny(ctx, "information use declared but no governance evaluator is composed", "CHR-INFO-008")
+		}
+		for _, use := range inv.InformationUses {
+			d := i.Information.Use(ctx, information.UseRequest{Namespace: inv.Namespace, Information: use.Information, Purpose: use.Purpose, At: inv.At})
+			r.result.Information = append(r.result.Information, d)
+			if d.Result != information.Allowed {
+				return r.deny(ctx, fmt.Sprintf("information %s for %q: %s", use.Information.ID, use.Purpose, d.Reason), d.Requirement)
+			}
 		}
 	}
 	bind, err := (binding.Lookup{Provider: i.Bindings}).CapabilityBindingFor(ctx, inv.Namespace, inv.CapabilityID, inv.SystemProfileID)
@@ -202,7 +218,7 @@ func (r *run) finish(ctx context.Context, status Status, outcome, reason, requir
 	inv := r.inv
 	record := model.ActionRecord{Actor: inv.Actor, RuntimeContext: inv.Runtime, AssignmentID: inv.AssignmentID, ResponsibilityID: inv.ResponsibilityID,
 		CapabilityID: inv.CapabilityID, MaterialInputsDigest: inv.MaterialInputsDigest, SubjectRefs: inv.SubjectRefs, OperationClass: r.contract.OperationClass,
-		ActionTime: inv.At, Outcome: clip(outcome), AuthorityEvaluations: []model.AuthorityEvaluation{authorityEvaluation(r.result.Authority)},
+		ActionTime: inv.At, Outcome: clip(outcome), Disposition: string(status), AuthorityEvaluations: []model.AuthorityEvaluation{authorityEvaluation(r.result.Authority)},
 		ApprovalEvaluations: []model.ApprovalEvaluation{approvalEvaluation(r.result.Approval)}, EvidenceRecordIDs: r.evidenceIDs}
 	if r.result.Approval.ApprovalRef != nil {
 		record.ApprovalIDs = []model.Ref{*r.result.Approval.ApprovalRef}
@@ -212,11 +228,39 @@ func (r *run) finish(ctx context.Context, status Status, outcome, reason, requir
 		enterprise := inv.EnterpriseID
 		record.EnterpriseID = &enterprise
 	}
+	for k, d := range r.result.Information {
+		record.InformationEvaluations = append(record.InformationEvaluations, model.InformationEvaluation{InformationID: r.inv.InformationUses[k].Information,
+			Purpose: clip(r.inv.InformationUses[k].Purpose), Result: string(d.Result), Reason: clip(d.Reason)})
+	}
 	if err := r.invoker.Evidence.Action(ctx, record); err != nil {
 		r.result.Err = errors.Join(r.result.Err, fmt.Errorf("evidence: %w", err))
 	}
 	r.result.Action = &record
+	r.escalate(ctx)
 	return r.result
+}
+
+// escalate appends the exception and escalation for a stopped action when an Escalator is composed (CHR-AGENT-004).
+func (r *run) escalate(ctx context.Context) {
+	e := r.invoker.Escalation
+	if e == nil || !e.Applies(r.result.Status) {
+		return
+	}
+	exception, escalation, err := e.Escalate(ctx, r.inv, r.result)
+	if err != nil {
+		r.result.Err = errors.Join(r.result.Err, fmt.Errorf("escalation: %w", err))
+		return
+	}
+	if err := r.invoker.Evidence.Exception(ctx, exception); err != nil {
+		r.result.Err = errors.Join(r.result.Err, fmt.Errorf("escalation: %w", err))
+		return
+	}
+	if err := r.invoker.Evidence.Escalation(ctx, escalation); err != nil {
+		r.result.Err = errors.Join(r.result.Err, fmt.Errorf("escalation: %w", err))
+		return
+	}
+	r.result.Exception = &model.Ref{Namespace: exception.Namespace, ID: exception.ID}
+	r.result.Escalation = &model.Ref{Namespace: escalation.Namespace, ID: escalation.ID}
 }
 
 func authorityEvaluation(d authority.Decision) model.AuthorityEvaluation {

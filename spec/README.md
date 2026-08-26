@@ -1,6 +1,6 @@
 # Charter Specification
 
-Status: Draft, unreleased
+Status: Version 1.0.0
 
 Read the chapters in this order:
 

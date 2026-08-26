@@ -1,6 +1,6 @@
 # Charter Specification Overview
 
-Status: Draft, unreleased
+Status: Version 1.0.0
 
 This directory contains the normative prose for the Nauticana Charter specification. Charter defines a vendor-neutral model for aligning human accountability, governed agents, business processes, authority, and enterprise-system capabilities.
 

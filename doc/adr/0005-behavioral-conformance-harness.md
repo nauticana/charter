@@ -1,6 +1,6 @@
 # 0005: Runtime-behavioral conformance harness
 
-Status: Proposed
+Status: Accepted
 Date: 2026-08-25
 
 ## Context
@@ -9,7 +9,7 @@ The agent-runtime and system-adapter profiles verify behavior that static docume
 
 ## Decision
 
-- A behavioral fixture is a `fixture.yaml` carrying a `scenario` (format in `schema/conformance/fixture_descriptor.schema.json`): a base context, invocation, or request that steps override field by field, each step with a scripted `transport` or `vendor` reply and an `expect` block naming the status or result, requirement id, evaluation results, call counts, and whether evidence was recorded.
+- A behavioral fixture is a `fixture.yaml` carrying a `scenario` (format in `schema/conformance/fixture_descriptor.schema.json`): a base context, invocation, or request that steps override field by field. Each step selects admission, invocation, or adapter request behavior and has an `expect` block naming the status or result, requirement id, evaluation results, call counts, and whether evidence was recorded; invocation and adapter steps can script a `transport` or `vendor` reply.
 - The implementation under test is a `validate.Subject` for runtimes (`Compose(documents, transport)` yields admission, invoker, and evidence read-back) or a `validate.AdapterSubject` for adapters (`Realize(documents, binding, vendor)` yields an executor). The harness owns the transport or vendor endpoint so external outcomes are scripted, and judges only the subject's decisions and mappings.
 - `expected: pass` scenarios must be carried out and `expected: fail` scenarios must be refused; a fixture passes when the subject matches its expectations in either case. This maps CHR-CONF-007's valid and invalid fixture classes onto behavior without inventing a third result class. Adapter results are classified as outcome, business-error, unknown, or not-executed; an unclassified failure never conforms (CHR-SEC-007).
 - One generic executor runs every behavioral rule; a rule's semantics are its scenarios, and `BehavioralRule.Kind` selects the subject it needs. The SDK is the default subject and adapter (`ReferenceSubject`, `ReferenceAdapter`); with no subject, behavioral rules report `not-tested` and the claim is `partial` (CHR-CONF-009).
@@ -22,4 +22,4 @@ Any Go runtime or adapter runs the whole manifest by implementing one interface;
 
 ## Specification impact
 
-The scenario semantics (carry out versus refuse, response classes) are documented in `conformance/README.md` and are non-normative. A future release of the conformance chapter may adopt them normatively.
+CHR-CONF-013 makes the scenario semantics normative: a behavioral rule is defined by scripted-outcome scenarios whose valid fixture must be carried out and whose invalid fixture must be refused. CHR-CONF-014 requires a behavioral claim to name the implementation exercised and to report unexercised rules as not tested and the claim as partial. `fixture_descriptor.schema.json` and `conformance_claim.schema.json` cite them.

@@ -1,0 +1,11 @@
+id: CHR-RULE-CAP-001
+title: Recorded outcomes stay within the capability contract
+requirements: [CHR-CAP-001, CHR-EVID-010]
+profile: core-model
+verification: semantic
+applies_to: [ActionRecord]
+check: >-
+  For every ActionRecord whose capabilityId resolves to a CapabilityContract, an executed disposition reports one of the contract's declared outcomes and a business-error disposition one of its declared business errors.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/undeclared-recorded-outcome

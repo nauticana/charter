@@ -5,16 +5,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/nauticana/charter/sdk/agent"
 	"github.com/nauticana/charter/sdk/authority"
 	"github.com/nauticana/charter/sdk/binding"
 	"github.com/nauticana/charter/sdk/capability"
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/evidence"
 	"github.com/nauticana/charter/sdk/identity"
+	"github.com/nauticana/charter/sdk/information"
 	"github.com/nauticana/charter/sdk/model"
+	"github.com/nauticana/charter/sdk/organization"
 	"github.com/nauticana/charter/sdk/validate"
 )
 
@@ -57,9 +61,9 @@ func newHarness(t *testing.T) *harness {
 		t.Fatal(err)
 	}
 	for _, raw := range []string{
-		`{"charterSpecVersion":"draft","namespace":"harbor.example","kind":"CapabilityBinding","id":"BIND-READ-1","bindingVersion":"1","systemProfileId":"SYSPROFILE-HARBOR-S4-2602","capabilityId":"CAP-READ-ORDER-EXCEPTION","operation":"GET /orders","featureSupport":[{"feature":"order-read","support":"supported"}],"mappings":{"inputs":"i","outputs":"o","businessErrors":"b","authorityChecks":"a","idempotency":"none","evidence":"e"}}`,
-		`{"charterSpecVersion":"draft","namespace":"harbor.example","kind":"HumanIdentity","id":"HUMAN-TEST","enterpriseId":"ENT-HARBOR","name":"Test Approver","lifecycleState":"active","lifecycleHistory":[{"state":"active","effectiveAt":"2026-01-01T00:00:00Z"}]}`,
-		`{"charterSpecVersion":"draft","namespace":"harbor.example","kind":"CapabilityBinding","id":"BIND-APPROVE-1","bindingVersion":"1","systemProfileId":"SYSPROFILE-HARBOR-S4-2602","capabilityId":"CAP-APPROVE-CREDIT-EXCEPTION","operation":"POST /credit-decisions","featureSupport":[{"feature":"credit-decision","support":"supported"}],"mappings":{"inputs":"i","outputs":"o","businessErrors":"b","authorityChecks":"a","idempotency":"digest","evidence":"e"}}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"harbor.example","kind":"CapabilityBinding","id":"BIND-READ-1","bindingVersion":"1","systemProfileId":"SYSPROFILE-HARBOR-S4-2602","capabilityId":"CAP-READ-ORDER-EXCEPTION","operation":"GET /orders","featureSupport":[{"feature":"order-read","support":"supported"}],"mappings":{"inputs":"i","outputs":"o","businessErrors":"b","authorityChecks":"a","idempotency":"none","evidence":"e"}}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"harbor.example","kind":"HumanIdentity","id":"HUMAN-TEST","enterpriseId":"ENT-HARBOR","name":"Test Approver","lifecycleState":"active","lifecycleHistory":[{"state":"active","effectiveAt":"2026-01-01T00:00:00Z"}]}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"harbor.example","kind":"CapabilityBinding","id":"BIND-APPROVE-1","bindingVersion":"1","systemProfileId":"SYSPROFILE-HARBOR-S4-2602","capabilityId":"CAP-APPROVE-CREDIT-EXCEPTION","operation":"POST /credit-decisions","featureSupport":[{"feature":"credit-decision","support":"supported"}],"mappings":{"inputs":"i","outputs":"o","businessErrors":"b","authorityChecks":"a","idempotency":"digest","evidence":"e"}}`,
 	} {
 		d, err := (corpus.Parser{}).Parse([]byte(raw))
 		if err != nil {
@@ -286,7 +290,7 @@ func TestSeparationOfDuties(t *testing.T) {
 			proposal := model.ActionRecord{Actor: approve().Actor, RuntimeContext: approve().Runtime, ResponsibilityID: approve().ResponsibilityID,
 				CapabilityID: model.Ref{ID: "CAP-PROPOSE-ORDER-RESOLUTION"}, SubjectRefs: approve().SubjectRefs, OperationClass: model.OperationPropose,
 				ActionTime: at.Add(-time.Hour), Outcome: "proposal-prepared", AuthorityEvaluations: []model.AuthorityEvaluation{{Result: model.AuthorityAllowed, Reason: "test"}}}
-			proposal.CharterSpecVersion, proposal.Namespace, proposal.ID = "draft", "harbor.example", "ACT-ALEX-PROPOSE"
+			proposal.CharterSpecVersion, proposal.Namespace, proposal.ID = "1.0.0", "harbor.example", "ACT-ALEX-PROPOSE"
 			if err := h.sink.Action(ctx, proposal); err != nil {
 				t.Fatal(err)
 			}
@@ -342,4 +346,83 @@ func TestVersionPolicyAndScope(t *testing.T) {
 	if err := json.Unmarshal([]byte(`{}`), &raw); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestInformationGovernanceGate(t *testing.T) {
+	ctx := context.Background()
+	h := newHarness(t)
+	h.invoker.Information = &information.BaseEvaluator{Provider: information.NewBaseProvider(h.corpus)}
+	inv := reserve()
+	inv.InformationUses = []capability.InformationUse{{Information: model.Ref{ID: "INFO-CREDIT-STATUS-SUMMARY"}, Purpose: "governed approval and execution"}}
+	res := h.invoker.Invoke(ctx, inv)
+	if res.Status != capability.StatusExecuted || len(res.Information) != 1 || res.Information[0].Result != information.Allowed {
+		t.Fatalf("permitted use: %+v", res)
+	}
+	rec := h.recorded(res)
+	if len(rec.InformationEvaluations) != 1 || rec.InformationEvaluations[0].Result != model.InformationAllowed || rec.InformationEvaluations[0].InformationID.ID != "INFO-CREDIT-STATUS-SUMMARY" || rec.Disposition != model.DispositionExecuted {
+		t.Errorf("information evidence: %+v", rec)
+	}
+	inv.InformationUses[0].Purpose = "marketing analysis"
+	inv.IdempotencyKey = "IDEMP-0042-2"
+	if res := h.invoker.Invoke(ctx, inv); res.Status != capability.StatusDenied || res.Requirement != "CHR-INFO-007" || h.transport.calls != 1 {
+		t.Errorf("undeclared purpose: %+v", res)
+	} else {
+		h.recorded(res)
+	}
+	h.invoker.Information = nil
+	inv.IdempotencyKey = "IDEMP-0042-3"
+	if res := h.invoker.Invoke(ctx, inv); res.Status != capability.StatusDenied || res.Requirement != "CHR-INFO-008" {
+		t.Errorf("declared use without evaluator must fail closed: %+v", res)
+	}
+}
+
+func TestStoppedActionsAreEscalated(t *testing.T) {
+	ctx := context.Background()
+	h := newHarness(t)
+	h.invoker.Escalation = &capability.BaseEscalator{Recipients: &capability.BaseAccountableRecipient{Agents: agent.NewBaseProvider(h.corpus), Organization: organization.NewBaseProvider(h.corpus)}, IDs: h.invoker.IDs}
+	if res := h.invoker.Invoke(ctx, reserve()); res.Status != capability.StatusExecuted || res.Escalation != nil || res.Exception != nil {
+		t.Fatalf("success must not escalate: %+v", res)
+	}
+	h = newHarness(t)
+	h.invoker.Escalation = &capability.BaseEscalator{Recipients: &capability.BaseAccountableRecipient{Agents: agent.NewBaseProvider(h.corpus), Organization: organization.NewBaseProvider(h.corpus)}, IDs: h.invoker.IDs}
+	h.transport.err = fmt.Errorf("%w: timeout", binding.ErrOutcomeUnknown)
+	res := h.invoker.Invoke(ctx, reserve())
+	if res.Status != capability.StatusUnknown || res.Escalation == nil || res.Exception == nil || res.Err == nil {
+		t.Fatalf("unknown outcome: %+v", res)
+	}
+	provider := evidence.NewBaseProvider(h.sink.Store)
+	escalation, err := provider.Escalation(ctx, res.Escalation.Namespace, *res.Escalation)
+	if err != nil || escalation.Recipient.ID != "POS-SALES-OPERATIONS-MANAGER" || escalation.Urgency != "high" || !strings.Contains(escalation.RequestedDecision, "IDEMP-0042-1") {
+		t.Errorf("escalation: %+v %v", escalation, err)
+	}
+	exception, err := provider.Exception(ctx, res.Exception.Namespace, *res.Exception)
+	if err != nil || exception.Affected.ID != "PROCINST-OE-2026-0042" || exception.EscalationTarget.ID != "POS-SALES-OPERATIONS-MANAGER" || exception.Disposition != "open" {
+		t.Errorf("exception: %+v %v", exception, err)
+	}
+	for _, d := range []*model.Document{mustFetch(t, h, res.Exception), mustFetch(t, h, res.Escalation)} {
+		for _, f := range h.structural.ValidateDocument(d) {
+			t.Errorf("%s: %s %s", d.ID, f.Path, f.Message)
+		}
+	}
+	human := approve()
+	human.IdempotencyKey = "IDEMP-H"
+	recipient, err := (&capability.BaseAccountableRecipient{Organization: organization.NewBaseProvider(h.corpus)}).Recipient(ctx, human)
+	if err != nil || recipient.ID != "POS-CREDIT-MANAGER" {
+		t.Errorf("human recipient via responsibility: %+v %v", recipient, err)
+	}
+	brokenAgent := reserve()
+	brokenAgent.Runtime.RuntimeInstanceID = model.Ref{ID: "RT-MISSING"}
+	brokenAgent.ResponsibilityID = &model.Ref{ID: "RESP-APPROVE-CREDIT-EXCEPTION"}
+	if _, err := (&capability.BaseAccountableRecipient{Agents: agent.NewBaseProvider(h.corpus), Organization: organization.NewBaseProvider(h.corpus)}).Recipient(ctx, brokenAgent); !errors.Is(err, corpus.ErrNotFound) {
+		t.Errorf("agent lookup failure must not fall back to a responsibility recipient: %v", err)
+	}
+}
+
+func mustFetch(t *testing.T, h *harness, ref *model.Ref) *model.Document {
+	t.Helper()
+	d, err := h.sink.Store.Fetch(context.Background(), corpus.DocumentKey{Namespace: ref.Namespace, ID: ref.ID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return d
 }

@@ -1,6 +1,6 @@
 # Capability Contracts
 
-Status: Draft, unreleased
+Status: Version 1.0.0
 
 A capability contract describes the stable business meaning of an operation independently of the protocol or vendor system that implements it.
 

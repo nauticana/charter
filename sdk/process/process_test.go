@@ -42,16 +42,16 @@ func TestHarborGraphAndContext(t *testing.T) {
 
 func TestContextFailsClosed(t *testing.T) {
 	docs := []string{
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"BusinessProcess","id":"P","name":"p","businessOutcome":"o"}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"BusinessProcess","id":"P2","name":"p2","businessOutcome":"o"}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"Task","id":"T","name":"t","processId":"P","businessOutcome":"o","accountableResponsibilityId":"R","permittedPerformerKinds":["human"],"permittedParticipation":["approves"]}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"ProcessInstance","id":"PI","processId":"P","processDefinitionVersion":"1","state":"running","createdAt":"2026-06-01T00:00:00Z"}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"ProcessInstance","id":"PI2","processId":"P2","processDefinitionVersion":"1","state":"running","createdAt":"2026-06-01T00:00:00Z"}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"Assignment","id":"A","subject":{"kind":"HumanIdentity","id":"H"},"target":{"kind":"Responsibility","id":"R"},"participation":"approves","validity":{"from":"2026-01-01","to":"2026-03-31"}}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"TaskInstance","id":"TI-AGENT","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"AgentIdentity","id":"G"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"TaskInstance","id":"TI-PART","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"executes","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"TaskInstance","id":"TI-PROC","processInstanceId":"PI2","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
-		`{"charterSpecVersion":"draft","namespace":"t","kind":"TaskInstance","id":"TI-EXPIRED","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"BusinessProcess","id":"P","name":"p","businessOutcome":"o"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"BusinessProcess","id":"P2","name":"p2","businessOutcome":"o"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Task","id":"T","name":"t","processId":"P","businessOutcome":"o","accountableResponsibilityId":"R","permittedPerformerKinds":["human"],"permittedParticipation":["approves"]}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"ProcessInstance","id":"PI","processId":"P","processDefinitionVersion":"1","state":"running","createdAt":"2026-06-01T00:00:00Z"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"ProcessInstance","id":"PI2","processId":"P2","processDefinitionVersion":"1","state":"running","createdAt":"2026-06-01T00:00:00Z"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Assignment","id":"A","subject":{"kind":"HumanIdentity","id":"H"},"target":{"kind":"Responsibility","id":"R"},"participation":"approves","validity":{"from":"2026-01-01","to":"2026-03-31"}}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-AGENT","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"AgentIdentity","id":"G"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-PART","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"executes","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-PROC","processInstanceId":"PI2","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-EXPIRED","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
 	}
 	c := corpus.New()
 	for _, raw := range docs {

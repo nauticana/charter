@@ -1,5 +1,5 @@
 rules: [CHR-RULE-ENT-004]
 also_fails: [CHR-RULE-CONF-001]
-specification_version: draft
+specification_version: 1.0.0
 expected: fail
 reason: The subject ref declares HumanIdentity, so the schema passes, but the id resolves to an AgentIdentity

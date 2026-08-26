@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "draft",
+  "charterSpecVersion": "1.0.0",
   "namespace": "harbor.example",
   "kind": "ActionRecord",
   "id": "ACT-0042-READ-1",
@@ -14,9 +14,16 @@
   },
   "assignmentId": "ASGN-OEC-ORDER-EXCEPTION-SUPPORT",
   "capabilityId": "CAP-READ-ORDER-EXCEPTION",
+  "subjectRefs": [
+    {
+      "kind": "ProcessInstance",
+      "id": "PROCINST-OE-2026-0042"
+    }
+  ],
   "operationClass": "read",
   "actionTime": "2026-06-18T17:03:12Z",
   "outcome": "facts-returned",
+  "disposition": "executed",
   "evidenceRecordIds": [
     "EVR-0042-STOCK-OBSERVED"
   ]

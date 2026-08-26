@@ -4,7 +4,8 @@ Optional bridge from Charter's neutral contracts to the primitives keel exposes;
 
 - `SessionFromContext` reads the principal, subject, tenant, api key, scopes, and request id keel's middlewares bind; `RuntimeContext` turns the request id into the execution context of an action.
 - `IdentityMap` connects keel subjects and user ids to Charter identities (`BaseClaimIdentityMap` reads them from token claims); `Caller` resolves the acting identity active at the action time.
+- `Gate` protects keel's boundaries: `Middleware` over a `Routes` table for HTTP (generated CRUD included, by path), `Handler` for table actions and custom endpoints (alone or inside `handler.WrapTableAction`), and `Check` with `JobContext` for workers, which bind the principal they claimed with the job. A gate establishes the active identity and an effective grant for the capability and hands a `Clearance` down the context; limits, approvals, separation of duties, and information governance remain the invoker's at the action boundary.
 - `PermissionGate` is an `authority.Evaluator` that layers keel's `CheckActionPermission` behind a Charter evaluator: keel may deny, never widen, and unmapped capabilities fail closed.
 - `GuardedInvoker` runs a `guard.TrustGuard` chain before the governed pipeline; duplicates report an unknown outcome to reconcile, policy refusals deny.
-- `TableLogStore` is an `evidence.Store` over a queryable `port.TableLogger`; `PublishingSink` publishes every appended document through `port.MessagePublisher` (back it with the outbox downstream).
+- `TableLogStore` is an `evidence.Store` over a queryable `port.TableLogger`; `PublishingSink` publishes every appended document, redacted, through `port.MessagePublisher` (back it with the outbox downstream).
 - `BigintIDs` mints evidence ids from `port.BigintGenerator`; `MetricsInvoker` counts invocations through `port.MetricsRecorder`.

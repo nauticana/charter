@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/process/task.schema.json",
   "title": "Task",
   "description": "An assignable unit of work with an accountable responsibility and permitted performer kinds.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-PROC-001",
     "CHR-PROC-002",
@@ -29,10 +29,16 @@
       "const": "Task"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "processId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "BusinessProcess"
+      ]
     },
     "businessOutcome": {
       "type": "string",
@@ -40,7 +46,10 @@
       "maxLength": 500
     },
     "accountableResponsibilityId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Responsibility"
+      ]
     },
     "permittedPerformerKinds": {
       "type": "array",

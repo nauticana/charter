@@ -1,6 +1,6 @@
 # Charter Conformance
 
-Status: core-model profile active with nineteen semantic rules; agent-runtime profile active with six runtime-behavioral rules and system-adapter profile with four, both run against the reference SDK by default.
+Status: core-model profile active with twenty semantic rules; agent-runtime profile active with eight runtime-behavioral rules and system-adapter profile with four, both run against the reference SDK by default.
 
 Conformance combines normative requirement traceability, structural schema validation, semantic rules, valid and invalid fixtures, and runtime behavioral checks where static documents are insufficient.
 

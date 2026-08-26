@@ -12,7 +12,7 @@ This repository holds the normative model, schemas, and conformance corpus toget
 
 ## Specification status and repository map
 
-The specification is an unreleased draft. Start with the [specification index](spec/README.md).
+The current specification release is 1.0.0. Start with the [specification index](spec/README.md); per-release compatibility notes live in [`migration_guide.json`](migration_guide.json) and the reference SDK's conformance claims in [`conformance/claims/`](conformance/claims/).
 
 - `spec/` contains normative semantics and behavioral requirements.
 - `schema/` contains normative language-independent schemas.

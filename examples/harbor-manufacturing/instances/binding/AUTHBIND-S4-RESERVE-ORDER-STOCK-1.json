@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "draft",
+  "charterSpecVersion": "1.0.0",
   "namespace": "harbor.example",
   "kind": "AuthorityBinding",
   "id": "AUTHBIND-S4-RESERVE-ORDER-STOCK-1",

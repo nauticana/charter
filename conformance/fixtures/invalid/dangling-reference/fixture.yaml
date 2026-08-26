@@ -1,4 +1,4 @@
 rules: [CHR-RULE-CONF-001]
-specification_version: draft
+specification_version: 1.0.0
 expected: fail
 reason: Role names a responsibility that does not exist

@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/approval.schema.json",
   "title": "Approval",
   "description": "A decision record binding approver, action, material inputs, limits, and validity; it does not execute anything.",
-  "x-charter-spec-version": "draft",
-  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-spec-version": "1.0.0",
+  "x-charter-schema-version": "1.0.0",
   "x-charter-requirements": [
     "CHR-AUTH-006",
     "CHR-AUTH-009"
@@ -23,7 +23,10 @@
       "const": "Approval"
     },
     "enterpriseId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
     },
     "approver": {
       "description": "The approving identity. An AgentIdentity is valid only when applicable governance explicitly permits non-human approval for this action.",
@@ -42,7 +45,10 @@
       }
     },
     "responsibilityId": {
-      "$ref": "../common.schema.json#/$defs/idRef"
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Responsibility"
+      ]
     },
     "approvedAction": {
       "type": "string",

@@ -1,6 +1,6 @@
 # Human and Agent Identity
 
-Status: Draft, unreleased
+Status: Version 1.0.0
 
 Identity establishes who or what participates in Charter-governed activity. Authentication credentials are implementation details bound to, but not identical with, an identity.
 

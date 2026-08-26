@@ -50,3 +50,17 @@ func TestBaseAdmission(t *testing.T) {
 		t.Error("execution context does not project runtime context and actor")
 	}
 }
+
+func TestTriggered(t *testing.T) {
+	c, err := corpus.NewDirLoader("../../examples/harbor-manufacturing/instances").Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	def, err := NewBaseProvider(c).Definition(context.Background(), "harbor.example", model.Ref{ID: "AGENTDEF-ORDER-EXCEPTION-COORDINATOR-1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !Triggered(def, "order-blocked event mapped to a known order") || Triggered(def, "price change") {
+		t.Error("declared triggers not recognised")
+	}
+}

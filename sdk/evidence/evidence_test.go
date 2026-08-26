@@ -3,6 +3,7 @@ package evidence
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 
 func record(id, category, content string, supersedes *model.Ref) model.EvidenceRecord {
 	r := model.EvidenceRecord{Category: category, Content: content, RecordedAt: time.Date(2026, 6, 18, 17, 3, 12, 0, time.UTC), Supersedes: supersedes}
-	r.CharterSpecVersion, r.Namespace, r.ID = "draft", "t.example", id
+	r.CharterSpecVersion, r.Namespace, r.ID = "1.0.0", "t.example", id
 	r.EnterpriseID = &model.Ref{ID: "ENT"}
 	return r
 }
@@ -45,7 +46,7 @@ func TestSinkIsAppendOnlyWithSupersessionAndIntegrity(t *testing.T) {
 	}
 
 	bundle := model.EvidenceBundle{Subject: model.ObjectRef{Kind: model.KindProcessInstance, ID: "PI-1"}, RecordIDs: []model.Ref{{ID: "EVR-1"}, {ID: "EVR-2"}}, AssuranceProfile: "standard"}
-	bundle.CharterSpecVersion, bundle.Namespace, bundle.ID = "draft", "t.example", "EVID-1"
+	bundle.CharterSpecVersion, bundle.Namespace, bundle.ID = "1.0.0", "t.example", "EVID-1"
 	bundle.EnterpriseID = &model.Ref{ID: "ENT"}
 	missing := bundle
 	missing.ID, missing.RecordIDs = "EVID-MISSING", []model.Ref{{ID: "EVR-NOWHERE"}}
@@ -86,4 +87,60 @@ func TestHarborQueries(t *testing.T) {
 	if lineage, err := q.Lineage(ctx, "harbor.example", model.Ref{ID: "EVR-0042-STOCK-CORRECTED"}); err != nil || len(lineage) != 2 || lineage[1].ID != "EVR-0042-STOCK-OBSERVED" {
 		t.Errorf("harbor lineage: %v %v", lineage, err)
 	}
+}
+
+func TestRedactionAndAssembly(t *testing.T) {
+	ctx := context.Background()
+	sink := NewBaseMemorySink()
+	leaky := record("EVR-LEAK", model.CategoryExternalResponse, "vendor said: Authorization: Bearer abc.def token=s3cr3t; api_key: k-1 ok", nil)
+	if err := sink.Record(ctx, leaky); err != nil {
+		t.Fatal(err)
+	}
+	provider := NewBaseProvider(sink.Store)
+	stored, err := provider.Record(ctx, "t.example", model.Ref{ID: "EVR-LEAK"})
+	if err != nil || strings.Contains(stored.Content, "abc.def") || strings.Contains(stored.Content, "s3cr3t") || strings.Contains(stored.Content, "k-1") || !strings.Contains(stored.Content, "[redacted]") || !strings.HasSuffix(stored.Content, " ok") {
+		t.Errorf("redaction: %q %v", stored.Content, err)
+	}
+	if id := stored.ID; id != "EVR-LEAK" {
+		t.Errorf("identifier altered: %s", id)
+	}
+
+	c, err := corpus.NewDirLoader("../../examples/harbor-manufacturing/instances").Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	subject := model.ObjectRef{Kind: model.KindProcessInstance, ID: "PROCINST-OE-2026-0042"}
+	refs, err := (Queries{Provider: NewBaseProvider(c)}).RecordsAbout(ctx, "harbor.example", subject)
+	if err != nil || len(refs) != 5 || refs[0].ID != "ACT-0042-READ-1" || refs[1].ID != "EVR-0042-STOCK-OBSERVED" || refs[2].ID != "ACT-0042-EXECUTE-1" {
+		t.Errorf("records about the process instance: %v %v", refs, err)
+	}
+	harborSink := &AbstractSink{Store: &memorySource{c}, Digester: BaseSHA256Digester{}}
+	bundle := model.EvidenceBundle{Subject: subject, AssuranceProfile: "harbor-standard"}
+	bundle.CharterSpecVersion, bundle.Namespace, bundle.ID = "1.0.0", "harbor.example", "EVID-ASSEMBLED"
+	bundle.EnterpriseID = &model.Ref{ID: "ENT-HARBOR"}
+	assembled, err := harborSink.Assemble(ctx, bundle)
+	if err != nil || len(assembled.RecordIDs) != 5 || assembled.Integrity.Value == "" {
+		t.Fatalf("assemble: %+v %v", assembled, err)
+	}
+	if err := (Verifier{Source: harborSink.Store, Digester: BaseSHA256Digester{}}).Verify(ctx, "harbor.example", model.Ref{ID: "EVID-ASSEMBLED"}); err != nil {
+		t.Errorf("verify assembled bundle: %v", err)
+	}
+	if _, err := harborSink.Assemble(ctx, withID(bundle, "EVID-EMPTY", model.ObjectRef{Kind: model.KindProcessInstance, ID: "PROCINST-NOWHERE"})); !errors.Is(err, ErrBundleRecord) {
+		t.Errorf("empty subject must not yield a bundle: %v", err)
+	}
+}
+
+func withID(b model.EvidenceBundle, id string, subject model.ObjectRef) model.EvidenceBundle {
+	b.ID, b.Subject = id, subject
+	return b
+}
+
+// memorySource makes a loaded corpus an append-only store for tests.
+type memorySource struct{ *corpus.Corpus }
+
+func (m *memorySource) Append(_ context.Context, d *model.Document) error {
+	if _, exists := m.Get(d.Namespace, d.ID); exists {
+		return ErrDuplicate
+	}
+	return m.Add(d)
 }

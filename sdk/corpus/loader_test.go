@@ -7,13 +7,13 @@ import (
 )
 
 func TestParserRequiresIDAndKind(t *testing.T) {
-	if _, err := (Parser{}).Parse([]byte(`{"charterSpecVersion":"draft","namespace":"t","id":"X"}`)); err == nil {
+	if _, err := (Parser{}).Parse([]byte(`{"charterSpecVersion":"1.0.0","namespace":"t","id":"X"}`)); err == nil {
 		t.Error("document without kind accepted")
 	}
 	if _, err := (Parser{}).Parse([]byte(`not json`)); err == nil {
 		t.Error("invalid JSON accepted")
 	}
-	d, err := (Parser{}).Parse([]byte(`{"charterSpecVersion":"draft","namespace":"t","id":"X","kind":"Enterprise","name":"x","extensions":{"vendor:x":{"n":1}}}`))
+	d, err := (Parser{}).Parse([]byte(`{"charterSpecVersion":"1.0.0","namespace":"t","id":"X","kind":"Enterprise","name":"x","extensions":{"vendor:x":{"n":1}}}`))
 	if err != nil || d.Kind != "Enterprise" || len(d.Extensions) != 1 {
 		t.Errorf("parse: %+v %v", d, err)
 	}
@@ -21,7 +21,7 @@ func TestParserRequiresIDAndKind(t *testing.T) {
 
 func TestFSLoaderEnforcesFilenamesAndUniqueness(t *testing.T) {
 	doc := func(id string) *fstest.MapFile {
-		return &fstest.MapFile{Data: []byte(`{"charterSpecVersion":"draft","namespace":"t","id":"` + id + `","kind":"Enterprise","name":"x"}`)}
+		return &fstest.MapFile{Data: []byte(`{"charterSpecVersion":"1.0.0","namespace":"t","id":"` + id + `","kind":"Enterprise","name":"x"}`)}
 	}
 	good := fstest.MapFS{"a/E1.json": doc("E1"), "b/E2.json": doc("E2"), "notes.md": &fstest.MapFile{Data: []byte("ignored")}}
 	c, err := (&BaseFSLoader{FS: good, Root: "."}).Load()
