@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-005
+title: Work is admitted in one consistent, effective assignment context
+requirements: [CHR-AGENT-005, CHR-AGENT-007]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  A context whose runtime, definition version, identity, and assignment are consistent and effective is admitted; a context whose assignment is not effective at the context time is refused citing the assignment requirement.
+fixtures:
+  valid: fixtures/valid/work-admitted
+  invalid: fixtures/invalid/assignment-expired-refused

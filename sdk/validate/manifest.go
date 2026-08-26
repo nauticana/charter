@@ -2,6 +2,7 @@ package validate
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -41,12 +42,13 @@ type RuleDefinition struct {
 }
 
 type FixtureDescriptor struct {
-	Rules                []string `yaml:"rules"`
-	AlsoFails            []string `yaml:"also_fails"`
-	SpecificationVersion string   `yaml:"specification_version"`
-	Expected             string   `yaml:"expected"`
-	Reason               string   `yaml:"reason"`
-	Documents            string   `yaml:"documents"`
+	Rules                []string  `yaml:"rules"`
+	AlsoFails            []string  `yaml:"also_fails"`
+	SpecificationVersion string    `yaml:"specification_version"`
+	Expected             string    `yaml:"expected"`
+	Reason               string    `yaml:"reason"`
+	Documents            string    `yaml:"documents"`
+	Scenario             *Scenario `yaml:"scenario"`
 }
 
 // ManifestReader reads the conformance manifest, rule definitions, and fixture descriptors below Dir.
@@ -59,9 +61,25 @@ func (m ManifestReader) read(path string, v any) error {
 	if err != nil {
 		return err
 	}
+	if err := validateFormat(formatOf(v), b); err != nil {
+		return fmt.Errorf("%s: %w", path, err)
+	}
 	dec := yaml.NewDecoder(bytes.NewReader(b))
 	dec.KnownFields(true)
-	return dec.Decode(v)
+	if err := dec.Decode(v); err != nil {
+		return fmt.Errorf("%s: %w", path, err)
+	}
+	return nil
+}
+
+func formatOf(v any) string {
+	switch v.(type) {
+	case *Manifest:
+		return formatManifest
+	case *RuleDefinition:
+		return formatRule
+	}
+	return formatFixture
 }
 
 func (m ManifestReader) Manifest() (*Manifest, error) {

@@ -1,0 +1,11 @@
+id: CHR-RULE-EVID-001
+title: Supersession chains are acyclic
+requirements: [CHR-EVID-004]
+profile: core-model
+verification: semantic
+applies_to: [EvidenceRecord]
+check: >-
+  Following supersedes from any EvidenceRecord reaches a record without supersedes and never revisits a record.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/supersession-cycle

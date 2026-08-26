@@ -1,0 +1,11 @@
+id: CHR-RULE-CONF-002
+title: References name documents of their implied kind
+requirements: [CHR-CONF-012]
+profile: core-model
+verification: semantic
+applies_to: ["*"]
+check: >-
+  Every idRef that resolves names a document of the kind its property implies: for example accountableResponsibilityId a Responsibility, taskId a Task, supersedes an EvidenceRecord.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/wrong-reference-kind

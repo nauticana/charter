@@ -1,0 +1,21 @@
+rules: [CHR-RULE-SA-003]
+specification_version: draft
+expected: fail
+reason: The vendor answers with a status the contract does not declare; a conforming adapter reports an unknown outcome instead of inventing one
+documents: ../../../../examples/harbor-manufacturing/instances
+scenario:
+  namespace: harbor.example
+  enterprise: ENT-HARBOR
+  binding: BIND-S4-RESERVE-ORDER-STOCK-1
+  request:
+    capability: CAP-RESERVE-ORDER-STOCK
+    contract_version: "1"
+    required_features: [reservation-create]
+    idempotency_key: IDEMP-0042-1
+    inputs: {order: ORD-2026-0173, line: "10", quantity: 30}
+    subjects: [{kind: ProcessInstance, id: PROCINST-OE-2026-0042}]
+  steps:
+    - name: vendor status outside the contract
+      request: {}
+      vendor: {result: {status: created-with-warnings, reference: "0000088421"}}
+      expect: {result: unknown, vendor_calls: 1}

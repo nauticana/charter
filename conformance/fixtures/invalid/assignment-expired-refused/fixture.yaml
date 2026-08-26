@@ -1,0 +1,22 @@
+rules: [CHR-RULE-RT-005]
+specification_version: draft
+expected: fail
+reason: The assignment ended before the context time; a conforming runtime refuses the work citing the assignment requirement
+documents: ../../../../examples/harbor-manufacturing/instances
+scenario:
+  namespace: harbor.example
+  enterprise: ENT-HARBOR
+  context:
+    identity: AGENT-ORDER-EXCEPTION-COORDINATOR
+    runtime: RT-OEC-PROD-01
+    execution_context_id: EXEC-OE-0042-05
+    definition: AGENTDEF-ORDER-EXCEPTION-COORDINATOR-1
+    definition_version: "1"
+    assignment: ASGN-OEC-ORDER-EXCEPTION-SUPPORT
+    participation: supports
+    capability: CAP-RESERVE-ORDER-STOCK
+    at: 2026-06-18T17:12:30Z
+  steps:
+    - name: assignment no longer effective
+      admit: {at: 2027-01-15T00:00:00Z}
+      expect: {result: refused, requirement: CHR-AGENT-007}

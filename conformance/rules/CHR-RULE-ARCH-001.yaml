@@ -1,0 +1,11 @@
+id: CHR-RULE-ARCH-001
+title: Gaps compare a time-bounded baseline with a target
+requirements: [CHR-ARCH-004, CHR-ARCH-006]
+profile: core-model
+verification: semantic
+applies_to: [Gap]
+check: >-
+  Every Gap's baselineStateId resolves to a baseline ArchitectureState and its targetStateId to a target ArchitectureState; both states are time-bounded with ordered validity and the target does not start before the baseline.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/gap-states-swapped

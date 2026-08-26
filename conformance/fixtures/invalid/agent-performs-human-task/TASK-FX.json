@@ -1,0 +1,17 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "Task",
+  "id": "TASK-FX",
+  "name": "task",
+  "processId": "PROC-FX",
+  "businessOutcome": "o",
+  "accountableResponsibilityId": "RESP-FX",
+  "permittedPerformerKinds": [
+    "human"
+  ],
+  "permittedParticipation": [
+    "approves"
+  ]
+}

@@ -1,13 +1,25 @@
 package validate
 
 import (
+	"context"
 	"encoding/json"
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/nauticana/charter/sdk/binding"
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/model"
 )
+
+type nilExecutorAdapter struct{}
+
+func (nilExecutorAdapter) Realize(context.Context, corpus.Source, string, model.Ref, VendorEndpoint) (binding.Executor, error) {
+	return nil, nil
+}
 
 const harbor = "../../examples/harbor-manufacturing/instances"
 
@@ -147,5 +159,89 @@ func TestStructuralRejectsUnknownProperty(t *testing.T) {
 	}
 	if len(s.ValidateDocument(d)) == 0 {
 		t.Fatal("unevaluated property was accepted")
+	}
+}
+
+func TestImpliedKindsCoverEveryIDRefProperty(t *testing.T) {
+	meta, err := NewSchemaMeta()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for key := range meta.IDRefKeys {
+		if _, ok := idRefKinds[key]; !ok {
+			t.Errorf("idRef property %q has no implied kind", key)
+		}
+	}
+}
+
+func TestCatalogMetaAndSpecVersion(t *testing.T) {
+	meta, err := (Catalog{}).Meta()
+	if err != nil || meta.SpecVersion != "draft" || meta.CatalogVersion == "" {
+		t.Fatalf("meta: %+v %v", meta, err)
+	}
+	c, err := corpus.NewDirLoader(harbor).Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if f := (SpecVersion{Version: meta.SpecVersion}).Validate(c); len(f) != 0 {
+		t.Errorf("Harbor targets %s: %v", meta.SpecVersion, f)
+	}
+	if f := (SpecVersion{Version: "1.0.0"}).Validate(c); len(f) != c.Len() || f[0].Requirements[0] != "CHR-CONF-001" {
+		t.Errorf("other version: %d findings", len(f))
+	}
+}
+
+func TestFormatSchemasRejectInvalidManifest(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "manifest.yaml"), []byte("format_version: 2\nspecification: {name: x, version: draft}\nprofiles: []\nrules: []\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := (ManifestReader{Dir: dir}).Manifest(); err == nil || !strings.Contains(err.Error(), "format") {
+		t.Errorf("invalid manifest accepted: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "fixture.yaml"), []byte("rules: [CHR-RULE-RT-001]\nspecification_version: draft\nexpected: fail\nreason: r\nscenario: {namespace: n, enterprise: E, steps: [{expect: {status: denied}, invoke: {}, admit: {}}]}\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := (ManifestReader{Dir: dir}).Fixture(dir); err == nil {
+		t.Error("step with both admit and invoke accepted")
+	}
+}
+
+func TestBehavioralRulesNeedASubject(t *testing.T) {
+	r, err := NewRunner("../../conformance")
+	if err != nil {
+		t.Fatal(err)
+	}
+	spec := ClaimSpec{Namespace: "sdk.example", ID: "CLAIM-RT", Profile: "agent-runtime", Implementation: model.ObjectRef{Kind: "GoModule", ID: "x", External: true}, ImplementationVersion: "0", ResultDate: "2026-08-25"}
+	claim, err := r.Claim(spec)
+	if err != nil || claim.Result != model.ResultConforming || len(claim.TestedRuleIDs) != 6 || !slices.Contains(claim.VerificationTypes, model.VerificationBehavioral) {
+		t.Fatalf("reference subject claim: %+v %v", claim, err)
+	}
+	r.Subject, r.Adapter = nil, nil
+	results, err := r.RunManifest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, res := range results {
+		if strings.Contains(res.Dir, "governed-execution") {
+			t.Error("behavioral fixture executed without a subject")
+		}
+	}
+	claim, err = r.Claim(spec)
+	if err != nil || claim.Result != model.ResultPartial || len(claim.TestedRuleIDs) != 0 || slices.Contains(claim.VerificationTypes, model.VerificationBehavioral) {
+		t.Errorf("claim without subject: %+v %v", claim, err)
+	}
+	for _, res := range claim.Results {
+		if res.Result != model.RuleNotTested || res.VerificationType != model.VerificationBehavioral {
+			t.Errorf("rule result without subject: %+v", res)
+		}
+	}
+}
+
+func TestBehavioralAdapterWithoutExecutorIsAFinding(t *testing.T) {
+	rule := BehavioralRule{AbstractRule: AbstractRule{id: "test"}, Kind: SubjectAdapter}
+	findings := rule.runAdapter(context.Background(), nilExecutorAdapter{}, corpus.New(), &Scenario{})
+	if len(findings) != 1 || !strings.Contains(findings[0].Message, "no executor") {
+		t.Fatalf("nil adapter executor: %+v", findings)
 	}
 }

@@ -1,0 +1,4 @@
+rules: [CHR-RULE-PROC-001]
+specification_version: draft
+expected: fail
+reason: An agent performs a task whose definition permits only human performers

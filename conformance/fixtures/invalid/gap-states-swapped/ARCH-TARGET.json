@@ -1,0 +1,17 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "ArchitectureState",
+  "id": "ARCH-TARGET",
+  "name": "target",
+  "stateType": "target",
+  "validity": {
+    "from": "2026-10-01"
+  },
+  "decisionAuthority": {
+    "kind": "OrganizationUnit",
+    "id": "OU-ROOT"
+  },
+  "description": "intended"
+}

@@ -1,3 +1,3 @@
 # Identity SDK
 
-Interfaces for human and agent identity references, lifecycle-at-time queries, and credential-independent actor resolution. Optional `Abstract*` types support custom providers; complete neutral defaults use `Base*` names.
+`Provider` resolves human and agent identities (`BaseProvider` over any `corpus.Source`); `Resolver` turns identity references into credential-independent `Actor`s and establishes lifecycle state at action time (`AbstractResolver` over any Provider, `BaseResolver` over a corpus). `Lifecycle.StateAt` and `ActiveAt` fail closed on missing, unordered, or inconsistent history.

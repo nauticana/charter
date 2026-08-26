@@ -1,0 +1,26 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "ActionRecord",
+  "id": "ACT-PREP",
+  "actor": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-FX"
+  },
+  "runtimeContext": {
+    "runtimeInstanceId": "RT-FX",
+    "executionContextId": "EX-PREP"
+  },
+  "responsibilityId": "RESP-FX",
+  "capabilityId": "CAP-PREP",
+  "subjectRefs": [
+    {
+      "kind": "CapabilityContract",
+      "id": "CAP-FX"
+    }
+  ],
+  "operationClass": "propose",
+  "actionTime": "2026-06-18T16:00:00Z",
+  "outcome": "proposed"
+}

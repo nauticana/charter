@@ -1,0 +1,11 @@
+id: CHR-RULE-SA-001
+title: Declared feature support is enforced before any vendor call
+requirements: [CHR-BIND-002, CHR-BIND-006, CHR-BIND-009]
+profile: system-adapter
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  A request relying only on features the binding declares supported reaches the vendor and maps its result; a request relying on a feature declared unsupported or not declared is refused as not executed without any vendor call.
+fixtures:
+  valid: fixtures/valid/adapter-supported-feature
+  invalid: fixtures/invalid/adapter-unsupported-feature

@@ -1,0 +1,4 @@
+rules: [CHR-RULE-PROC-003]
+specification_version: draft
+expected: fail
+reason: The task instance runs a task of PROC-FX inside an instance of PROC-B

@@ -8,17 +8,17 @@ Its purpose is not to replace an enterprise's human organization. It creates an 
 
 It extends an existing enterprise architecture with an agentic operating model. It does not replace TOGAF, the SAP Enterprise Architecture Framework, an ERP or CRM platform, or the enterprise's established architecture practice.
 
-This repository currently documents the concepts and planned interfaces. Implementation of the Go reference SDK and validation CLI is deferred until the normative model and initial schemas are sufficiently stable.
+This repository holds the normative model, schemas, and conformance corpus together with the Go reference SDK (`sdk/`) and the `charter` validation CLI (`cmd/charter`), which validate the Harbor example and the conformance fixtures on every change.
 
 ## Specification status and repository map
 
 The specification is an unreleased draft. Start with the [specification index](spec/README.md).
 
 - `spec/` contains normative semantics and behavioral requirements.
-- `schema/` will contain normative language-independent schemas.
+- `schema/` contains normative language-independent schemas.
 - `conformance/` defines profiles, traceability, rules, and fixtures.
 - `examples/` contains non-normative scenarios. Core example objects remain vendor-independent, while examples may name external products to illustrate bindings.
-- `sdk/` and `cmd/` contain the planned Go reference SDK and validation CLI.
+- `sdk/` and `cmd/` contain the Go reference SDK and the `charter` validation CLI.
 - `doc/` contains non-normative strategy and architecture decisions.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for change requirements and [GOVERNANCE.md](GOVERNANCE.md) for specification authority and release policy.

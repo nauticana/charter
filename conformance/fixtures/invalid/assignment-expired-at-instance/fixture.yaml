@@ -1,0 +1,4 @@
+rules: [CHR-RULE-PROC-002]
+specification_version: draft
+expected: fail
+reason: The task instance cites an assignment that ended before the instance was created

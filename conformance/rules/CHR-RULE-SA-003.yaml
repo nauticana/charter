@@ -1,0 +1,11 @@
+id: CHR-RULE-SA-003
+title: Outcomes and references stay within the contract
+requirements: [CHR-CAP-001, CHR-CAP-007]
+profile: system-adapter
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  A vendor result the adapter can map is reported as a declared outcome with its external reference; a vendor result naming no declared outcome is reported as unknown rather than mapped to an outcome the contract does not declare.
+fixtures:
+  valid: fixtures/valid/adapter-declared-outcome
+  invalid: fixtures/invalid/adapter-unmappable-result

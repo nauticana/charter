@@ -1,0 +1,11 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "Gap",
+  "id": "GAP-FX",
+  "baselineStateId": "ARCH-TARGET",
+  "targetStateId": "ARCH-BASE",
+  "classification": "missing",
+  "description": "swapped"
+}

@@ -1,0 +1,42 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "ActionRecord",
+  "id": "ACT-FX",
+  "actor": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-FX"
+  },
+  "runtimeContext": {
+    "runtimeInstanceId": "RT-FX",
+    "executionContextId": "EX-FX"
+  },
+  "assignmentId": "ASGN-FX",
+  "capabilityId": "CAP-FX",
+  "materialInputsDigest": "sha256:fx",
+  "subjectRefs": [
+    {
+      "kind": "CapabilityContract",
+      "id": "CAP-FX"
+    }
+  ],
+  "operationClass": "execute",
+  "actionTime": "2026-06-18T17:00:00Z",
+  "outcome": "done",
+  "authorityEvaluations": [
+    {
+      "authorityGrantId": "AUTH-FX",
+      "result": "allowed",
+      "reason": "fixture"
+    }
+  ],
+  "approvalEvaluations": [
+    {
+      "approvalId": "APPR-FX",
+      "approvedAction": "CAP-FX",
+      "result": "approved",
+      "reason": "fixture"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+rules: [CHR-RULE-EVID-001]
+specification_version: draft
+expected: fail
+reason: EVR-A supersedes EVR-B, which supersedes EVR-A

@@ -1,0 +1,11 @@
+id: CHR-RULE-INFO-001
+title: Declared governance policies cover the information they govern
+requirements: [CHR-INFO-002]
+profile: core-model
+verification: semantic
+applies_to: [InformationDefinition]
+check: >-
+  Every InformationGovernancePolicy an InformationDefinition lists in governancePolicyIds names that definition in its scope.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/policy-out-of-scope

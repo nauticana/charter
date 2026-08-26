@@ -1,0 +1,11 @@
+id: CHR-RULE-PROC-001
+title: Task instances use permitted performer kinds and participation
+requirements: [CHR-PROC-002, CHR-PROC-006]
+profile: core-model
+verification: semantic
+applies_to: [TaskInstance]
+check: >-
+  For every TaskInstance whose taskId resolves to a Task, the performer's identity kind is among permittedPerformerKinds and, when the Task declares permittedParticipation, the instance participation is among them.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/agent-performs-human-task

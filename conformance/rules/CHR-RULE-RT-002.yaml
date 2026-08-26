@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-002
+title: Approvals bind the action
+requirements: [CHR-AUTH-009]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  An invocation whose approval binds the approved action, material inputs, subjects, and limits and is valid at action time executes; one whose approval expired is denied with the stale evaluation recorded and the transport never called.
+fixtures:
+  valid: fixtures/valid/bound-approval
+  invalid: fixtures/invalid/stale-approval-refused

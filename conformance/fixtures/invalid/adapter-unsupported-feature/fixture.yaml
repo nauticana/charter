@@ -1,0 +1,25 @@
+rules: [CHR-RULE-SA-001]
+specification_version: draft
+expected: fail
+reason: The request relies on features the binding declares unsupported or does not declare; a conforming adapter refuses before calling the vendor
+documents: ../../../../examples/harbor-manufacturing/instances
+scenario:
+  namespace: harbor.example
+  enterprise: ENT-HARBOR
+  binding: BIND-S4-RESERVE-ORDER-STOCK-1
+  request:
+    capability: CAP-RESERVE-ORDER-STOCK
+    contract_version: "1"
+    required_features: [reservation-create]
+    idempotency_key: IDEMP-0042-1
+    inputs: {order: ORD-2026-0173, line: "10", quantity: 30}
+    subjects: [{kind: ProcessInstance, id: PROCINST-OE-2026-0042}]
+  steps:
+    - name: declared unsupported feature
+      request: {required_features: [reservation-expiry]}
+      vendor: {result: {status: reserved}}
+      expect: {result: not-executed, vendor_calls: 0}
+    - name: undeclared feature
+      request: {required_features: [reservation-create, native-order-lock]}
+      vendor: {result: {status: reserved}}
+      expect: {result: not-executed, vendor_calls: 0}

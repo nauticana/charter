@@ -1,0 +1,35 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "CapabilityContract",
+  "id": "CAP-OTHER",
+  "name": "CAP-OTHER",
+  "purpose": "fixture",
+  "operationClass": "execute",
+  "contractVersion": "1",
+  "inputs": [
+    "x"
+  ],
+  "outputs": [
+    "y"
+  ],
+  "preconditions": [],
+  "outcomes": [
+    "done"
+  ],
+  "businessErrors": [],
+  "requiredAuthority": "grant",
+  "constraints": {
+    "approvalRequired": true,
+    "sodConstraintIds": [],
+    "limits": []
+  },
+  "idempotency": {
+    "mutating": true,
+    "retrySemantics": "reconcile"
+  },
+  "evidenceRequirements": [
+    "outcome"
+  ]
+}

@@ -2,25 +2,49 @@ package model
 
 import "time"
 
+type Kind string
+
 const (
-	KindEnterprise               Kind = "Enterprise"
-	KindOrganizationUnit         Kind = "OrganizationUnit"
-	KindPositionType             Kind = "PositionType"
-	KindPosition                 Kind = "Position"
-	KindRole                     Kind = "Role"
-	KindResponsibility           Kind = "Responsibility"
-	KindAssignment               Kind = "Assignment"
-	KindOrganizationRelationship Kind = "OrganizationRelationship"
-	KindHumanIdentity            Kind = "HumanIdentity"
-	KindAgentIdentity            Kind = "AgentIdentity"
-	KindAgentDefinition          Kind = "AgentDefinition"
-	KindAgentRuntime             Kind = "AgentRuntime"
-	KindAuthorityGrant           Kind = "AuthorityGrant"
-	KindApproval                 Kind = "Approval"
-	KindSodConstraint            Kind = "SodConstraint"
-	KindCapabilityContract       Kind = "CapabilityContract"
-	KindActionRecord             Kind = "ActionRecord"
-	KindEvidenceRecord           Kind = "EvidenceRecord"
+	KindEnterprise                  Kind = "Enterprise"
+	KindOrganizationUnit            Kind = "OrganizationUnit"
+	KindPositionType                Kind = "PositionType"
+	KindPosition                    Kind = "Position"
+	KindRole                        Kind = "Role"
+	KindResponsibility              Kind = "Responsibility"
+	KindAssignment                  Kind = "Assignment"
+	KindOrganizationRelationship    Kind = "OrganizationRelationship"
+	KindHumanIdentity               Kind = "HumanIdentity"
+	KindAgentIdentity               Kind = "AgentIdentity"
+	KindAgentDefinition             Kind = "AgentDefinition"
+	KindAgentRuntime                Kind = "AgentRuntime"
+	KindAuthorityGrant              Kind = "AuthorityGrant"
+	KindApproval                    Kind = "Approval"
+	KindSodConstraint               Kind = "SodConstraint"
+	KindValueStream                 Kind = "ValueStream"
+	KindBusinessProcess             Kind = "BusinessProcess"
+	KindTask                        Kind = "Task"
+	KindProcessRelationship         Kind = "ProcessRelationship"
+	KindProcessInstance             Kind = "ProcessInstance"
+	KindTaskInstance                Kind = "TaskInstance"
+	KindCapabilityContract          Kind = "CapabilityContract"
+	KindArchitectureState           Kind = "ArchitectureState"
+	KindGap                         Kind = "Gap"
+	KindRoadmapItem                 Kind = "RoadmapItem"
+	KindEnterpriseSystem            Kind = "EnterpriseSystem"
+	KindSystemProfile               Kind = "SystemProfile"
+	KindCapabilityBinding           Kind = "CapabilityBinding"
+	KindDataBinding                 Kind = "DataBinding"
+	KindAuthorityBinding            Kind = "AuthorityBinding"
+	KindEventBinding                Kind = "EventBinding"
+	KindBindingConformance          Kind = "BindingConformance"
+	KindActionRecord                Kind = "ActionRecord"
+	KindEvidenceRecord              Kind = "EvidenceRecord"
+	KindEvidenceBundle              Kind = "EvidenceBundle"
+	KindExceptionRecord             Kind = "ExceptionRecord"
+	KindEscalation                  Kind = "Escalation"
+	KindInformationDefinition       Kind = "InformationDefinition"
+	KindInformationGovernancePolicy Kind = "InformationGovernancePolicy"
+	KindConformanceClaim            Kind = "ConformanceClaim"
 )
 
 const (
@@ -31,9 +55,52 @@ const (
 	LifecycleRetired   = "retired"
 )
 
-const ParticipationOccupies = "occupies"
+const (
+	ParticipationOccupies   = "occupies"
+	ParticipationSupports   = "supports"
+	ParticipationObserves   = "observes"
+	ParticipationRecommends = "recommends"
+	ParticipationPrepares   = "prepares"
+	ParticipationApproves   = "approves"
+	ParticipationPerforms   = "performs"
+	ParticipationExecutes   = "executes"
+)
 
-type Kind string
+const (
+	PerformerHuman = "human"
+	PerformerAgent = "agent"
+)
+
+const (
+	OperationRead    = "read"
+	OperationPropose = "propose"
+	OperationApprove = "approve"
+	OperationExecute = "execute"
+)
+
+const (
+	SupportSupported   = "supported"
+	SupportPartial     = "partial"
+	SupportUnsupported = "unsupported"
+)
+
+const (
+	ResultConforming    = "conforming"
+	ResultPartial       = "partial"
+	ResultNonconforming = "nonconforming"
+)
+
+const (
+	VerificationStructural = "structural"
+	VerificationSemantic   = "semantic"
+	VerificationBehavioral = "runtime-behavioral"
+)
+
+const (
+	RulePass      = "pass"
+	RuleFail      = "fail"
+	RuleNotTested = "not-tested"
+)
 
 type LifecycleTransition struct {
 	State       string     `json:"state"`
@@ -48,91 +115,9 @@ type ObjectRef struct {
 	External  bool   `json:"external,omitempty"`
 }
 
-type OrganizationUnit struct {
-	Envelope
-	ParentUnitID *Ref `json:"parentUnitId,omitempty"`
-}
-
-type Position struct {
-	Envelope
-	OrganizationUnitID Ref  `json:"organizationUnitId"`
-	PositionTypeID     *Ref `json:"positionTypeId,omitempty"`
-}
-
-type Assignment struct {
-	Envelope
-	Subject       ObjectRef `json:"subject"`
-	Target        ObjectRef `json:"target"`
-	Participation string    `json:"participation"`
-	Condition     string    `json:"condition,omitempty"`
-	Reason        string    `json:"reason,omitempty"`
-}
-
-type Delegation struct {
-	Delegator            ObjectRef `json:"delegator"`
-	MaxRedelegationDepth int       `json:"maxRedelegationDepth"`
-}
-
-type AuthorityGrant struct {
-	Envelope
-	Actor                 ObjectRef   `json:"actor"`
-	CapabilityID          Ref         `json:"capabilityId"`
-	ResourceScope         string      `json:"resourceScope"`
-	OrganizationalContext string      `json:"organizationalContext"`
-	Limits                []Limit     `json:"limits"`
-	Delegation            *Delegation `json:"delegation,omitempty"`
-}
-
-type Approval struct {
-	Envelope
-	Approver             ObjectRef   `json:"approver"`
-	ResponsibilityID     *Ref        `json:"responsibilityId,omitempty"`
-	ApprovedAction       string      `json:"approvedAction"`
-	SubjectRefs          []ObjectRef `json:"subjectRefs,omitempty"`
-	MaterialInputsDigest string      `json:"materialInputsDigest"`
-	Limits               []Limit     `json:"limits"`
-	Conditions           []string    `json:"conditions"`
-	IssuedAt             time.Time   `json:"issuedAt"`
-	ValidityMode         string      `json:"validityMode"`
-	ExpiresAt            *time.Time  `json:"expiresAt,omitempty"`
-}
-
-type SodConstraint struct {
-	Envelope
-	ConstrainedActions []Ref  `json:"constrainedActions"`
-	Scope              string `json:"scope,omitempty"`
-}
-
-type RuntimeContext struct {
-	RuntimeInstanceID  Ref    `json:"runtimeInstanceId"`
-	ExecutionContextID string `json:"executionContextId"`
-}
-
-type AuthorityEvaluation struct {
-	AuthorityGrantID *Ref   `json:"authorityGrantId,omitempty"`
-	Result           string `json:"result"`
-	Reason           string `json:"reason"`
-}
-
-type ApprovalEvaluation struct {
-	ApprovalID     *Ref   `json:"approvalId,omitempty"`
-	ApprovedAction string `json:"approvedAction,omitempty"`
-	Result         string `json:"result"`
-	Reason         string `json:"reason"`
-}
-
-type ActionRecord struct {
-	Envelope
-	Actor                ObjectRef             `json:"actor"`
-	RuntimeContext       RuntimeContext        `json:"runtimeContext"`
-	AssignmentID         *Ref                  `json:"assignmentId,omitempty"`
-	ResponsibilityID     *Ref                  `json:"responsibilityId,omitempty"`
-	CapabilityID         Ref                   `json:"capabilityId"`
-	MaterialInputsDigest string                `json:"materialInputsDigest,omitempty"`
-	SubjectRefs          []ObjectRef           `json:"subjectRefs,omitempty"`
-	OperationClass       string                `json:"operationClass"`
-	ActionTime           time.Time             `json:"actionTime"`
-	Outcome              string                `json:"outcome"`
-	AuthorityEvaluations []AuthorityEvaluation `json:"authorityEvaluations,omitempty"`
-	ApprovalEvaluations  []ApprovalEvaluation  `json:"approvalEvaluations,omitempty"`
+// FeatureSupport declares how one contract feature is supported by a binding or evaluated by a conformance check.
+type FeatureSupport struct {
+	Feature string `json:"feature"`
+	Support string `json:"support"`
+	Notes   string `json:"notes,omitempty"`
 }

@@ -1,3 +1,3 @@
 # Process SDK
 
-Provider and resolution interfaces for value streams, process/task definitions, relationships, and instances. Reusable foundations preserve definition/runtime separation and effective context.
+`DefinitionProvider` and `InstanceProvider` keep definitions and execution context distinct (`BaseProvider` implements both). `Graph` reads hierarchy, sequence, and dependency relationships as declared, and `BaseContextResolver` builds a `TaskContext` from a task instance, failing closed on definition mismatch, performer kind, participation, or an assignment not effective at instance time.

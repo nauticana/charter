@@ -1,0 +1,4 @@
+rules: [CHR-RULE-AUTH-003]
+specification_version: draft
+expected: fail
+reason: HUMAN-FX prepared the proposal for CAP-FX and then approved it, which SOD-FX forbids

@@ -1,0 +1,11 @@
+id: CHR-RULE-PROC-002
+title: Task instance assignments cover the performer at instance time
+requirements: [CHR-PROC-002, CHR-ENT-005]
+profile: core-model
+verification: semantic
+applies_to: [TaskInstance]
+check: >-
+  For every TaskInstance whose assignmentId resolves to an Assignment, the assignment subject is the performer and the assignment is effective (validity contains startedAt, or createdAt when not started; lifecycle not retired).
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/assignment-expired-at-instance

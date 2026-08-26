@@ -1,0 +1,29 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "InformationGovernancePolicy",
+  "id": "POL-FX",
+  "name": "policy",
+  "scope": [
+    {
+      "kind": "InformationDefinition",
+      "id": "INFO-B"
+    }
+  ],
+  "permittedUses": [
+    "audit"
+  ],
+  "accessConstraints": [
+    "c"
+  ],
+  "retentionAndDeletion": [
+    {
+      "artifactKind": "cache",
+      "retentionRule": "1 day",
+      "deletionRule": "purge"
+    }
+  ],
+  "precedence": 1,
+  "conflictBehavior": "fail-closed"
+}

@@ -1,0 +1,20 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "Assignment",
+  "id": "ASGN-FX",
+  "subject": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-FX"
+  },
+  "target": {
+    "kind": "WorkContext",
+    "id": "WC-FX",
+    "external": true
+  },
+  "participation": "supports",
+  "validity": {
+    "from": "2026-01-01"
+  }
+}

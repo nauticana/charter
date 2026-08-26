@@ -1,0 +1,11 @@
+id: CHR-RULE-SA-002
+title: Business errors, unknown outcomes, and non-execution are distinguished
+requirements: [CHR-CAP-005, CHR-BIND-005, CHR-SEC-007, CHR-SEC-008]
+profile: system-adapter
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  A vendor condition the contract declares as a business error is reported as that business error; a vendor failure after the request was sent is reported as an unknown outcome and a failure before sending as not executed, never as success or as a business error.
+fixtures:
+  valid: fixtures/valid/adapter-business-error
+  invalid: fixtures/invalid/adapter-transport-failures

@@ -1,0 +1,11 @@
+id: CHR-RULE-SA-004
+title: A binding realizes only its own capability
+requirements: [CHR-CAP-007, CHR-BIND-001]
+profile: system-adapter
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  A request for the capability the binding realizes is executed; a request for any other capability is refused as not executed without any vendor call.
+fixtures:
+  valid: fixtures/valid/adapter-bound-capability
+  invalid: fixtures/invalid/adapter-other-capability

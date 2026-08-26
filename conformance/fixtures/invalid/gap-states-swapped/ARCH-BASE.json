@@ -1,0 +1,14 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "ArchitectureState",
+  "id": "ARCH-BASE",
+  "name": "baseline",
+  "stateType": "baseline",
+  "validity": {
+    "from": "2026-01-01",
+    "to": "2026-03-31"
+  },
+  "description": "observed"
+}

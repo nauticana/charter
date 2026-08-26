@@ -1,0 +1,11 @@
+id: CHR-RULE-ENT-005
+title: References stay within the enterprise boundary
+requirements: [CHR-ENT-001, CHR-SEC-006]
+profile: core-model
+verification: semantic
+applies_to: ["*"]
+check: >-
+  Every resolved reference from a document with an enterpriseId names a document whose enterpriseId, when present, is the same enterprise; declared-external references are exempt.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/cross-enterprise-placement

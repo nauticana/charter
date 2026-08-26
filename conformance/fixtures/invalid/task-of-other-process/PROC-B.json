@@ -1,0 +1,9 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "BusinessProcess",
+  "id": "PROC-B",
+  "name": "PROC-B",
+  "businessOutcome": "o"
+}

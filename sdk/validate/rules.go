@@ -17,6 +17,17 @@ func NewRuleSet() (RuleSet, error) {
 		ActiveActorRule{AbstractRule{"CHR-RULE-ID-001", []string{"CHR-ID-005", "CHR-ID-009"}}},
 		GrantEffectiveRule{AbstractRule{"CHR-RULE-AUTH-001", []string{"CHR-AUTH-005", "CHR-EVID-002"}}},
 		ApprovalValidRule{AbstractRule{"CHR-RULE-AUTH-002", []string{"CHR-AUTH-009"}}},
+		ReferenceKindsRule{AbstractRule{"CHR-RULE-CONF-002", []string{"CHR-CONF-012"}}, meta},
+		EnterpriseBoundaryRule{AbstractRule{"CHR-RULE-ENT-005", []string{"CHR-ENT-001", "CHR-SEC-006"}}, meta},
+		PerformerRule{AbstractRule{"CHR-RULE-PROC-001", []string{"CHR-PROC-002", "CHR-PROC-006"}}},
+		InstanceAssignmentRule{AbstractRule{"CHR-RULE-PROC-002", []string{"CHR-PROC-002", "CHR-ENT-005"}}},
+		InstanceDefinitionRule{AbstractRule{"CHR-RULE-PROC-003", []string{"CHR-PROC-005"}}},
+		GapStatesRule{AbstractRule{"CHR-RULE-ARCH-001", []string{"CHR-ARCH-004", "CHR-ARCH-006"}}},
+		PolicyScopeRule{AbstractRule{"CHR-RULE-INFO-001", []string{"CHR-INFO-002"}}},
+		SupersessionRule{AbstractRule{"CHR-RULE-EVID-001", []string{"CHR-EVID-004"}}},
+		RuntimeActorRule{AbstractRule{"CHR-RULE-AGENT-001", []string{"CHR-AGENT-006"}}},
+		DeclaredCapabilityRule{AbstractRule{"CHR-RULE-AGENT-002", []string{"CHR-AGENT-003"}}},
+		SodApprovalRule{AbstractRule{"CHR-RULE-AUTH-003", []string{"CHR-AUTH-007"}}},
 	}
 	set := RuleSet{}
 	for _, r := range all {

@@ -1,0 +1,469 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/conformance/fixture_descriptor.schema.json",
+  "title": "ConformanceFixtureDescriptor",
+  "description": "Format of fixture.yaml: the rules a fixture exercises, its expected result, its documents, and, for runtime-behavioral rules, the scenario driven against the implementation under test.",
+  "x-charter-spec-version": "draft",
+  "x-charter-schema-version": "0.1.0-draft",
+  "x-charter-requirements": [
+    "CHR-CONF-007",
+    "CHR-CONF-008",
+    "CHR-CONF-011"
+  ],
+  "type": "object",
+  "$defs": {
+    "ruleIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^CHR-RULE-[A-Z]+-[0-9]{3}$"
+      }
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "objectRef": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "external": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "measure": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "boolean"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "currency_exponent": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "context": {
+      "description": "An execution context a runtime is asked to admit; step values override the scenario's base context.",
+      "type": "object",
+      "properties": {
+        "identity": {
+          "$ref": "#/$defs/identifier"
+        },
+        "runtime": {
+          "$ref": "#/$defs/identifier"
+        },
+        "execution_context_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "definition": {
+          "$ref": "#/$defs/identifier"
+        },
+        "definition_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "assignment": {
+          "$ref": "#/$defs/identifier"
+        },
+        "participation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability": {
+          "$ref": "#/$defs/identifier"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "invocation": {
+      "description": "A governed invocation; step values override the scenario's base invocation.",
+      "type": "object",
+      "properties": {
+        "actor": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "runtime": {
+          "$ref": "#/$defs/identifier"
+        },
+        "execution_context_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "assignment": {
+          "$ref": "#/$defs/identifier"
+        },
+        "responsibility": {
+          "$ref": "#/$defs/identifier"
+        },
+        "capability": {
+          "$ref": "#/$defs/identifier"
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "system_profile": {
+          "$ref": "#/$defs/identifier"
+        },
+        "required_features": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "resource_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "organizational_context": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measures": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/measure"
+          }
+        },
+        "approved_action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "material_inputs_digest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/objectRef"
+          }
+        },
+        "idempotency_key": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "transport": {
+      "description": "The scripted external outcome of one invocation: a declared outcome, a business error, or an error class.",
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "minLength": 1
+        },
+        "business_error": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "description": "unknown, not-executed, or free text treated as an unknown outcome"
+        }
+      },
+      "additionalProperties": false
+    },
+    "expect": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "enum": [
+            "admitted",
+            "refused",
+            "error",
+            "outcome",
+            "business-error",
+            "unknown",
+            "not-executed"
+          ]
+        },
+        "status": {
+          "enum": [
+            "executed",
+            "business-error",
+            "denied",
+            "failed",
+            "unknown"
+          ]
+        },
+        "requirement": {
+          "type": "string",
+          "pattern": "^CHR-[A-Z]+-[0-9]{3}$"
+        },
+        "authority": {
+          "enum": [
+            "allowed",
+            "denied",
+            "missing",
+            "error",
+            ""
+          ]
+        },
+        "approval": {
+          "enum": [
+            "approved",
+            "rejected",
+            "not-required",
+            "missing",
+            "stale",
+            "error",
+            ""
+          ]
+        },
+        "outcome": {
+          "type": "string"
+        },
+        "transport_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidence": {
+          "type": "boolean"
+        },
+        "business_error": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "vendor_calls": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "step": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "admit": {
+          "$ref": "#/$defs/context"
+        },
+        "invoke": {
+          "$ref": "#/$defs/invocation"
+        },
+        "transport": {
+          "$ref": "#/$defs/transport"
+        },
+        "expect": {
+          "$ref": "#/$defs/expect"
+        },
+        "request": {
+          "$ref": "#/$defs/request"
+        },
+        "vendor": {
+          "$ref": "#/$defs/vendor"
+        }
+      },
+      "required": [
+        "expect"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "admit"
+          ]
+        },
+        {
+          "required": [
+            "invoke"
+          ]
+        },
+        {
+          "required": [
+            "request"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "scenario": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "enterprise": {
+          "$ref": "#/$defs/identifier"
+        },
+        "context": {
+          "$ref": "#/$defs/context"
+        },
+        "invocation": {
+          "$ref": "#/$defs/invocation"
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        },
+        "binding": {
+          "$ref": "#/$defs/identifier"
+        },
+        "request": {
+          "$ref": "#/$defs/request"
+        }
+      },
+      "required": [
+        "namespace",
+        "enterprise",
+        "steps"
+      ],
+      "additionalProperties": false
+    },
+    "request": {
+      "description": "A capability request as an adapter sees it; step values override the scenario's base request.",
+      "type": "object",
+      "properties": {
+        "capability": {
+          "$ref": "#/$defs/identifier"
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inputs": {},
+        "idempotency_key": {
+          "type": "string"
+        },
+        "required_features": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/objectRef"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "vendor": {
+      "description": "The scripted reply of the external system: a result the adapter must map, or an error whose class is not-executed or, by default, a failure after sending.",
+      "type": "object",
+      "properties": {
+        "result": {},
+        "error": {
+          "type": "string",
+          "minLength": 1
+        },
+        "class": {
+          "enum": [
+            "not-executed",
+            "failed"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "rules": {
+      "$ref": "#/$defs/ruleIds",
+      "minItems": 1
+    },
+    "also_fails": {
+      "$ref": "#/$defs/ruleIds"
+    },
+    "specification_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expected": {
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "documents": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario": {
+      "$ref": "#/$defs/scenario"
+    }
+  },
+  "required": [
+    "rules",
+    "specification_version",
+    "expected"
+  ],
+  "additionalProperties": false,
+  "if": {
+    "properties": {
+      "expected": {
+        "const": "fail"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "reason"
+    ]
+  }
+}

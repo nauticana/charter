@@ -1,0 +1,27 @@
+rules: [CHR-RULE-RT-006]
+specification_version: draft
+expected: fail
+reason: The acting agent identity is suspended at the action time; a conforming runtime denies before evaluating authority
+documents: ../suspended-actor
+scenario:
+  namespace: fixture.example
+  enterprise: ENT-FX
+  invocation:
+    actor: {kind: AgentIdentity, id: AGENT-FX}
+    runtime: RT-FX
+    execution_context_id: EX-FX
+    assignment: ASGN-FX
+    capability: CAP-FX
+    contract_version: "1"
+    resource_scope: fixture
+    organizational_context: OU-ROOT
+    approved_action: CAP-FX
+    material_inputs_digest: sha256:fx
+    subjects: [{kind: CapabilityContract, id: CAP-FX}]
+    idempotency_key: K-1
+    at: 2026-06-18T17:00:00Z
+  steps:
+    - name: suspended identity acts
+      invoke: {}
+      transport: {outcome: done}
+      expect: {status: denied, requirement: CHR-ID-005, transport_calls: 0, evidence: true}

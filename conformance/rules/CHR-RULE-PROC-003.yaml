@@ -1,0 +1,11 @@
+id: CHR-RULE-PROC-003
+title: Task instances run tasks of their process instance's process
+requirements: [CHR-PROC-005]
+profile: core-model
+verification: semantic
+applies_to: [TaskInstance]
+check: >-
+  For every TaskInstance whose taskId and processInstanceId resolve, Task.processId and ProcessInstance.processId name the same BusinessProcess.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/task-of-other-process

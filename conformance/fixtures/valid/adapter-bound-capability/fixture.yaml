@@ -1,0 +1,20 @@
+rules: [CHR-RULE-SA-004]
+specification_version: draft
+expected: pass
+documents: ../../../../examples/harbor-manufacturing/instances
+scenario:
+  namespace: harbor.example
+  enterprise: ENT-HARBOR
+  binding: BIND-S4-RESERVE-ORDER-STOCK-1
+  request:
+    capability: CAP-RESERVE-ORDER-STOCK
+    contract_version: "1"
+    required_features: [reservation-create]
+    idempotency_key: IDEMP-0042-1
+    inputs: {order: ORD-2026-0173, line: "10", quantity: 30}
+    subjects: [{kind: ProcessInstance, id: PROCINST-OE-2026-0042}]
+  steps:
+    - name: supported feature, vendor reserves
+      request: {}
+      vendor: {result: {status: reserved, reference: "0000088421"}}
+      expect: {result: outcome, outcome: reserved, reference: "0000088421", vendor_calls: 1}

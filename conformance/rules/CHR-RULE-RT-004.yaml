@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-004
+title: Only declared outcomes and business errors are reported
+requirements: [CHR-CAP-001, CHR-CAP-005, CHR-SEC-007]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  A declared business error is reported as a business error with evidence; an outcome the contract does not declare is reported as unknown, never as success.
+fixtures:
+  valid: fixtures/valid/declared-business-error
+  invalid: fixtures/invalid/undeclared-outcome

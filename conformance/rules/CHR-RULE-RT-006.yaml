@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-006
+title: Inactive identities initiate no governed action
+requirements: [CHR-ID-005, CHR-SEC-009]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  An active identity's invocation proceeds to authority evaluation; a suspended identity's invocation is denied before authority is evaluated, with the transport never called and the denial recorded.
+fixtures:
+  valid: fixtures/valid/active-actor
+  invalid: fixtures/invalid/suspended-actor-refused

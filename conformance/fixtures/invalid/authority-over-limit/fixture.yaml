@@ -1,0 +1,36 @@
+rules: [CHR-RULE-RT-001]
+specification_version: draft
+expected: fail
+reason: The reservation value exceeds the grant's limit; a conforming runtime denies before any external call and records the denied evaluation
+documents: ../../../../examples/harbor-manufacturing/instances
+scenario:
+  namespace: harbor.example
+  enterprise: ENT-HARBOR
+  invocation:
+    actor: {kind: AgentIdentity, id: AGENT-ORDER-EXCEPTION-COORDINATOR}
+    runtime: RT-OEC-PROD-01
+    execution_context_id: EXEC-OE-0042-05
+    assignment: ASGN-OEC-ORDER-EXCEPTION-SUPPORT
+    capability: CAP-RESERVE-ORDER-STOCK
+    contract_version: "1"
+    required_features: [reservation-create]
+    resource_scope: order exceptions assigned to the agent
+    organizational_context: OU-SALES-OPERATIONS
+    approved_action: CAP-APPROVE-CREDIT-EXCEPTION
+    material_inputs_digest: sha256:4f1d2a9c7b3e5d6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f
+    subjects: [{kind: ProcessInstance, id: PROCINST-OE-2026-0042}]
+    idempotency_key: IDEMP-0042-1
+    at: 2026-06-18T17:12:30Z
+    measures:
+      reservation-value: {value: 1850000, currency: USD, currency_exponent: 2}
+      reservation-duration: {value: 48, unit: hour}
+      credit-exposure: {value: 1850000, currency: USD, currency_exponent: 2}
+  steps:
+    - name: value over the grant limit
+      invoke:
+        measures:
+          reservation-value: {value: 2700000, currency: USD, currency_exponent: 2}
+          reservation-duration: {value: 48, unit: hour}
+          credit-exposure: {value: 1850000, currency: USD, currency_exponent: 2}
+      transport: {outcome: reserved}
+      expect: {status: denied, requirement: CHR-AUTH-010, authority: denied, transport_calls: 0, evidence: true}

@@ -41,6 +41,9 @@
     { "kind": "Escalation", "id": "https://nauticana.github.io/charter/schema/evidence/escalation.schema.json", "path": "evidence/escalation.schema.json" },
     { "kind": "InformationDefinition", "id": "https://nauticana.github.io/charter/schema/information/information_definition.schema.json", "path": "information/information_definition.schema.json" },
     { "kind": "InformationGovernancePolicy", "id": "https://nauticana.github.io/charter/schema/information/information_governance_policy.schema.json", "path": "information/information_governance_policy.schema.json" },
-    { "kind": "ConformanceClaim", "id": "https://nauticana.github.io/charter/schema/conformance/conformance_claim.schema.json", "path": "conformance/conformance_claim.schema.json" }
+    { "kind": "ConformanceClaim", "id": "https://nauticana.github.io/charter/schema/conformance/conformance_claim.schema.json", "path": "conformance/conformance_claim.schema.json" },
+    { "name": "conformance-manifest", "id": "https://nauticana.github.io/charter/schema/conformance/manifest.schema.json", "path": "conformance/manifest.schema.json" },
+    { "name": "conformance-rule-definition", "id": "https://nauticana.github.io/charter/schema/conformance/rule_definition.schema.json", "path": "conformance/rule_definition.schema.json" },
+    { "name": "conformance-fixture-descriptor", "id": "https://nauticana.github.io/charter/schema/conformance/fixture_descriptor.schema.json", "path": "conformance/fixture_descriptor.schema.json" }
   ]
 }

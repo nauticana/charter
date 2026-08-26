@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-003
+title: Mutating capabilities are idempotent and unknown outcomes block retries
+requirements: [CHR-CAP-004, CHR-SEC-008]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  A replay of an executed idempotency key returns the prior result without calling the transport again; after an unknown external outcome the runtime reports unknown and refuses to re-execute the key until reconciled.
+fixtures:
+  valid: fixtures/valid/idempotent-replay
+  invalid: fixtures/invalid/unknown-outcome-blocks-retry

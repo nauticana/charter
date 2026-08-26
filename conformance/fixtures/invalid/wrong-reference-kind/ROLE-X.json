@@ -1,0 +1,11 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "Role",
+  "id": "ROLE-X",
+  "name": "x",
+  "responsibilityIds": [
+    "OU-ROOT"
+  ]
+}

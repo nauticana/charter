@@ -1,0 +1,16 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "AgentRuntime",
+  "id": "RT-FX",
+  "name": "rt",
+  "agentIdentityId": "AGENT-FX",
+  "agentDefinitionId": "AGENTDEF-FX",
+  "definitionVersion": "1",
+  "lifecycleState": "active",
+  "operator": {
+    "kind": "OrganizationUnit",
+    "id": "OU-ROOT"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "SodConstraint",
+  "id": "SOD-FX",
+  "constrainedActions": [
+    "CAP-PREP",
+    "CAP-FX"
+  ]
+}

@@ -1,0 +1,25 @@
+rules: [CHR-RULE-SA-002]
+specification_version: draft
+expected: fail
+reason: The vendor fails after the request was sent, then before it could be sent; a conforming adapter reports unknown and not-executed respectively, never a business error or success
+documents: ../../../../examples/harbor-manufacturing/instances
+scenario:
+  namespace: harbor.example
+  enterprise: ENT-HARBOR
+  binding: BIND-S4-RESERVE-ORDER-STOCK-1
+  request:
+    capability: CAP-RESERVE-ORDER-STOCK
+    contract_version: "1"
+    required_features: [reservation-create]
+    idempotency_key: IDEMP-0042-1
+    inputs: {order: ORD-2026-0173, line: "10", quantity: 30}
+    subjects: [{kind: ProcessInstance, id: PROCINST-OE-2026-0042}]
+  steps:
+    - name: failure after sending
+      request: {}
+      vendor: {error: gateway timeout}
+      expect: {result: unknown, vendor_calls: 1}
+    - name: failure before sending
+      request: {}
+      vendor: {error: connection refused, class: not-executed}
+      expect: {result: not-executed, vendor_calls: 2}

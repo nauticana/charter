@@ -1,0 +1,11 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "EvidenceRecord",
+  "id": "EVR-B",
+  "category": "observed-fact",
+  "content": "c",
+  "recordedAt": "2026-06-18T17:00:00Z",
+  "supersedes": "EVR-A"
+}

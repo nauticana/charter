@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nauticana/charter/sdk/authority"
 	"github.com/nauticana/charter/sdk/corpus"
+	"github.com/nauticana/charter/sdk/identity"
 	"github.com/nauticana/charter/sdk/model"
 	"github.com/nauticana/charter/sdk/temporal"
 )
@@ -42,34 +44,14 @@ func (r ActiveActorRule) Validate(c *corpus.Corpus) []Finding {
 }
 
 func identityStateAt(d *model.Document, at time.Time) (string, error) {
-	var identity struct {
+	var id struct {
 		LifecycleState   string                      `json:"lifecycleState"`
 		LifecycleHistory []model.LifecycleTransition `json:"lifecycleHistory"`
 	}
-	if err := json.Unmarshal(d.Raw, &identity); err != nil {
+	if err := json.Unmarshal(d.Raw, &id); err != nil {
 		return "", err
 	}
-	if len(identity.LifecycleHistory) == 0 {
-		return "", fmt.Errorf("lifecycleHistory is missing")
-	}
-	state := ""
-	var previous time.Time
-	for _, transition := range identity.LifecycleHistory {
-		if transition.EffectiveAt.IsZero() || (!previous.IsZero() && !transition.EffectiveAt.After(previous)) {
-			return "", fmt.Errorf("lifecycleHistory is not strictly ordered")
-		}
-		previous = transition.EffectiveAt
-		if !transition.EffectiveAt.After(at) {
-			state = transition.State
-		}
-	}
-	if identity.LifecycleState != identity.LifecycleHistory[len(identity.LifecycleHistory)-1].State {
-		return "", fmt.Errorf("current lifecycleState differs from latest transition")
-	}
-	if state == "" {
-		return "", fmt.Errorf("no transition is effective at action time")
-	}
-	return state, nil
+	return identity.Lifecycle{Current: id.LifecycleState, History: id.LifecycleHistory}.StateAt(at)
 }
 
 func (r GrantEffectiveRule) Validate(c *corpus.Corpus) []Finding {
@@ -148,4 +130,36 @@ func effectiveRefNamespace(owner, explicit string) string {
 		return explicit
 	}
 	return owner
+}
+
+// SodApprovalRule finds approvals whose approver performed a constrained action on the same subjects (CHR-AUTH-007).
+type SodApprovalRule struct{ AbstractRule }
+
+var _ Rule = SodApprovalRule{}
+
+func (r SodApprovalRule) Validate(c *corpus.Corpus) []Finding {
+	constraints := allOf[model.SodConstraint](c, model.KindSodConstraint)
+	if len(constraints) == 0 {
+		return nil
+	}
+	var out []Finding
+	actions := r.actions(c)
+	evaluator := authority.SodEvaluator{Scopes: authority.ExactSodScopeMatcher{}}
+	for _, p := range allOf[model.Approval](c, model.KindApproval) {
+		approver := corpus.ObjectKeyOf(p.Namespace, p.Approver)
+		var performed []authority.SodAction
+		for _, a := range actions {
+			if a.Actor.Kind == p.Approver.Kind && corpus.ObjectKeyOf(a.Namespace, a.Actor) == approver && authority.Performed(a) {
+				performed = append(performed, authority.SodAction{Namespace: a.Namespace, Capability: a.CapabilityID, Scope: authority.SubjectScope(a.Namespace, a.SubjectRefs)})
+			}
+		}
+		proposed := authority.SodAction{Namespace: p.Namespace, Capability: model.Ref{ID: p.ApprovedAction}, Scope: authority.SubjectScope(p.Namespace, p.SubjectRefs)}
+		ref, conflict, err := evaluator.Conflict(constraints, performed, proposed)
+		if err != nil {
+			out = append(out, r.finding(p.Namespace, p.ID, err.Error()))
+		} else if conflict {
+			out = append(out, r.finding(p.Namespace, p.ID, fmt.Sprintf("approver %s performed an action constrained by %s on the approved subjects", p.Approver.ID, ref.ID)))
+		}
+	}
+	return out
 }

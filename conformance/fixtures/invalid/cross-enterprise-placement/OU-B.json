@@ -1,0 +1,8 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-B",
+  "kind": "OrganizationUnit",
+  "id": "OU-B",
+  "name": "OU-B"
+}

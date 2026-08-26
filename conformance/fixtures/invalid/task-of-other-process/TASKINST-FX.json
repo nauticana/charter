@@ -1,0 +1,18 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "TaskInstance",
+  "id": "TASKINST-FX",
+  "processInstanceId": "PROCINST-FX",
+  "taskId": "TASK-FX",
+  "taskDefinitionVersion": "1",
+  "performer": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-FX"
+  },
+  "assignmentId": "ASGN-FX",
+  "participation": "approves",
+  "state": "pending",
+  "createdAt": "2026-06-18T17:00:00Z"
+}

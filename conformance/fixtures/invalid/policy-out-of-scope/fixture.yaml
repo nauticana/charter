@@ -1,0 +1,4 @@
+rules: [CHR-RULE-INFO-001]
+specification_version: draft
+expected: fail
+reason: INFO-A declares POL-FX, but the policy's scope lists only INFO-B

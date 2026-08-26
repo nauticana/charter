@@ -1,0 +1,37 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "CapabilityContract",
+  "id": "CAP-PREP",
+  "name": "CAP-PREP",
+  "purpose": "fixture",
+  "operationClass": "propose",
+  "contractVersion": "1",
+  "inputs": [
+    "x"
+  ],
+  "outputs": [
+    "y"
+  ],
+  "preconditions": [],
+  "outcomes": [
+    "proposed"
+  ],
+  "businessErrors": [],
+  "requiredAuthority": "grant",
+  "constraints": {
+    "approvalRequired": false,
+    "sodConstraintIds": [
+      "SOD-FX"
+    ],
+    "limits": []
+  },
+  "idempotency": {
+    "mutating": false,
+    "retrySemantics": "repeatable"
+  },
+  "evidenceRequirements": [
+    "outcome"
+  ]
+}

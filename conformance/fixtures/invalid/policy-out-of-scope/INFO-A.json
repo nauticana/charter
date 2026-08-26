@@ -1,0 +1,17 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "InformationDefinition",
+  "id": "INFO-A",
+  "name": "INFO-A",
+  "businessMeaning": "m",
+  "ownerOrSteward": {
+    "kind": "OrganizationUnit",
+    "id": "OU-ROOT"
+  },
+  "classification": "internal",
+  "governancePolicyIds": [
+    "POL-FX"
+  ]
+}

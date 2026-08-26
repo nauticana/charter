@@ -1,0 +1,11 @@
+id: CHR-RULE-AGENT-002
+title: Agent actions use capabilities their definition declares
+requirements: [CHR-AGENT-003]
+profile: core-model
+verification: semantic
+applies_to: [ActionRecord]
+check: >-
+  For every ActionRecord whose actor is an AgentIdentity, the AgentDefinition operated by the cited runtime lists the record's capabilityId.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/undeclared-capability

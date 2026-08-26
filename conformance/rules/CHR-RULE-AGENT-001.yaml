@@ -1,0 +1,11 @@
+id: CHR-RULE-AGENT-001
+title: Agent actions cite a runtime acting as the actor
+requirements: [CHR-AGENT-006]
+profile: core-model
+verification: semantic
+applies_to: [ActionRecord]
+check: >-
+  For every ActionRecord whose actor is an AgentIdentity and whose runtimeInstanceId resolves to an AgentRuntime, the runtime's agentIdentityId is the actor, and the definition it operates belongs to the actor.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/runtime-of-other-agent

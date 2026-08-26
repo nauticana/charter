@@ -14,12 +14,33 @@ profiles:
       - CHR-RULE-ID-001
       - CHR-RULE-AUTH-001
       - CHR-RULE-AUTH-002
+      - CHR-RULE-CONF-002
+      - CHR-RULE-ENT-005
+      - CHR-RULE-PROC-001
+      - CHR-RULE-PROC-002
+      - CHR-RULE-PROC-003
+      - CHR-RULE-ARCH-001
+      - CHR-RULE-INFO-001
+      - CHR-RULE-EVID-001
+      - CHR-RULE-AGENT-001
+      - CHR-RULE-AGENT-002
+      - CHR-RULE-AUTH-003
   - id: agent-runtime
-    status: planned
-    rules: []
+    status: active
+    rules:
+      - CHR-RULE-RT-001
+      - CHR-RULE-RT-002
+      - CHR-RULE-RT-003
+      - CHR-RULE-RT-004
+      - CHR-RULE-RT-005
+      - CHR-RULE-RT-006
   - id: system-adapter
-    status: planned
-    rules: []
+    status: active
+    rules:
+      - CHR-RULE-SA-001
+      - CHR-RULE-SA-002
+      - CHR-RULE-SA-003
+      - CHR-RULE-SA-004
 rules:
   - id: CHR-RULE-ENT-001
     status: active
@@ -45,3 +66,66 @@ rules:
   - id: CHR-RULE-AUTH-002
     status: active
     path: rules/CHR-RULE-AUTH-002.yaml
+  - id: CHR-RULE-CONF-002
+    status: active
+    path: rules/CHR-RULE-CONF-002.yaml
+  - id: CHR-RULE-ENT-005
+    status: active
+    path: rules/CHR-RULE-ENT-005.yaml
+  - id: CHR-RULE-PROC-001
+    status: active
+    path: rules/CHR-RULE-PROC-001.yaml
+  - id: CHR-RULE-PROC-002
+    status: active
+    path: rules/CHR-RULE-PROC-002.yaml
+  - id: CHR-RULE-PROC-003
+    status: active
+    path: rules/CHR-RULE-PROC-003.yaml
+  - id: CHR-RULE-ARCH-001
+    status: active
+    path: rules/CHR-RULE-ARCH-001.yaml
+  - id: CHR-RULE-INFO-001
+    status: active
+    path: rules/CHR-RULE-INFO-001.yaml
+  - id: CHR-RULE-EVID-001
+    status: active
+    path: rules/CHR-RULE-EVID-001.yaml
+  - id: CHR-RULE-AGENT-001
+    status: active
+    path: rules/CHR-RULE-AGENT-001.yaml
+  - id: CHR-RULE-AGENT-002
+    status: active
+    path: rules/CHR-RULE-AGENT-002.yaml
+  - id: CHR-RULE-AUTH-003
+    status: active
+    path: rules/CHR-RULE-AUTH-003.yaml
+  - id: CHR-RULE-RT-001
+    status: active
+    path: rules/CHR-RULE-RT-001.yaml
+  - id: CHR-RULE-RT-002
+    status: active
+    path: rules/CHR-RULE-RT-002.yaml
+  - id: CHR-RULE-RT-003
+    status: active
+    path: rules/CHR-RULE-RT-003.yaml
+  - id: CHR-RULE-RT-004
+    status: active
+    path: rules/CHR-RULE-RT-004.yaml
+  - id: CHR-RULE-RT-005
+    status: active
+    path: rules/CHR-RULE-RT-005.yaml
+  - id: CHR-RULE-RT-006
+    status: active
+    path: rules/CHR-RULE-RT-006.yaml
+  - id: CHR-RULE-SA-001
+    status: active
+    path: rules/CHR-RULE-SA-001.yaml
+  - id: CHR-RULE-SA-002
+    status: active
+    path: rules/CHR-RULE-SA-002.yaml
+  - id: CHR-RULE-SA-003
+    status: active
+    path: rules/CHR-RULE-SA-003.yaml
+  - id: CHR-RULE-SA-004
+    status: active
+    path: rules/CHR-RULE-SA-004.yaml

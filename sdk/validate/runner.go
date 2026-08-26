@@ -1,6 +1,7 @@
 package validate
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"slices"
@@ -10,19 +11,25 @@ import (
 )
 
 type FixtureResult struct {
-	Dir      string
-	Expected string
-	Passed   bool
-	Detail   string
-	Findings []Finding
+	Dir      string    `json:"dir"`
+	Expected string    `json:"expected"`
+	Passed   bool      `json:"passed"`
+	Detail   string    `json:"detail,omitempty"`
+	Findings []Finding `json:"findings,omitempty"`
 }
 
-// Runner executes fixtures against the structural validator and the active rules.
+// Runner executes fixtures against the structural validator, the semantic rules, and, through the Subject, the
+// runtime-behavioral rules; a nil Subject leaves behavioral rules untested.
 type Runner struct {
 	Structural *Structural
 	Rules      RuleSet
+	Behavioral BehavioralRuleSet
+	Subject    Subject
+	Adapter    AdapterSubject
 	Manifest   ManifestReader
 }
+
+func (r *Runner) subjects() Subjects { return Subjects{Runtime: r.Subject, Adapter: r.Adapter} }
 
 func NewRunner(confDir string) (*Runner, error) {
 	s, err := NewStructural()
@@ -33,11 +40,12 @@ func NewRunner(confDir string) (*Runner, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Runner{Structural: s, Rules: rules, Manifest: ManifestReader{Dir: confDir}}, nil
+	return &Runner{Structural: s, Rules: rules, Behavioral: NewBehavioralRuleSet(), Subject: ReferenceSubject{}, Adapter: ReferenceAdapter{}, Manifest: ManifestReader{Dir: confDir}}, nil
 }
 
-// RunFixture evaluates one fixture directory: a valid fixture must produce no findings for its rules;
-// an invalid fixture must fail every declared rule and no undeclared rule. Every document must be schema-valid.
+// RunFixture evaluates one fixture directory: a valid fixture must produce no findings for its rules; an invalid fixture
+// must fail every declared rule and no undeclared rule; a scenario fixture must see the Subject behave as expected.
+// Every document must be schema-valid.
 func (r *Runner) RunFixture(dir string) (FixtureResult, error) {
 	res := FixtureResult{Dir: dir}
 	fx, err := r.Manifest.Fixture(dir)
@@ -63,6 +71,9 @@ func (r *Runner) RunFixture(dir string) (FixtureResult, error) {
 	if sf := r.Structural.Validate(c); len(sf) > 0 {
 		res.Findings, res.Detail = sf, "documents are not schema-valid"
 		return res, nil
+	}
+	if fx.Scenario != nil {
+		return r.runScenario(res, dir, fx, c)
 	}
 	declared := map[string]bool{}
 	for _, id := range append(append([]string{}, fx.Rules...), fx.AlsoFails...) {
@@ -106,7 +117,26 @@ func (r *Runner) RunFixture(dir string) (FixtureResult, error) {
 	return res, nil
 }
 
-// RunManifest executes every fixture referenced by the active rules of the manifest.
+func (r *Runner) runScenario(res FixtureResult, dir string, fx *FixtureDescriptor, c *corpus.Corpus) (FixtureResult, error) {
+	for _, id := range fx.Rules {
+		rule, ok := r.Behavioral[id]
+		if !ok {
+			return res, fmt.Errorf("%s: fixture declares unknown behavioral rule %s", dir, id)
+		}
+		if !r.subjects().Has(rule.Kind) {
+			return res, fmt.Errorf("%s: scenario fixture needs a %s under test", dir, rule.Kind)
+		}
+		res.Findings = append(res.Findings, rule.Run(context.Background(), r.subjects(), c, fx.Scenario)...)
+	}
+	if len(res.Findings) > 0 {
+		res.Detail = "subject deviated from the scenario"
+		return res, nil
+	}
+	res.Passed = true
+	return res, nil
+}
+
+// RunManifest executes every fixture referenced by the active rules of the manifest; behavioral fixtures run only with a Subject.
 func (r *Runner) RunManifest() ([]FixtureResult, error) {
 	m, err := r.Manifest.Manifest()
 	if err != nil {
@@ -138,11 +168,6 @@ func (r *Runner) RunManifest() ([]FixtureResult, error) {
 		if entry.Status != "active" {
 			continue
 		}
-		implementation, ok := r.Rules[entry.ID]
-		if !ok {
-			return nil, fmt.Errorf("active rule %s has no implementation", entry.ID)
-		}
-		activeEntries[entry.ID] = true
 		def, err := r.Manifest.RuleDefinition(entry.Path)
 		if err != nil {
 			return nil, err
@@ -150,18 +175,38 @@ func (r *Runner) RunManifest() ([]FixtureResult, error) {
 		if def.ID != entry.ID {
 			return nil, fmt.Errorf("active rule %s definition declares %s", entry.ID, def.ID)
 		}
-		if def.Verification != string(ClassSemantic) {
-			return nil, fmt.Errorf("active rule %s implementation is semantic but definition declares %s", entry.ID, def.Verification)
+		var implementationRequirements []string
+		testable := true
+		switch def.Verification {
+		case string(ClassSemantic):
+			implementation, ok := r.Rules[entry.ID]
+			if !ok {
+				return nil, fmt.Errorf("active semantic rule %s has no implementation", entry.ID)
+			}
+			implementationRequirements = implementation.Requirements()
+		case string(ClassBehavioral):
+			implementation, ok := r.Behavioral[entry.ID]
+			if !ok {
+				return nil, fmt.Errorf("active behavioral rule %s has no implementation", entry.ID)
+			}
+			implementationRequirements = implementation.Requirements()
+			testable = r.subjects().Has(implementation.Kind)
+		default:
+			return nil, fmt.Errorf("active rule %s declares unsupported verification %s", entry.ID, def.Verification)
 		}
+		activeEntries[entry.ID] = true
 		if !activeProfiles[def.Profile][entry.ID] {
 			return nil, fmt.Errorf("active rule %s is not listed by active profile %s", entry.ID, def.Profile)
 		}
 		definitionRequirements := append([]string{}, def.Requirements...)
-		implementationRequirements := append([]string{}, implementation.Requirements()...)
+		implementationRequirements = append([]string{}, implementationRequirements...)
 		slices.Sort(definitionRequirements)
 		slices.Sort(implementationRequirements)
 		if !slices.Equal(definitionRequirements, implementationRequirements) {
 			return nil, fmt.Errorf("active rule %s requirement citations differ between definition and implementation", entry.ID)
+		}
+		if !testable {
+			continue
 		}
 		dirs[filepath.Join(r.Manifest.Dir, def.Fixtures.Valid)] = true
 		dirs[filepath.Join(r.Manifest.Dir, def.Fixtures.Invalid)] = true

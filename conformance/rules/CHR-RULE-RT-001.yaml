@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-001
+title: Authority is evaluated at the action boundary
+requirements: [CHR-AUTH-002, CHR-AUTH-008, CHR-AUTH-010, CHR-SEC-003, CHR-EVID-002]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  The runtime evaluates the actor's grant, limits, and context before any external call: an invocation within limits executes with the grant cited in its action record, and one over a limit is denied with the denied evaluation recorded and the transport never called.
+fixtures:
+  valid: fixtures/valid/governed-execution
+  invalid: fixtures/invalid/authority-over-limit

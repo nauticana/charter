@@ -1,0 +1,38 @@
+package validate
+
+import (
+	"context"
+
+	"github.com/nauticana/charter/sdk/agent"
+	"github.com/nauticana/charter/sdk/authority"
+	"github.com/nauticana/charter/sdk/binding"
+	"github.com/nauticana/charter/sdk/capability"
+	"github.com/nauticana/charter/sdk/corpus"
+	"github.com/nauticana/charter/sdk/evidence"
+	"github.com/nauticana/charter/sdk/identity"
+	"github.com/nauticana/charter/sdk/organization"
+)
+
+// ReferenceSubject is the SDK's own runtime: the invoker, admission, evaluators, ledger, and evidence sink composed over
+// the scenario documents. It is the subject the manifest runs against unless an implementation supplies its own.
+type ReferenceSubject struct{}
+
+var _ Subject = ReferenceSubject{}
+
+func (ReferenceSubject) Compose(_ context.Context, documents corpus.Source, transport binding.Executor) (Runtime, error) {
+	sink := evidence.NewBaseMemorySink()
+	invoker := &capability.AbstractInvoker{
+		Catalog:    capability.NewBaseCatalog(documents),
+		Identities: identity.NewBaseResolver(documents),
+		Authority:  &authority.AbstractEvaluator{Source: authority.NewDocumentGrantSource(documents)},
+		Approvals:  &authority.AbstractApprovalGate{Source: authority.NewDocumentApprovalSource(documents)},
+		Sod:        capability.NewBaseSodChecker(documents, evidence.NewBaseProvider(sink.Store)),
+		Bindings:   binding.NewBaseProvider(documents),
+		Transport:  transport,
+		Ledger:     capability.NewBaseMemoryLedger(),
+		Evidence:   sink,
+		IDs:        &capability.BaseCounterIDs{Prefix: "RT-"},
+	}
+	admission := &agent.BaseAdmission{Agents: agent.NewBaseProvider(documents), Assignments: organization.NewBaseProvider(documents)}
+	return Runtime{Admission: admission, Invoker: invoker, Evidence: evidence.NewBaseProvider(sink.Store)}, nil
+}

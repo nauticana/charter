@@ -1,0 +1,11 @@
+{
+  "charterSpecVersion": "draft",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "ProcessInstance",
+  "id": "PROCINST-FX",
+  "processId": "PROC-FX",
+  "processDefinitionVersion": "1",
+  "state": "running",
+  "createdAt": "2026-06-18T17:00:00Z"
+}

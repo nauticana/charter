@@ -1,0 +1,21 @@
+rules: [CHR-RULE-SA-004]
+specification_version: draft
+expected: fail
+reason: The request names a capability the binding does not realize; a conforming adapter refuses before calling the vendor
+documents: ../../../../examples/harbor-manufacturing/instances
+scenario:
+  namespace: harbor.example
+  enterprise: ENT-HARBOR
+  binding: BIND-S4-RESERVE-ORDER-STOCK-1
+  request:
+    capability: CAP-RESERVE-ORDER-STOCK
+    contract_version: "1"
+    required_features: [reservation-create]
+    idempotency_key: IDEMP-0042-1
+    inputs: {order: ORD-2026-0173, line: "10", quantity: 30}
+    subjects: [{kind: ProcessInstance, id: PROCINST-OE-2026-0042}]
+  steps:
+    - name: capability not realized by the binding
+      request: {capability: CAP-READ-ORDER-EXCEPTION, required_features: []}
+      vendor: {result: {status: facts-returned}}
+      expect: {result: not-executed, vendor_calls: 0}
