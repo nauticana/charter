@@ -33,7 +33,7 @@ const (
 var at = time.Date(2026, 6, 18, 17, 12, 30, 0, time.UTC)
 
 func oauthContext(claims map[string]any) context.Context {
-	p := &port.Principal{Subject: "sub-42", Scopes: []string{"orders:write", "orders:read"}, Claims: claims}
+	p := &kmodel.TokenPrincipal{Subject: "sub-42", Scopes: []string{"orders:write", "orders:read"}, Claims: claims}
 	ctx := context.WithValue(context.Background(), common.AuthPrincipal, p)
 	ctx = context.WithValue(ctx, common.Subject, p.Subject)
 	ctx = context.WithValue(ctx, common.Scopes, strings.Join(p.Scopes, " "))
@@ -425,7 +425,7 @@ func TestGateAtHTTPTableActionAndWorkerBoundaries(t *testing.T) {
 	gate.Now = func() time.Time { return at }
 
 	// A worker binds the principal it claimed with the job, then checks the gate before invoking.
-	job := JobContext(context.Background(), &port.Principal{Subject: "sub-42", Claims: agentClaims()}, 7, "aB3dE5fG7hJ9")
+	job := JobContext(context.Background(), &kmodel.TokenPrincipal{Subject: "sub-42", Claims: agentClaims()}, 7, "aB3dE5fG7hJ9")
 	clearance, err := gate.Check(job, reserve)
 	if err != nil || clearance.Session.PartnerID != 7 || clearance.Session.RequestID != "aB3dE5fG7hJ9" {
 		t.Errorf("worker clearance: %+v %v", clearance, err)

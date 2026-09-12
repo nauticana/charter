@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/nauticana/keel/common"
-	"github.com/nauticana/keel/port"
+	kmodel "github.com/nauticana/keel/model"
 
 	"github.com/nauticana/charter/sdk/model"
 )
@@ -22,7 +22,7 @@ var (
 
 // Session is what keel's middleware established for the request: OAuth principal, subject, tenant, credential, scopes, and correlation id.
 type Session struct {
-	Principal *port.Principal
+	Principal *kmodel.TokenPrincipal
 	Subject   string
 	PartnerID int64
 	APIKeyID  int64
@@ -33,7 +33,7 @@ type Session struct {
 // SessionFromContext reads the values keel's OAuth and API-key middlewares bind; an unauthenticated context fails closed (CHR-SEC-001).
 func SessionFromContext(ctx context.Context) (Session, error) {
 	s := Session{RequestID: common.RequestIDFromContext(ctx)}
-	s.Principal, _ = ctx.Value(common.AuthPrincipal).(*port.Principal)
+	s.Principal, _ = ctx.Value(common.AuthPrincipal).(*kmodel.TokenPrincipal)
 	s.Subject, _ = ctx.Value(common.Subject).(string)
 	s.PartnerID, _ = ctx.Value(common.PartnerID).(int64)
 	s.APIKeyID, _ = ctx.Value(common.ApiKeyID).(int64)

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/nauticana/keel/common"
-	"github.com/nauticana/keel/port"
+	kmodel "github.com/nauticana/keel/model"
 
 	"github.com/nauticana/charter/sdk/authority"
 	"github.com/nauticana/charter/sdk/corpus"
@@ -161,7 +161,7 @@ func (g *Gate) serve(w http.ResponseWriter, r *http.Request, cap Gated, next htt
 
 // JobContext binds the principal and correlation id a background job acts under, since no middleware runs there;
 // the worker reads them from the job it claimed and then checks the gate or invokes the capability (CHR-AGENT-006).
-func JobContext(ctx context.Context, principal *port.Principal, partnerID int64, requestID string) context.Context {
+func JobContext(ctx context.Context, principal *kmodel.TokenPrincipal, partnerID int64, requestID string) context.Context {
 	if principal != nil {
 		ctx = context.WithValue(ctx, common.AuthPrincipal, principal)
 		ctx = context.WithValue(ctx, common.Subject, principal.Subject)

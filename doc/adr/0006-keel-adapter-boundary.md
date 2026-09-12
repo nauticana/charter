@@ -5,7 +5,7 @@ Date: 2026-08-25
 
 ## Context
 
-Keel is the backend framework beneath the reference runtime. The adapter was originally reviewed against v1.2.55 and is currently verified against v1.2.61. Those reviews concluded that keel already exposes the primitives a Charter adapter needs (principal and tenant context keys, `CheckActionPermission`, trust guards, the table change logger, message publishing, metrics, request ids) and that everything Charter-shaped belongs in Charter or an adapter. Charter's core must stay platform-free, and keel must never depend on Charter.
+Keel is the backend framework beneath the reference runtime. The adapter was originally reviewed against v1.2.55 and is currently verified against v1.2.62. Those reviews concluded that keel already exposes the primitives a Charter adapter needs (principal and tenant context keys, `CheckActionPermission`, trust guards, the table change logger, message publishing, metrics, request ids) and that everything Charter-shaped belongs in Charter or an adapter. Charter's core must stay platform-free, and keel must never depend on Charter.
 
 ## Decision
 
@@ -20,7 +20,7 @@ Keel is the backend framework beneath the reference runtime. The adapter was ori
 
 ## Consequences
 
-`go.mod` gains four modules. Nothing is requested from keel: tenant scoping on change rows arrived with keel v1.2.55, and compatibility through v1.2.61 requires no adapter code changes. Two generic pieces stay as upstream candidates once a project proves their shape: a pre-action port inside keel's generated CRUD and a queryable `port.TableLogger` destination (keel's filesystem logger is write-only, so `TableLogStore` refuses it). Scout composes these adapters; Charter ships no HTTP surface itself.
+`go.mod` gains four modules. Nothing is requested from keel: tenant scoping on change rows arrived with keel v1.2.55. Compatibility with v1.2.62 moves the OAuth token identity used by `Session` and `JobContext` from `port.Principal` to `model.TokenPrincipal`; Charter's authority model remains independent from keel's new grant-evaluation `model.Principal`. Two generic pieces stay as upstream candidates once a project proves their shape: a pre-action port inside keel's generated CRUD and a queryable `port.TableLogger` destination (keel's filesystem logger is write-only, so `TableLogStore` refuses it). Scout composes these adapters; Charter ships no HTTP surface itself.
 
 ## Specification impact
 

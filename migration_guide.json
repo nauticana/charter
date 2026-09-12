@@ -2,12 +2,21 @@
   "package": "github.com/nauticana/charter",
   "description": "Per-release compatibility and migration guidance for the Charter specification, schemas, conformance corpus, and Go reference SDK. Newest first. README.md documents the current state; this file is the versioned history GOVERNANCE.md requires of every release.",
   "field_notes": {
-    "version": "semantic version of the specification release and the Go module tag (v<version>)",
+    "version": "semantic version of the repository release and Go module tag (v<version>); the body identifies the supported specification and schema versions",
     "tags": "any of: additive, breaking",
     "summary": "one-paragraph lead",
     "body_markdown": "full guide in GitHub-flavored markdown"
   },
   "migrations": [
+    {
+      "version": "1.0.1",
+      "title": "Keel 1.2.62 compatibility",
+      "tags": [
+        "breaking"
+      ],
+      "summary": "Updates the optional Keel adapter from keel v1.2.61 to v1.2.62 and adopts Keel's renamed OAuth token identity type. The Charter specification, schema catalogue, conformance profiles, and runtime behavior are unchanged from 1.0.0.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`charterSpecVersion`, `x-charter-spec-version`) | 1.0.0 |\n| Schema catalogue (`catalogVersion`, `x-charter-schema-version`) | 1.0.0 |\n| Conformance manifest (`specification.version`) | 1.0.0 |\n| Go module `github.com/nauticana/charter` | v1.0.1 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.2.62 |\n\n## Compatibility impact\n\nThe normative Charter contract and all document formats remain compatible with 1.0.0. The optional Go adapter has one source-level migration caused by keel v1.2.62 moving OAuth token identity out of its interface-only `port` package:\n\n| Before | After |\n|---|---|\n| `*port.Principal` | `*model.TokenPrincipal` |\n| `Session.Principal *port.Principal` | `Session.Principal *model.TokenPrincipal` |\n| `JobContext(ctx, *port.Principal, ...)` | `JobContext(ctx, *model.TokenPrincipal, ...)` |\n\nThis token identity is distinct from keel's new `model.Principal`, which represents the subject of a database grant decision. Charter's authority model remains platform-neutral and is unchanged.\n\n## Adoption\n\n1. Upgrade with `go get github.com/nauticana/charter@v1.0.1`.\n2. If using `sdk/adapter/keel`, upgrade keel to v1.2.62.\n3. Replace constructed or referenced `port.Principal` values with `model.TokenPrincipal`; update imports from `github.com/nauticana/keel/port` to `github.com/nauticana/keel/model` where the token principal was the only port symbol used.\n4. Run the downstream test suite. No Charter documents, schemas, fixtures, or conformance claims require migration.\n"
+    },
     {
       "version": "1.0.0",
       "title": "First release",
