@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/nauticana/charter/sdk/model"
 )
@@ -53,5 +54,36 @@ func TestDelegationPolicy(t *testing.T) {
 	g.Delegation = &model.Delegation{MaxRedelegationDepth: 2}
 	if (DelegationPolicy{}).RemainingDepth(g) != 2 {
 		t.Error("delegation depth not reported")
+	}
+
+	at := time.Date(2026, 6, 18, 0, 0, 0, 0, time.UTC)
+	validity := &model.Validity{From: "2026-01-01", To: "2026-12-31"}
+	chain := model.AuthorityChain{
+		{GrantRef: model.Ref{ID: "GRANT-INNER"}, Delegator: model.ObjectRef{Kind: model.KindAgentIdentity, ID: "AGENT-PARENT"}, RemainingDepth: 0, Validity: validity},
+		{GrantRef: model.Ref{ID: "GRANT-OUTER"}, Delegator: model.ObjectRef{Kind: model.KindHumanIdentity, ID: "HUMAN-OWNER"}, RemainingDepth: 1, Validity: validity, ApprovalRequired: true},
+	}
+	policy := DelegationPolicy{}
+	if reason := policy.Check(chain, at, nil); reason != "" {
+		t.Errorf("valid chain: %q", reason)
+	}
+	if !policy.ApprovalRequired(chain) {
+		t.Error("delegated approval bound ignored")
+	}
+	invalidDepth := append(model.AuthorityChain(nil), chain...)
+	invalidDepth[0].RemainingDepth = 1
+	if reason := policy.Check(invalidDepth, at, nil); !strings.Contains(reason, "remaining depth") {
+		t.Errorf("widened depth accepted: %q", reason)
+	}
+	expired := append(model.AuthorityChain(nil), chain...)
+	expired[0].Validity = &model.Validity{From: "2025-01-01", To: "2025-12-31"}
+	if reason := policy.Check(expired, at, nil); !strings.Contains(reason, "not effective") {
+		t.Errorf("expired hop accepted: %q", reason)
+	}
+	two := 2
+	bounded := append(model.AuthorityChain(nil), chain...)
+	bounded[0].Limits = []model.Limit{{LimitKind: "delegated-budget", Operator: "lte", Value: int64(1000), Currency: "EUR", CurrencyExponent: &two}}
+	over := map[string]Measure{"delegated-budget": {Value: int64(1001), Currency: "EUR", CurrencyExponent: 2}}
+	if reason := policy.Check(bounded, at, over); !strings.Contains(reason, "delegated-budget") {
+		t.Errorf("delegated budget exceeded without refusal: %q", reason)
 	}
 }

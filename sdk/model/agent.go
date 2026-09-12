@@ -42,6 +42,20 @@ type Delegation struct {
 	MaxRedelegationDepth int       `json:"maxRedelegationDepth"`
 }
 
+// AuthorityChain is the presented delegation path, ordered from the immediate delegator to the original authority,
+// matching the nested actor shape of RFC 8693. It carries authority references and bounds, never credentials.
+type AuthorityChain []AuthorityHop
+
+// AuthorityHop is one verified delegation step and the bounds it conveys to the next actor.
+type AuthorityHop struct {
+	GrantRef         Ref       `json:"grantRef"`
+	Delegator        ObjectRef `json:"delegator"`
+	RemainingDepth   int       `json:"remainingDepth"`
+	Limits           []Limit   `json:"limits,omitempty"`
+	Validity         *Validity `json:"validity"`
+	ApprovalRequired bool      `json:"approvalRequired"`
+}
+
 type AuthorityGrant struct {
 	Envelope
 	Actor                 ObjectRef   `json:"actor"`

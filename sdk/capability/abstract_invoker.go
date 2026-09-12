@@ -24,6 +24,7 @@ type AbstractInvoker struct {
 	Identities  identity.Resolver
 	Authority   authority.Evaluator
 	Approvals   authority.ApprovalGate
+	Delegations authority.DelegationPolicy
 	Sod         SodChecker
 	Information information.Evaluator
 	Bindings    binding.Provider
@@ -77,7 +78,8 @@ func (r *run) execute(ctx context.Context) Result {
 		return r.deny(ctx, "actor: "+err.Error(), "CHR-ID-005")
 	}
 	r.result.Authority = i.Authority.Evaluate(ctx, authority.Request{Namespace: inv.Namespace, EnterpriseID: inv.EnterpriseID, Actor: inv.Actor,
-		CapabilityID: inv.CapabilityID, ResourceScope: inv.ResourceScope, At: inv.At, OrganizationalContext: inv.OrganizationalContext, Measures: inv.Measures})
+		CapabilityID: inv.CapabilityID, ResourceScope: inv.ResourceScope, At: inv.At, OrganizationalContext: inv.OrganizationalContext, Measures: inv.Measures,
+		AuthorityChain: inv.AuthorityChain})
 	switch r.result.Authority.Result {
 	case authority.Allowed:
 	case authority.Missing:
@@ -87,7 +89,7 @@ func (r *run) execute(ctx context.Context) Result {
 	default:
 		return r.deny(ctx, "authority: "+r.result.Authority.Reason, "CHR-AUTH-010")
 	}
-	if contract.Constraints.ApprovalRequired {
+	if contract.Constraints.ApprovalRequired || i.Delegations.ApprovalRequired(inv.AuthorityChain) {
 		if i.Approvals == nil {
 			return r.deny(ctx, "approval required but no approval gate is composed", "CHR-AUTH-009")
 		}
@@ -99,7 +101,8 @@ func (r *run) execute(ctx context.Context) Result {
 			action = inv.CapabilityID.ID
 		}
 		r.result.Approval = i.Approvals.Evaluate(ctx, authority.ApprovalRequest{Namespace: inv.Namespace, EnterpriseID: inv.EnterpriseID, Actor: inv.Actor,
-			ApprovedAction: action, MaterialInputsDigest: inv.MaterialInputsDigest, SubjectRefs: inv.SubjectRefs, At: inv.At, Measures: inv.Measures})
+			ApprovedAction: action, MaterialInputsDigest: inv.MaterialInputsDigest, SubjectRefs: inv.SubjectRefs, At: inv.At, Measures: inv.Measures,
+			AuthorityChain: inv.AuthorityChain})
 		if r.result.Approval.Result != authority.Approved {
 			return r.deny(ctx, "approval: "+r.result.Approval.Reason, "CHR-AUTH-009")
 		}

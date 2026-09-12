@@ -40,4 +40,5 @@ type Request struct {
 	At                    time.Time
 	OrganizationalContext string
 	Measures              map[string]Measure
+	AuthorityChain        model.AuthorityChain
 }

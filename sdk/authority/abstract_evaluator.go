@@ -11,8 +11,9 @@ import (
 
 // AbstractEvaluator implements validity, context, and typed-limit evaluation; embed it and supply a GrantSource.
 type AbstractEvaluator struct {
-	Source GrantSource
-	Limits LimitEvaluator
+	Source      GrantSource
+	Limits      LimitEvaluator
+	Delegations DelegationPolicy
 }
 
 var _ Evaluator = (*AbstractEvaluator)(nil)
@@ -20,6 +21,9 @@ var _ Evaluator = (*AbstractEvaluator)(nil)
 func (e *AbstractEvaluator) Evaluate(ctx context.Context, req Request) Decision {
 	if e.Source == nil {
 		return Decision{Result: Error, Reason: "no grant source"}
+	}
+	if reason := e.Delegations.Check(req.AuthorityChain, req.At, req.Measures); reason != "" {
+		return Decision{Result: Denied, Reason: reason}
 	}
 	grants, err := e.Source.Grants(ctx, req)
 	if err != nil {

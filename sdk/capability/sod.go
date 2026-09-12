@@ -15,11 +15,16 @@ type SodChecker interface {
 	Conflict(ctx context.Context, inv Invocation, constraints []model.Ref) (model.Ref, bool, error)
 }
 
-// BaseSodChecker evaluates the contract's constraints against the actor's authorized recorded actions, scoping by subjects.
+// BaseSodChecker evaluates the contract's constraints against the performed actions of the actor and every delegator, scoping by subjects.
 type BaseSodChecker struct {
 	Definitions corpus.AbstractDocumentProvider
 	Actions     evidence.Provider
 	Evaluator   authority.SodEvaluator
+}
+
+type actorKey struct {
+	Kind     model.Kind
+	Document corpus.DocumentKey
 }
 
 var _ SodChecker = (*BaseSodChecker)(nil)
@@ -43,14 +48,27 @@ func (c *BaseSodChecker) Conflict(ctx context.Context, inv Invocation, refs []mo
 		}
 		constraints = append(constraints, sc)
 	}
-	actions, err := (evidence.Queries{Provider: c.Actions}).ActionsBy(ctx, inv.Namespace, inv.Actor)
-	if err != nil {
-		return model.Ref{}, false, err
+	actors := []model.ObjectRef{inv.Actor}
+	for _, hop := range inv.AuthorityChain {
+		actors = append(actors, hop.Delegator)
 	}
+	queries := evidence.Queries{Provider: c.Actions}
+	seen := make(map[actorKey]bool, len(actors))
 	var performed []authority.SodAction
-	for _, a := range actions {
-		if authority.Performed(a) {
-			performed = append(performed, authority.SodAction{Namespace: a.Namespace, Capability: a.CapabilityID, Scope: authority.SubjectScope(a.Namespace, a.SubjectRefs)})
+	for _, actor := range actors {
+		key := actorKey{Kind: actor.Kind, Document: corpus.ObjectKeyOf(inv.Namespace, actor)}
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		actions, err := queries.ActionsBy(ctx, inv.Namespace, actor)
+		if err != nil {
+			return model.Ref{}, false, err
+		}
+		for _, a := range actions {
+			if authority.Performed(a) {
+				performed = append(performed, authority.SodAction{Namespace: a.Namespace, Capability: a.CapabilityID, Scope: authority.SubjectScope(a.Namespace, a.SubjectRefs)})
+			}
 		}
 	}
 	proposed := authority.SodAction{Namespace: inv.Namespace, Capability: inv.CapabilityID, Scope: authority.SubjectScope(inv.Namespace, inv.SubjectRefs)}

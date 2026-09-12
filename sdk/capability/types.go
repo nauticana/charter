@@ -40,6 +40,7 @@ type Invocation struct {
 	ResourceScope         string
 	OrganizationalContext string
 	Measures              map[string]authority.Measure
+	AuthorityChain        model.AuthorityChain
 	// ApprovedAction is the action class an approval must bind; empty means the capability id.
 	ApprovedAction       string
 	Inputs               any

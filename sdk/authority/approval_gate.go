@@ -27,6 +27,7 @@ type ApprovalRequest struct {
 	SubjectRefs          []model.ObjectRef
 	At                   time.Time
 	Measures             map[string]Measure
+	AuthorityChain       model.AuthorityChain
 }
 
 // ApprovalDecision is the structured, evidence-ready outcome of an approval evaluation.

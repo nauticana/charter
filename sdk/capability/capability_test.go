@@ -154,6 +154,37 @@ func TestGovernedExecutionAndReplay(t *testing.T) {
 	}
 }
 
+func TestDelegationChainBoundsReachAuthority(t *testing.T) {
+	h := newHarness(t)
+	inv := reserve()
+	inv.AuthorityChain = model.AuthorityChain{{
+		GrantRef: model.Ref{ID: "GRANT-EXPIRED"}, Delegator: model.ObjectRef{Kind: model.KindHumanIdentity, ID: "HUMAN-ALEX-RIVERA"},
+		Validity: &model.Validity{From: "2025-01-01", To: "2025-12-31"},
+	}}
+	res := h.invoker.Invoke(context.Background(), inv)
+	if res.Status != capability.StatusDenied || res.Requirement != "CHR-AUTH-010" || !strings.Contains(res.Reason, "delegation hop") || h.transport.calls != 0 {
+		t.Errorf("expired delegation reached execution: %+v calls=%d", res, h.transport.calls)
+	}
+	h.recorded(res)
+}
+
+func TestDelegationChainCanRequireApproval(t *testing.T) {
+	h := newHarness(t)
+	h.invoker.ReadWithoutGrant = true
+	inv := reserve()
+	inv.CapabilityID, inv.RequiredFeatures, inv.IdempotencyKey = model.Ref{ID: "CAP-READ-ORDER-EXCEPTION"}, nil, ""
+	inv.ApprovedAction = ""
+	inv.AuthorityChain = model.AuthorityChain{{
+		GrantRef: model.Ref{ID: "GRANT-APPROVAL-BOUND"}, Delegator: model.ObjectRef{Kind: model.KindHumanIdentity, ID: "HUMAN-ALEX-RIVERA"},
+		Validity: &model.Validity{From: "2026-01-01"}, ApprovalRequired: true,
+	}}
+	res := h.invoker.Invoke(context.Background(), inv)
+	if res.Status != capability.StatusDenied || res.Requirement != "CHR-AUTH-009" || !strings.Contains(res.Reason, "approval") || h.transport.calls != 0 {
+		t.Errorf("delegation approval bound ignored: %+v calls=%d", res, h.transport.calls)
+	}
+	h.recorded(res)
+}
+
 func TestDenialsFailClosedAndAreRecorded(t *testing.T) {
 	cases := []struct {
 		name        string
@@ -303,6 +334,22 @@ func TestSeparationOfDuties(t *testing.T) {
 			t.Errorf("independent approver: %+v", res)
 		}
 		h.recorded(res)
+	}
+
+	h := newHarness(t)
+	delegator := approve().Actor
+	proposal := model.ActionRecord{Actor: delegator, RuntimeContext: approve().Runtime, ResponsibilityID: approve().ResponsibilityID,
+		CapabilityID: model.Ref{ID: "CAP-PROPOSE-ORDER-RESOLUTION"}, SubjectRefs: approve().SubjectRefs, OperationClass: model.OperationPropose,
+		ActionTime: at.Add(-time.Hour), Outcome: "proposal-prepared", AuthorityEvaluations: []model.AuthorityEvaluation{{Result: model.AuthorityAllowed, Reason: "test"}}}
+	proposal.CharterSpecVersion, proposal.Namespace, proposal.ID = "1.0.0", "harbor.example", "ACT-DELEGATOR-PROPOSE"
+	if err := h.sink.Action(ctx, proposal); err != nil {
+		t.Fatal(err)
+	}
+	delegated := approve()
+	delegated.Actor = model.ObjectRef{Kind: model.KindAgentIdentity, ID: delegator.ID}
+	delegated.AuthorityChain = model.AuthorityChain{{GrantRef: model.Ref{ID: "GRANT-DELEGATED-APPROVAL"}, Delegator: delegator, Validity: &model.Validity{From: "2026-01-01"}}}
+	if ref, conflict, err := h.invoker.Sod.Conflict(ctx, delegated, []model.Ref{{ID: "SOD-PREPARE-APPROVE-CREDIT"}}); err != nil || !conflict || ref.ID != "SOD-PREPARE-APPROVE-CREDIT" {
+		t.Errorf("delegator history must participate in separation of duties: %s %t %v", ref.ID, conflict, err)
 	}
 }
 

@@ -23,11 +23,13 @@ type IdentityMap interface {
 }
 
 const (
-	DefaultKindClaim                        = "charter_kind"
-	DefaultIDClaim                          = "charter_id"
-	DefaultUserIDClaim                      = "keel_user_id"
-	AgentPrincipalKind kmodel.PrincipalKind = "agent"
+	DefaultKindClaim   = "charter_kind"
+	DefaultIDClaim     = "charter_id"
+	DefaultUserIDClaim = "keel_user_id"
 )
+
+// AgentPrincipalKind is the keel grant kind for a Charter AgentIdentity: subject agent_id, sole filter tenant_id.
+const AgentPrincipalKind kmodel.PrincipalKind = "agent"
 
 // BaseClaimIdentityMap reads the Charter identity and, for humans, the keel user id from claims the enterprise's
 // authorization server mints into access tokens; sessions without a token principal are unmapped.
@@ -53,7 +55,7 @@ func (m BaseClaimIdentityMap) Actor(_ context.Context, s Session) (model.ObjectR
 }
 
 // Principal returns the keel grant principal for the actor established by the session. Human identities use the
-// claimed keel user id; agent identities use their stable Charter id directly with keel's agent principal kind.
+// claimed keel user id. Agent identities use their stable Charter id and authenticated tenant directly.
 func (m BaseClaimIdentityMap) Principal(ctx context.Context, actor model.ObjectRef) (kmodel.Principal, error) {
 	s, err := SessionFromContext(ctx)
 	if err != nil {
@@ -67,7 +69,10 @@ func (m BaseClaimIdentityMap) Principal(ctx context.Context, actor model.ObjectR
 		return kmodel.Principal{}, fmt.Errorf("%w: session acts as %s %s, not %s %s", ErrUnmapped, mapped.Kind, mapped.ID, actor.Kind, actor.ID)
 	}
 	if actor.Kind == model.KindAgentIdentity {
-		return kmodel.Principal{Kind: AgentPrincipalKind, ID: actor.ID}, nil
+		if s.PartnerID <= 0 {
+			return kmodel.Principal{}, fmt.Errorf("%w: no keel tenant for agent %q", ErrUnmapped, actor.ID)
+		}
+		return kmodel.Principal{Kind: AgentPrincipalKind, ID: actor.ID, Scope: []any{s.PartnerID}}, nil
 	}
 	userID, ok := common.AsInt64OK(s.Principal.Claims[claim(m.UserIDClaim, DefaultUserIDClaim)])
 	if !ok || userID <= 0 {
