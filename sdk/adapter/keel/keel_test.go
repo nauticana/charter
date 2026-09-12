@@ -42,7 +42,7 @@ func oauthContext(claims map[string]any) context.Context {
 }
 
 func agentClaims() map[string]any {
-	return map[string]any{DefaultKindClaim: "AgentIdentity", DefaultIDClaim: agent, DefaultUserIDClaim: float64(42)}
+	return map[string]any{DefaultKindClaim: "AgentIdentity", DefaultIDClaim: agent}
 }
 
 func harbor(t *testing.T) *corpus.Corpus {
@@ -99,18 +99,23 @@ func TestCallerResolvesMappedIdentity(t *testing.T) {
 		t.Errorf("missing identity provider: %v", err)
 	}
 	m := BaseClaimIdentityMap{Namespace: ns}
-	if uid, err := m.UserID(oauthContext(agentClaims()), model.ObjectRef{Kind: model.KindAgentIdentity, ID: agent}); err != nil || uid != 42 {
-		t.Errorf("user id: %d %v", uid, err)
+	if principal, err := m.Principal(oauthContext(agentClaims()), model.ObjectRef{Kind: model.KindAgentIdentity, ID: agent}); err != nil || principal.Kind != AgentPrincipalKind || principal.ID != agent {
+		t.Errorf("agent principal: %+v %v", principal, err)
 	}
-	if _, err := m.UserID(oauthContext(agentClaims()), model.ObjectRef{Kind: model.KindHumanIdentity, ID: "HUMAN-ALEX-RIVERA"}); !errors.Is(err, ErrUnmapped) {
+	human := model.ObjectRef{Kind: model.KindHumanIdentity, ID: "HUMAN-ALEX-RIVERA"}
+	humanClaims := map[string]any{DefaultKindClaim: string(human.Kind), DefaultIDClaim: human.ID, DefaultUserIDClaim: float64(42)}
+	if principal, err := m.Principal(oauthContext(humanClaims), human); err != nil || principal.Kind != kmodel.PrincipalUser || principal.ID != 42 {
+		t.Errorf("user principal: %+v %v", principal, err)
+	}
+	if _, err := m.Principal(oauthContext(agentClaims()), model.ObjectRef{Kind: model.KindHumanIdentity, ID: "HUMAN-ALEX-RIVERA"}); !errors.Is(err, ErrUnmapped) {
 		t.Errorf("session for another actor accepted: %v", err)
 	}
 }
 
 type checker map[string]bool
 
-func (c checker) CheckActionPermission(_ context.Context, userID int, authObject, action, scope string) (bool, bool) {
-	return c[fmt.Sprintf("%d:%s:%s:%s", userID, authObject, action, scope)], false
+func (c checker) CheckActionPermission(_ context.Context, principal kmodel.Principal, authObject, action, scope string) (bool, bool) {
+	return c[fmt.Sprintf("%s:%v:%s:%s:%s", principal.Kind, principal.ID, authObject, action, scope)], false
 }
 
 type broadGrantSource []model.AuthorityGrant
@@ -127,7 +132,7 @@ func TestPermissionGateLayersKeelBehindCharter(t *testing.T) {
 	capabilityKey := corpus.KeyOf(ns, req.CapabilityID)
 	perm := Permission{AuthObject: "RESERVATION", Action: "CREATE", Scope: "*"}
 	gate := &PermissionGate{Charter: &authority.AbstractEvaluator{Source: authority.NewDocumentGrantSource(c)}, Identities: BaseClaimIdentityMap{Namespace: ns},
-		Keel: checker{"42:RESERVATION:CREATE:*": true}, Permissions: map[corpus.DocumentKey]Permission{capabilityKey: perm}}
+		Keel: checker{"agent:" + agent + ":RESERVATION:CREATE:*": true}, Permissions: map[corpus.DocumentKey]Permission{capabilityKey: perm}}
 	ctx := oauthContext(agentClaims())
 	if d := gate.Evaluate(ctx, req); d.Result != authority.Allowed || d.GrantRef == nil || !strings.Contains(d.Reason, "keel permission") {
 		t.Errorf("both allow: %+v", d)
@@ -136,7 +141,7 @@ func TestPermissionGateLayersKeelBehindCharter(t *testing.T) {
 	if d := gate.Evaluate(ctx, req); d.Result != authority.Denied || d.GrantRef == nil {
 		t.Errorf("keel denial must deny and keep the grant reference: %+v", d)
 	}
-	gate.Keel = checker{"42:RESERVATION:CREATE:*": true}
+	gate.Keel = checker{"agent:" + agent + ":RESERVATION:CREATE:*": true}
 	over := req
 	over.Measures = map[string]authority.Measure{"reservation-value": {Value: int64(9900000), Currency: "USD", CurrencyExponent: 2}, "reservation-duration": {Value: 48, Unit: "hour"}}
 	if d := gate.Evaluate(ctx, over); d.Result != authority.Denied {

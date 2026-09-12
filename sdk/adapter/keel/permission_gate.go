@@ -4,14 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	kmodel "github.com/nauticana/keel/model"
+	"github.com/nauticana/keel/port"
+
 	"github.com/nauticana/charter/sdk/authority"
 	"github.com/nauticana/charter/sdk/corpus"
 )
 
 // PermissionChecker is keel's RBAC hook; port.DatabaseRepository satisfies it through CheckActionPermission.
 type PermissionChecker interface {
-	CheckActionPermission(ctx context.Context, userID int, authObject, action, scope string) (allowed bool, ownScope bool)
+	CheckActionPermission(ctx context.Context, principal kmodel.Principal, authObject, action, scope string) (allowed bool, ownScope bool)
 }
+
+var _ PermissionChecker = (port.DatabaseRepository)(nil)
 
 // Permission names the keel authorization object, action, and scope that enforce one capability.
 type Permission struct {
@@ -43,12 +48,12 @@ func (g *PermissionGate) Evaluate(ctx context.Context, req authority.Request) au
 	if !ok {
 		return authority.Decision{GrantRef: d.GrantRef, Result: authority.Denied, Reason: fmt.Sprintf("no keel permission is mapped for capability %s", req.CapabilityID.ID)}
 	}
-	userID, err := g.Identities.UserID(ctx, req.Actor)
+	principal, err := g.Identities.Principal(ctx, req.Actor)
 	if err != nil {
 		return authority.Decision{GrantRef: d.GrantRef, Result: authority.Error, Reason: err.Error()}
 	}
-	if allowed, _ := g.Keel.CheckActionPermission(ctx, userID, perm.AuthObject, perm.Action, perm.Scope); !allowed {
-		return authority.Decision{GrantRef: d.GrantRef, Result: authority.Denied, Reason: fmt.Sprintf("keel denies %s/%s on %q for user %d", perm.AuthObject, perm.Action, perm.Scope, userID)}
+	if allowed, _ := g.Keel.CheckActionPermission(ctx, principal, perm.AuthObject, perm.Action, perm.Scope); !allowed {
+		return authority.Decision{GrantRef: d.GrantRef, Result: authority.Denied, Reason: fmt.Sprintf("keel denies %s/%s on %q for %s principal %v", perm.AuthObject, perm.Action, perm.Scope, principal.Kind, principal.ID)}
 	}
 	d.Reason += fmt.Sprintf("; keel permission %s/%s confirmed", perm.AuthObject, perm.Action)
 	return d

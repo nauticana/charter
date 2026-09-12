@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.0.2",
+      "title": "Principal-aware Keel permission gate",
+      "tags": [
+        "breaking"
+      ],
+      "summary": "Corrects the optional Keel adapter's permission interface for keel v1.2.62 and passes principal-aware grant subjects through `PermissionGate`. Agent actors can now be authorized directly against a keel `agent` grant source instead of requiring a synthetic user mapping. The Charter specification, schema catalogue, and conformance profiles are unchanged from 1.0.0.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`charterSpecVersion`, `x-charter-spec-version`) | 1.0.0 |\n| Schema catalogue (`catalogVersion`, `x-charter-schema-version`) | 1.0.0 |\n| Conformance manifest (`specification.version`) | 1.0.0 |\n| Go module `github.com/nauticana/charter` | v1.0.2 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.2.62 |\n\n## Compatibility impact\n\nThe normative Charter contract and all document formats remain compatible with 1.0.0. Version 1.0.1 updated the token identity type but left Charter's local `PermissionChecker` on keel's old user-id signature. That interface compiled in isolation, but `port.DatabaseRepository` no longer satisfied it. Version 1.0.2 corrects the adapter contract:\n\n| Before | After |\n|---|---|\n| `PermissionChecker.CheckActionPermission(ctx, userID int, ...)` | `PermissionChecker.CheckActionPermission(ctx, principal model.Principal, ...)` |\n| `IdentityMap.UserID(ctx, actor)` | `IdentityMap.Principal(ctx, actor)` |\n\n`PermissionGate` now passes the grant-evaluation `model.Principal` to `CheckActionPermission`, and a compile-time assertion verifies that `port.DatabaseRepository` satisfies `PermissionChecker`.\n\n`BaseClaimIdentityMap` maps a human actor to `model.UserPrincipal` using its `keel_user_id` claim. It maps an agent actor directly to `model.Principal{Kind: \"agent\", ID: actor.ID}`; an agent token no longer needs a `keel_user_id` claim. Register the corresponding `agent` grant source in keel before repository initialization. If that source declares extra filters, provide a custom `IdentityMap` that returns their values in `Principal.Scope` in registration order. Charter's authority model remains platform-neutral and unchanged.\n\n## Adoption\n\n1. Upgrade with `go get github.com/nauticana/charter@v1.0.2`.\n2. Update custom `PermissionChecker` implementations to accept `model.Principal`, and replace custom `IdentityMap.UserID` methods with `Principal`.\n3. For human actors, return `model.UserPrincipal(userID)`. For agent actors, register a keel `agent` grant source and return its principal kind, stable id, and any configured scope values.\n4. Wire `PermissionGate.Keel` directly to a keel v1.2.62 `port.DatabaseRepository` implementation and run the downstream test suite. No Charter documents, schemas, fixtures, or conformance claims require migration.\n"
+    },
+    {
       "version": "1.0.1",
       "title": "Keel 1.2.62 compatibility",
       "tags": [
