@@ -4,7 +4,7 @@
   "title": "InformationGovernancePolicy",
   "description": "Permitted use, access, retention, deletion, and precedence rules for governed information.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-INFO-002",
     "CHR-INFO-005",

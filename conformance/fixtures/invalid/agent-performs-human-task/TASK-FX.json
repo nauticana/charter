@@ -6,6 +6,7 @@
   "id": "TASK-FX",
   "name": "task",
   "processId": "PROC-FX",
+  "taskDefinitionVersion": "1",
   "businessOutcome": "o",
   "accountableResponsibilityId": "RESP-FX",
   "permittedPerformerKinds": [

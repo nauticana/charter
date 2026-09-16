@@ -6,6 +6,7 @@
   "enterpriseId": "ENT-HARBOR",
   "name": "Prepare resolution",
   "processId": "PROC-RESOLVE-ORDER-EXCEPTION",
+  "taskDefinitionVersion": "1",
   "businessOutcome": "Evidenced resolution proposal prepared",
   "accountableResponsibilityId": "RESP-COORDINATE-ORDER-EXCEPTION",
   "permittedPerformerKinds": [

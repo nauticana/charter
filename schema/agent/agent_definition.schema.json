@@ -4,7 +4,7 @@
   "title": "AgentDefinition",
   "description": "The governed design of an agent: purpose, triggers, inputs, outcomes, capabilities, policies, and escalation conditions.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-AGENT-001",
     "CHR-AGENT-002",
@@ -40,6 +40,12 @@
       "x-charter-ref-kinds": [
         "AgentIdentity"
       ]
+    },
+    "definitionVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "The version an AgentRuntime must name to operate this definition; a changed design is a new version."
     },
     "purpose": {
       "type": "string",
@@ -143,6 +149,7 @@
     "kind",
     "enterpriseId",
     "agentIdentityId",
+    "definitionVersion",
     "purpose",
     "accountable",
     "responsibilityIds",

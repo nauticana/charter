@@ -4,7 +4,7 @@
   "title": "Position",
   "description": "A stable assignment point in exactly one organization unit, outside the unit tree; occupancy and support are separate Assignments.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ENT-001",
     "CHR-ENT-004",

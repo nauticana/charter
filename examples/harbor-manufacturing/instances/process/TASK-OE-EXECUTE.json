@@ -6,6 +6,7 @@
   "enterpriseId": "ENT-HARBOR",
   "name": "Execute resolution",
   "processId": "PROC-RESOLVE-ORDER-EXCEPTION",
+  "taskDefinitionVersion": "1",
   "businessOutcome": "Approved, bounded capability executed",
   "accountableResponsibilityId": "RESP-COORDINATE-ORDER-EXCEPTION",
   "permittedPerformerKinds": [

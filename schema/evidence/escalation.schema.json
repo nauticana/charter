@@ -4,7 +4,7 @@
   "title": "Escalation",
   "description": "A request for decision with reason, recipient, urgency, and resulting disposition when known.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-EVID-007"
   ],

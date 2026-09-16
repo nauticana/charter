@@ -4,7 +4,7 @@
   "title": "Task",
   "description": "An assignable unit of work with an accountable responsibility and permitted performer kinds.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-PROC-001",
     "CHR-PROC-002",
@@ -39,6 +39,12 @@
       "x-charter-ref-kinds": [
         "BusinessProcess"
       ]
+    },
+    "taskDefinitionVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "The version a TaskInstance must name to run this task; a changed definition is a new version."
     },
     "businessOutcome": {
       "type": "string",
@@ -81,6 +87,7 @@
     "name",
     "enterpriseId",
     "processId",
+    "taskDefinitionVersion",
     "businessOutcome",
     "accountableResponsibilityId",
     "permittedPerformerKinds"

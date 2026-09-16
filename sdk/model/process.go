@@ -9,14 +9,18 @@ type ValueStream struct {
 
 type BusinessProcess struct {
 	Envelope
-	BusinessOutcome string   `json:"businessOutcome"`
-	ValueStreamID   *Ref     `json:"valueStreamId,omitempty"`
-	ParentProcessID *Ref     `json:"parentProcessId,omitempty"`
-	Aliases         []string `json:"aliases,omitempty"`
+	// ProcessDefinitionVersion is the version a ProcessInstance must name to run this process.
+	ProcessDefinitionVersion string   `json:"processDefinitionVersion"`
+	BusinessOutcome          string   `json:"businessOutcome"`
+	ValueStreamID            *Ref     `json:"valueStreamId,omitempty"`
+	ParentProcessID          *Ref     `json:"parentProcessId,omitempty"`
+	Aliases                  []string `json:"aliases,omitempty"`
 }
 
 type Task struct {
 	Envelope
+	// TaskDefinitionVersion is the version a TaskInstance must name to run this task.
+	TaskDefinitionVersion       string   `json:"taskDefinitionVersion"`
 	ProcessID                   Ref      `json:"processId"`
 	BusinessOutcome             string   `json:"businessOutcome"`
 	AccountableResponsibilityID Ref      `json:"accountableResponsibilityId"`

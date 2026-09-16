@@ -4,7 +4,7 @@
   "title": "ProcessInstance",
   "description": "Execution state for one business-process occurrence without modifying its process definition.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-PROC-005",
     "CHR-PROC-007"

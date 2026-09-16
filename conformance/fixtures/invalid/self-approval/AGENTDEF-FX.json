@@ -5,6 +5,7 @@
   "kind": "AgentDefinition",
   "id": "AGENTDEF-FX",
   "agentIdentityId": "AGENT-FX",
+  "definitionVersion": "1",
   "purpose": "fixture",
   "accountable": {
     "kind": "OrganizationUnit",

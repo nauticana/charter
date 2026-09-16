@@ -64,3 +64,34 @@ func TestTriggered(t *testing.T) {
 		t.Error("declared triggers not recognised")
 	}
 }
+
+// A definition that does not declare the version its runtime operates is refused: without this the runtime's
+// version string is an unverified claim and an edited definition passes admission unnoticed.
+func TestAdmissionRefusesDefinitionVersionDrift(t *testing.T) {
+	docs := []string{
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"AgentIdentity","id":"G","name":"g","lifecycleState":"active","lifecycleHistory":[{"state":"active","effectiveAt":"2026-01-01T00:00:00Z"}]}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"AgentDefinition","id":"D","name":"d","enterpriseId":"E","agentIdentityId":"G","definitionVersion":"1","purpose":"p","accountable":{"kind":"Position","id":"POS"},"responsibilityIds":["R"],"triggers":["t"],"requiredInputs":["i"],"expectedOutcomes":["o"],"capabilityIds":[],"policies":[],"confidenceBoundaries":[],"escalationConditions":[]}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"AgentRuntime","id":"RT","name":"rt","lifecycleState":"active","agentIdentityId":"G","agentDefinitionId":"D","definitionVersion":"2","operator":{"kind":"OrganizationUnit","id":"OU"}}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Assignment","id":"A","subject":{"kind":"AgentIdentity","id":"G"},"target":{"kind":"Responsibility","id":"R"},"participation":"supports","validity":{"from":"2026-01-01"}}`,
+	}
+	c := corpus.New()
+	for _, raw := range docs {
+		d, err := (corpus.Parser{}).Parse([]byte(raw))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := c.Add(d); err != nil {
+			t.Fatal(err)
+		}
+	}
+	admission := &BaseAdmission{Agents: NewBaseProvider(c), Assignments: organization.NewBaseProvider(c)}
+	ec := ExecutionContext{
+		Namespace: "t", Identity: model.Ref{ID: "G"}, Runtime: model.Ref{ID: "RT"}, ExecutionContextID: "X",
+		Definition: model.Ref{ID: "D"}, DefinitionVersion: "2", Assignment: model.Ref{ID: "A"},
+		Participation: model.ParticipationSupports, At: time.Date(2026, 6, 1, 0, 0, 0, 0, time.UTC),
+	}
+	d := admission.Admit(context.Background(), ec)
+	if d.Result != Refused || d.Requirement != "CHR-AGENT-006" {
+		t.Fatalf("drift = %s %s (%s), want Refused CHR-AGENT-006", d.Result, d.Requirement, d.Reason)
+	}
+}

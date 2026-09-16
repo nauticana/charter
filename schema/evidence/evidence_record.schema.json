@@ -4,7 +4,7 @@
   "title": "EvidenceRecord",
   "description": "One categorized record; corrections supersede rather than replace.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-EVID-003",
     "CHR-EVID-004",

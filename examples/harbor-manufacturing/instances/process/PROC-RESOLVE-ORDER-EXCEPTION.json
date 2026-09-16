@@ -7,6 +7,7 @@
   "name": "Resolve Order Exception",
   "valueStreamId": "VS-FULFILL-CUSTOMER-ORDER",
   "businessOutcome": "A blocked order is safely released, explicitly rejected, or escalated to an accountable authority",
+  "processDefinitionVersion": "1",
   "aliases": [
     "order exception handling"
   ]

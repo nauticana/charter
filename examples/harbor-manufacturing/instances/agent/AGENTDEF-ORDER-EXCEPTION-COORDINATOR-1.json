@@ -5,6 +5,7 @@
   "id": "AGENTDEF-ORDER-EXCEPTION-COORDINATOR-1",
   "enterpriseId": "ENT-HARBOR",
   "agentIdentityId": "AGENT-ORDER-EXCEPTION-COORDINATOR",
+  "definitionVersion": "1",
   "purpose": "Coordinate safe and timely resolution of blocked customer orders",
   "accountable": {
     "kind": "Position",

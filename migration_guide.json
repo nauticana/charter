@@ -8,6 +8,15 @@
     "body_markdown": "full guide in GitHub-flavored markdown"
   },
   "migrations": [
+  {
+   "version": "1.0.5",
+   "title": "Definitions declare the version their instances name",
+   "tags": [
+    "breaking"
+   ],
+   "summary": "AgentDefinition, Task and BusinessProcess now declare their own version, and admission and task-context resolution refuse an instance whose named version the definition does not declare. Until now the version lived only on the referencing document, so an edited definition passed unnoticed — the gap CHR-PROC-005 and CHR-AGENT-006 already forbid. Schema catalogue 2.0.0; the specification is unchanged at 1.0.0.",
+   "body_markdown": "### Breaking — three document kinds gain a required property\n\n| Kind | New required property | Verified against |\n|---|---|---|\n| `AgentDefinition` | `definitionVersion` | `AgentRuntime.definitionVersion` |\n| `Task` | `taskDefinitionVersion` | `TaskInstance.taskDefinitionVersion` |\n| `BusinessProcess` | `processDefinitionVersion` | `ProcessInstance.processDefinitionVersion` |\n\nEvery existing document of these kinds must declare the version its instances already name; validation rejects it otherwise.\n\n### Why\n\n`CapabilityContract` already closes this loop — `VersionPolicy.Compatible(required, offered)` reads the offered version off the contract document. The three definition kinds did not: the version lived only on the runtime or instance pointing at them, so two assertions from the same side were compared to each other. Editing a definition in place left both saying `\"1\"` and admission passed against changed content — exactly what **CHR-PROC-005** (\"execution state MUST NOT silently modify the normative definition\") and **CHR-AGENT-006** (attribution to the runtime that performed it) forbid. No new requirement: the schema simply made the existing ones uncheckable.\n\n### Enforcement\n\n- `agent.BaseAdmission.Admit` refuses when `def.DefinitionVersion != rt.DefinitionVersion` (CHR-AGENT-006).\n- `process.BaseContextResolver.TaskContext` returns `ErrDefinition` when a task or process instance names a version its definition does not declare.\n\n### Migration\n\nAdd the property to each definition document, matching what its instances name. Implementations that mint definitions must set it, and must issue a new version — not an in-place edit — when a definition changes.\n"
+  },
     {
       "version": "1.0.4",
       "title": "Keel 1.2.64 compatibility and fenced ledger claims",

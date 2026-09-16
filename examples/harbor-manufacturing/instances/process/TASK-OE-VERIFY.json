@@ -6,6 +6,7 @@
   "enterpriseId": "ENT-HARBOR",
   "name": "Verify and close",
   "processId": "PROC-RESOLVE-ORDER-EXCEPTION",
+  "taskDefinitionVersion": "1",
   "businessOutcome": "External outcome verified; exception closed or escalated",
   "accountableResponsibilityId": "RESP-COORDINATE-ORDER-EXCEPTION",
   "permittedPerformerKinds": [

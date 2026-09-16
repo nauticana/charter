@@ -4,7 +4,7 @@
   "title": "OrganizationRelationship",
   "description": "A typed, directed, effective-dated relationship between organizational objects, separate from the unit tree.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ENT-001",
     "CHR-ENT-004",

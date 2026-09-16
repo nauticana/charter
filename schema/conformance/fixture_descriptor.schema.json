@@ -4,7 +4,7 @@
   "title": "ConformanceFixtureDescriptor",
   "description": "Format of fixture.yaml: the rules a fixture exercises, its expected result, its documents, and, for runtime-behavioral rules, the scenario driven against the implementation under test.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-CONF-007",
     "CHR-CONF-008",

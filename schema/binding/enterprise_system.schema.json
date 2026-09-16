@@ -4,7 +4,7 @@
   "title": "EnterpriseSystem",
   "description": "An external system participating through profiles and bindings.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-BIND-001"
   ],

@@ -4,7 +4,7 @@
   "title": "BusinessProcess",
   "description": "Organizes work toward a declared business outcome; customer naming and hierarchy are preserved.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-PROC-001",
     "CHR-PROC-003",
@@ -39,6 +39,12 @@
       "minLength": 1,
       "maxLength": 500
     },
+    "processDefinitionVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "The version a ProcessInstance must name to run this process; a changed definition is a new version."
+    },
     "valueStreamId": {
       "$ref": "../common.schema.json#/$defs/idRef",
       "x-charter-ref-kinds": [
@@ -64,7 +70,8 @@
     "kind",
     "name",
     "enterpriseId",
-    "businessOutcome"
+    "businessOutcome",
+    "processDefinitionVersion"
   ],
   "unevaluatedProperties": false
 }

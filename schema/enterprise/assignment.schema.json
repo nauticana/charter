@@ -4,7 +4,7 @@
   "title": "Assignment",
   "description": "Connects a human or agent identity to a position, responsibility, role, or work context for an effective period.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ENT-003",
     "CHR-ENT-005",

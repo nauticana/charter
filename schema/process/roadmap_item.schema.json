@@ -4,7 +4,7 @@
   "title": "RoadmapItem",
   "description": "Addresses gaps with declared ownership, dependencies, and status.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ARCH-005",
     "CHR-ARCH-007"

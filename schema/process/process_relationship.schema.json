@@ -4,7 +4,7 @@
   "title": "ProcessRelationship",
   "description": "One explicit hierarchy, sequence, or dependency relationship between process or task definitions.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-PROC-003"
   ],

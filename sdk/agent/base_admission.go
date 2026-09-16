@@ -48,6 +48,9 @@ func (a *BaseAdmission) Admit(ctx context.Context, ec ExecutionContext) Decision
 	if err != nil {
 		return failure(err, "CHR-AGENT-001")
 	}
+	if def.DefinitionVersion != rt.DefinitionVersion {
+		return refuse(fmt.Sprintf("definition %s is version %s, runtime %s operates %s", def.ID, def.DefinitionVersion, rt.ID, rt.DefinitionVersion), "CHR-AGENT-006")
+	}
 	if corpus.KeyOf(def.Namespace, def.AgentIdentityID) != identityKey {
 		return refuse(fmt.Sprintf("definition %s belongs to %s", def.ID, def.AgentIdentityID.ID), "CHR-AGENT-006")
 	}

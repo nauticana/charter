@@ -4,7 +4,7 @@
   "title": "CapabilityContract",
   "description": "Stable business meaning of an operation, independent of protocol or vendor; execute contracts declare idempotency.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-CAP-001",
     "CHR-CAP-002",

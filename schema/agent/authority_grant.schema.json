@@ -4,7 +4,7 @@
   "title": "AuthorityGrant",
   "description": "Explicit authority scoped to actor, capability, resource scope, organizational context, and validity; absence of a grant is denial.",
   "x-charter-spec-version": "1.0.0",
-  "x-charter-schema-version": "1.0.0",
+  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-AUTH-001",
     "CHR-AUTH-002",

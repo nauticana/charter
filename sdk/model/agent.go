@@ -16,7 +16,9 @@ type AgentIdentity struct {
 
 type AgentDefinition struct {
 	Envelope
-	AgentIdentityID      Ref       `json:"agentIdentityId"`
+	AgentIdentityID Ref `json:"agentIdentityId"`
+	// DefinitionVersion is the version an AgentRuntime must name to operate this definition.
+	DefinitionVersion    string    `json:"definitionVersion"`
 	Purpose              string    `json:"purpose"`
 	Accountable          ObjectRef `json:"accountable"`
 	ResponsibilityIDs    []Ref     `json:"responsibilityIds"`
