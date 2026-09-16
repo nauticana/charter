@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/nauticana/keel/common"
-	kmodel "github.com/nauticana/keel/model"
 
 	"github.com/nauticana/charter/sdk/authority"
 	"github.com/nauticana/charter/sdk/corpus"
@@ -60,7 +59,7 @@ func (t BaseRouteTable) Capability(r *http.Request) (Gated, bool) {
 // Clearance is what a boundary established: the active actor, its session, and the grant that authorizes the capability.
 type Clearance struct {
 	Actor      identity.Actor
-	Session    Session
+	Session    common.CallerSession
 	Capability Gated
 	GrantRef   model.Ref
 }
@@ -149,7 +148,7 @@ func (g *Gate) serve(w http.ResponseWriter, r *http.Request, cap Gated, next htt
 	switch {
 	case err == nil:
 		next(w, r.WithContext(context.WithValue(r.Context(), clearanceKey{}, clearance)))
-	case errors.Is(err, ErrUnauthenticated):
+	case errors.Is(err, common.ErrUnauthenticated), errors.Is(err, common.ErrCallerIdentityConflict):
 		common.WriteJSONError(w, http.StatusUnauthorized, err.Error())
 	case errors.Is(err, ErrNoAuthority), errors.Is(err, ErrUnmapped), errors.Is(err, corpus.ErrNotFound), errors.Is(err, identity.ErrNotIdentity),
 		errors.Is(err, identity.ErrInactive), errors.Is(err, identity.ErrLifecycle):
@@ -157,18 +156,4 @@ func (g *Gate) serve(w http.ResponseWriter, r *http.Request, cap Gated, next htt
 	default:
 		common.WriteJSONError(w, http.StatusInternalServerError, "authority could not be established")
 	}
-}
-
-// JobContext binds the principal and correlation id a background job acts under, since no middleware runs there;
-// the worker reads them from the job it claimed and then checks the gate or invokes the capability (CHR-AGENT-006).
-func JobContext(ctx context.Context, principal *kmodel.TokenPrincipal, partnerID int64, requestID string) context.Context {
-	if principal != nil {
-		ctx = context.WithValue(ctx, common.AuthPrincipal, principal)
-		ctx = context.WithValue(ctx, common.Subject, principal.Subject)
-		ctx = context.WithValue(ctx, common.Scopes, strings.Join(principal.Scopes, " "))
-	}
-	if partnerID > 0 {
-		ctx = context.WithValue(ctx, common.PartnerID, partnerID)
-	}
-	return common.WithRequestID(ctx, requestID)
 }

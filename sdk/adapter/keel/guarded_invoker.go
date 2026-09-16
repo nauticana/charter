@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/nauticana/keel/common"
 	"github.com/nauticana/keel/guard"
 
 	"github.com/nauticana/charter/sdk/authority"
@@ -26,7 +27,7 @@ func (g *GuardedInvoker) Invoke(ctx context.Context, inv capability.Invocation) 
 	if g.Next == nil || g.Guards == nil || g.Querier == nil {
 		return capability.Result{Status: capability.StatusDenied, Reason: "guarded invoker is not fully composed", Requirement: "CHR-AUTH-010"}
 	}
-	s, err := SessionFromContext(ctx)
+	s, err := common.CallerSessionFromContext(ctx)
 	if err != nil {
 		return capability.Result{Status: capability.StatusDenied, Reason: err.Error(), Requirement: "CHR-SEC-001", Err: err}
 	}

@@ -14,6 +14,7 @@ import (
 
 	"github.com/nauticana/keel/common"
 	"github.com/nauticana/keel/guard"
+	"github.com/nauticana/keel/idempotency"
 	kmodel "github.com/nauticana/keel/model"
 	"github.com/nauticana/keel/port"
 
@@ -53,18 +54,7 @@ func harbor(t *testing.T) *corpus.Corpus {
 	return c
 }
 
-func TestSessionAndRuntimeContext(t *testing.T) {
-	s, err := SessionFromContext(oauthContext(agentClaims()))
-	if err != nil || s.Subject != "sub-42" || s.PartnerID != 7 || !s.HasScope("orders:write") || s.HasScope("admin") || s.RequestID == "" {
-		t.Fatalf("oauth session: %+v %v", s, err)
-	}
-	apiKey := context.WithValue(context.WithValue(context.Background(), common.ApiKeyID, int64(9)), common.Scopes, "a,b")
-	if s, err := SessionFromContext(apiKey); err != nil || s.APIKeyID != 9 || len(s.Scopes) != 2 {
-		t.Errorf("api-key session: %+v %v", s, err)
-	}
-	if _, err := SessionFromContext(context.Background()); !errors.Is(err, ErrUnauthenticated) {
-		t.Errorf("anonymous context accepted: %v", err)
-	}
+func TestRuntimeContext(t *testing.T) {
 	rc, err := RuntimeContext(oauthContext(nil), model.Ref{ID: "RT-OEC-PROD-01"})
 	if err != nil || rc.ExecutionContextID != "aB3dE5fG7hJ9" || rc.RuntimeInstanceID.ID != "RT-OEC-PROD-01" {
 		t.Errorf("runtime context: %+v %v", rc, err)
@@ -89,7 +79,7 @@ func TestCallerResolvesMappedIdentity(t *testing.T) {
 	if _, _, err := c.Actor(oauthContext(map[string]any{"sub": "x"}), at); !errors.Is(err, ErrUnmapped) {
 		t.Errorf("claims without identity accepted: %v", err)
 	}
-	if _, _, err := c.Actor(context.Background(), at); !errors.Is(err, ErrUnauthenticated) {
+	if _, _, err := c.Actor(context.Background(), at); !errors.Is(err, common.ErrUnauthenticated) {
 		t.Errorf("anonymous caller accepted: %v", err)
 	}
 	if _, _, err := (Caller{}).Actor(oauthContext(agentClaims()), at); !errors.Is(err, ErrUnmapped) {
@@ -215,10 +205,10 @@ func TestGuardedInvoker(t *testing.T) {
 	}
 }
 
-// memoryLogger is a queryable port.TableLogger; the file logger in keel cannot answer FindChanges.
+// memoryLogger is a ChangeLog whose reads can be made to fail.
 type memoryLogger struct {
 	rows        []*kmodel.TableChangeLog
-	writeOnly   bool
+	readBroken  bool
 	lastPartner int64
 	lastOwner   int
 }
@@ -233,8 +223,8 @@ func (l *memoryLogger) GetChange(_ context.Context, id int64, _ int64, _ int) (*
 	return l.rows[id-1], nil
 }
 func (l *memoryLogger) FindChanges(_ context.Context, filter port.ChangeFilter, partnerID int64, ownerID int) ([]*kmodel.TableChangeLog, error) {
-	if l.writeOnly {
-		return nil, errors.New("FindChanges is not implemented")
+	if l.readBroken {
+		return nil, errors.New("FindChanges failed")
 	}
 	l.lastPartner, l.lastOwner = partnerID, ownerID
 	var out []*kmodel.TableChangeLog
@@ -292,9 +282,9 @@ func TestTableLogStoreIsAppendOnlyAndVerifiable(t *testing.T) {
 	if lineage, err := (evidence.Queries{Provider: evidence.NewBaseProvider(store)}).Lineage(ctx, ns, model.Ref{ID: "EVR-2"}); err != nil || len(lineage) != 2 {
 		t.Errorf("lineage: %v %v", lineage, err)
 	}
-	writeOnly := &memoryLogger{writeOnly: true}
-	if err := (&evidence.AbstractSink{Store: &TableLogStore{Logger: writeOnly, PartnerID: 7, OwnerUserID: 42}, Digester: evidence.BaseSHA256Digester{}}).Record(ctx, record("EVR-3", nil)); err == nil || len(writeOnly.rows) != 0 {
-		t.Errorf("write-only logger must fail closed: %v rows=%d", err, len(writeOnly.rows))
+	readBroken := &memoryLogger{readBroken: true}
+	if err := (&evidence.AbstractSink{Store: &TableLogStore{Logger: readBroken, PartnerID: 7, OwnerUserID: 42}, Digester: evidence.BaseSHA256Digester{}}).Record(ctx, record("EVR-3", nil)); err == nil || len(readBroken.rows) != 0 {
+		t.Errorf("unanswerable duplicate check must fail closed: %v rows=%d", err, len(readBroken.rows))
 	}
 	poisoned := &memoryLogger{rows: []*kmodel.TableChangeLog{{ID: 1, TableName: "charter_evidencerecord", RecordKey: "harbor.example:EVR-WANT",
 		Action: appendAction, OldData: map[string]any{"charterSpecVersion": "1.0.0", "namespace": "harbor.example", "kind": "EvidenceRecord", "id": "EVR-OTHER"}}}}
@@ -434,7 +424,7 @@ func TestGateAtHTTPTableActionAndWorkerBoundaries(t *testing.T) {
 	gate.Now = func() time.Time { return at }
 
 	// A worker binds the principal it claimed with the job, then checks the gate before invoking.
-	job := JobContext(context.Background(), &kmodel.TokenPrincipal{Subject: "sub-42", Claims: agentClaims()}, 7, "aB3dE5fG7hJ9")
+	job := common.WithCallerSession(context.Background(), common.CallerSession{Principal: &kmodel.TokenPrincipal{Subject: "sub-42", Claims: agentClaims()}, PartnerID: 7, RequestID: "aB3dE5fG7hJ9"})
 	clearance, err := gate.Check(job, reserve)
 	if err != nil || clearance.Session.PartnerID != 7 || clearance.Session.RequestID != "aB3dE5fG7hJ9" {
 		t.Errorf("worker clearance: %+v %v", clearance, err)
@@ -442,7 +432,7 @@ func TestGateAtHTTPTableActionAndWorkerBoundaries(t *testing.T) {
 	if rc, err := RuntimeContext(job, model.Ref{ID: "RT-OEC-PROD-01"}); err != nil || rc.ExecutionContextID != "aB3dE5fG7hJ9" {
 		t.Errorf("worker runtime context: %+v %v", rc, err)
 	}
-	if _, err := gate.Check(JobContext(context.Background(), nil, 7, "x"), reserve); !errors.Is(err, ErrUnauthenticated) {
+	if _, err := gate.Check(common.WithCallerSession(context.Background(), common.CallerSession{PartnerID: 7, RequestID: "x"}), reserve); !errors.Is(err, common.ErrUnauthenticated) {
 		t.Errorf("job without principal: %v", err)
 	}
 	grants, err := authority.NewDocumentGrantSource(c).Grants(job, authority.Request{Namespace: ns, EnterpriseID: reserve.EnterpriseID,
@@ -455,6 +445,50 @@ func TestGateAtHTTPTableActionAndWorkerBoundaries(t *testing.T) {
 	gate.Grants = broadGrantSource{wrong}
 	if _, err := gate.Check(job, reserve); !errors.Is(err, ErrNoAuthority) {
 		t.Errorf("gate trusted a source that returned another actor's grant: %v", err)
+	}
+}
+
+func TestLedgerStoresResultsInKeelLedger(t *testing.T) {
+	ctx := context.Background()
+	if _, err := (&Ledger{}).Begin(ctx, "k"); !errors.Is(err, ErrNoLedger) {
+		t.Errorf("incomplete ledger: %v", err)
+	}
+	ledger := &Ledger{Keel: &idempotency.MemoryLedger{}}
+	entry, err := ledger.Begin(ctx, "IDEMP-1")
+	if err != nil || entry.State != capability.LedgerNew || entry.Fence == "" {
+		t.Fatalf("claim: %+v %v", entry, err)
+	}
+	if again, err := ledger.Begin(ctx, "IDEMP-1"); err != nil || again.State != capability.LedgerInFlight || again.Fence != "" {
+		t.Errorf("concurrent claim: %+v %v", again, err)
+	}
+	if err := ledger.MarkUnknown(ctx, "IDEMP-1", "stale"); err == nil {
+		t.Error("stale fence accepted")
+	}
+	done := capability.Result{Status: capability.StatusExecuted, Outcome: "reserved", Outputs: map[string]any{"reservation": "0000088421"},
+		Action: &model.ActionRecord{Outcome: "reserved"}, Err: errors.New("dropped"), LedgerFence: entry.Fence}
+	if err := ledger.Complete(ctx, "IDEMP-1", entry.Fence, done); err != nil {
+		t.Fatal(err)
+	}
+	replay, err := ledger.Begin(ctx, "IDEMP-1")
+	if err != nil || replay.State != capability.LedgerCompleted || replay.Result == nil || replay.Result.Outcome != "reserved" ||
+		replay.Result.Action == nil || replay.Result.Err != nil || replay.Result.LedgerFence != "" || replay.Result.Outputs.(map[string]any)["reservation"] != "0000088421" {
+		t.Errorf("replay: %+v %v", replay, err)
+	}
+	next, err := ledger.Begin(ctx, "IDEMP-2")
+	if err != nil || next.State != capability.LedgerNew {
+		t.Fatalf("second key: %+v %v", next, err)
+	}
+	if err := ledger.MarkUnknown(ctx, "IDEMP-2", next.Fence); err != nil {
+		t.Fatal(err)
+	}
+	if unknown, err := ledger.Begin(ctx, "IDEMP-2"); err != nil || unknown.State != capability.LedgerUnknown || unknown.Fence != "" {
+		t.Errorf("unknown key must block: %+v %v", unknown, err)
+	}
+	if err := ledger.Release(ctx, "IDEMP-2", next.Fence); err != nil {
+		t.Fatal(err)
+	}
+	if released, err := ledger.Begin(ctx, "IDEMP-2"); err != nil || released.State != capability.LedgerNew {
+		t.Errorf("released key must be claimable: %+v %v", released, err)
 	}
 }
 

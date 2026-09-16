@@ -23,11 +23,17 @@ var evidenceKinds = []model.Kind{model.KindActionRecord, model.KindEvidenceRecor
 
 var farFuture = time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC)
 
+// ChangeLog is a table logger that also answers queries; keel's file logger is write-only and does not qualify.
+type ChangeLog interface {
+	port.TableLogger
+	port.ChangeQuerier
+}
+
 // TableLogStore keeps Charter evidence in keel's table change log: one appended change row per document, keyed by
 // namespace and id, never updated or deleted. PartnerID and OwnerUserID are the scope already resolved by the caller;
-// zero retains keel's unrestricted convention. The file logger cannot answer FindChanges, so appends and reads fail closed on it.
+// zero retains keel's unrestricted convention.
 type TableLogStore struct {
-	Logger      port.TableLogger
+	Logger      ChangeLog
 	Prefix      string
 	PartnerID   int64
 	OwnerUserID int

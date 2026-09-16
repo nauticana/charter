@@ -18,7 +18,7 @@ var ErrUnmapped = errors.New("keel identity does not map to a Charter identity")
 // principal kind and id whose keel grants must be evaluated.
 // Credentials never define the identity: a rotated token or key maps to the same actor (CHR-ID-003, CHR-ID-007).
 type IdentityMap interface {
-	Actor(ctx context.Context, s Session) (model.ObjectRef, error)
+	Actor(ctx context.Context, s common.CallerSession) (model.ObjectRef, error)
 	Principal(ctx context.Context, actor model.ObjectRef) (kmodel.Principal, error)
 }
 
@@ -42,7 +42,7 @@ type BaseClaimIdentityMap struct {
 
 var _ IdentityMap = BaseClaimIdentityMap{}
 
-func (m BaseClaimIdentityMap) Actor(_ context.Context, s Session) (model.ObjectRef, error) {
+func (m BaseClaimIdentityMap) Actor(_ context.Context, s common.CallerSession) (model.ObjectRef, error) {
 	if s.Principal == nil {
 		return model.ObjectRef{}, fmt.Errorf("%w: subject %q carries no claims", ErrUnmapped, s.Subject)
 	}
@@ -57,7 +57,7 @@ func (m BaseClaimIdentityMap) Actor(_ context.Context, s Session) (model.ObjectR
 // Principal returns the keel grant principal for the actor established by the session. Human identities use the
 // claimed keel user id. Agent identities use their stable Charter id and authenticated tenant directly.
 func (m BaseClaimIdentityMap) Principal(ctx context.Context, actor model.ObjectRef) (kmodel.Principal, error) {
-	s, err := SessionFromContext(ctx)
+	s, err := common.CallerSessionFromContext(ctx)
 	if err != nil {
 		return kmodel.Principal{}, err
 	}

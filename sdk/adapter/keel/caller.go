@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nauticana/keel/common"
+
 	"github.com/nauticana/charter/sdk/identity"
 )
 
@@ -15,16 +17,16 @@ type Caller struct {
 }
 
 // Actor returns the mapped identity, established active at the action time (CHR-SEC-001, CHR-ID-005).
-func (c Caller) Actor(ctx context.Context, at time.Time) (identity.Actor, Session, error) {
+func (c Caller) Actor(ctx context.Context, at time.Time) (identity.Actor, common.CallerSession, error) {
 	if c.Map == nil {
-		return identity.Actor{}, Session{}, fmt.Errorf("%w: no identity map", ErrUnmapped)
+		return identity.Actor{}, common.CallerSession{}, fmt.Errorf("%w: no identity map", ErrUnmapped)
 	}
 	if c.Identities == nil {
-		return identity.Actor{}, Session{}, identity.ErrNoProvider
+		return identity.Actor{}, common.CallerSession{}, identity.ErrNoProvider
 	}
-	s, err := SessionFromContext(ctx)
+	s, err := common.CallerSessionFromContext(ctx)
 	if err != nil {
-		return identity.Actor{}, Session{}, err
+		return identity.Actor{}, common.CallerSession{}, err
 	}
 	ref, err := c.Map.Actor(ctx, s)
 	if err != nil {

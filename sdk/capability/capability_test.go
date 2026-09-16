@@ -33,9 +33,21 @@ type malformedLedger struct{}
 func (malformedLedger) Begin(context.Context, string) (capability.LedgerEntry, error) {
 	return capability.LedgerEntry{State: capability.LedgerCompleted}, nil
 }
-func (malformedLedger) Complete(context.Context, string, capability.Result) error { return nil }
-func (malformedLedger) Release(context.Context, string) error                     { return nil }
-func (malformedLedger) MarkUnknown(context.Context, string) error                 { return nil }
+func (malformedLedger) Complete(context.Context, string, string, capability.Result) error { return nil }
+func (malformedLedger) Release(context.Context, string, string) error                     { return nil }
+func (malformedLedger) MarkUnknown(context.Context, string, string) error                 { return nil }
+
+type unfencedLedger struct{ malformedLedger }
+
+func (unfencedLedger) Begin(context.Context, string) (capability.LedgerEntry, error) {
+	return capability.LedgerEntry{State: capability.LedgerNew}, nil
+}
+
+type invalidStateLedger struct{ malformedLedger }
+
+func (invalidStateLedger) Begin(context.Context, string) (capability.LedgerEntry, error) {
+	return capability.LedgerEntry{State: capability.LedgerState("corrupt"), Fence: "must-not-leak"}, nil
+}
 
 func (f *fakeTransport) Execute(context.Context, binding.Request) (binding.Response, error) {
 	f.calls++
@@ -137,6 +149,9 @@ func TestGovernedExecutionAndReplay(t *testing.T) {
 	res := h.invoker.Invoke(ctx, reserve())
 	if res.Status != capability.StatusExecuted || res.Outcome != "reserved" || res.ExternalReference != "0000088421" || res.Binding == nil || res.Binding.ID != "BIND-S4-RESERVE-ORDER-STOCK-1" {
 		t.Fatalf("execution: %+v", res)
+	}
+	if res.LedgerFence != "" {
+		t.Errorf("completed execution leaked ledger fence %q", res.LedgerFence)
 	}
 	rec := h.recorded(res)
 	if len(rec.AuthorityEvaluations) != 1 || rec.AuthorityEvaluations[0].Result != model.AuthorityAllowed || rec.AuthorityEvaluations[0].AuthorityGrantID.ID != "AUTH-OEC-STOCK-RESERVATION-2026" {
@@ -245,7 +260,13 @@ func TestUnknownOutcomeBlocksRetryUntilReconciled(t *testing.T) {
 		t.Fatalf("retry before reconciliation must not execute: %+v calls=%d", retry, h.transport.calls)
 	}
 	reconciled := capability.Result{Status: capability.StatusExecuted, Outcome: "already-reserved", ExternalReference: "0000088421"}
-	if err := h.invoker.Ledger.Complete(ctx, "IDEMP-0042-1", reconciled); err != nil {
+	if err := h.invoker.Ledger.Complete(ctx, "IDEMP-0042-1", "stale", reconciled); !errors.Is(err, capability.ErrLedgerFence) {
+		t.Errorf("reconciliation without the fence accepted: %v", err)
+	}
+	if res.LedgerFence == "" || retry.LedgerFence != "" {
+		t.Errorf("fence must reach only the claim holder: %q %q", res.LedgerFence, retry.LedgerFence)
+	}
+	if err := h.invoker.Ledger.Complete(ctx, "IDEMP-0042-1", res.LedgerFence, reconciled); err != nil {
 		t.Fatal(err)
 	}
 	if after := h.invoker.Invoke(ctx, reserve()); after.Status != capability.StatusExecuted || after.Outcome != "already-reserved" || h.transport.calls != 1 {
@@ -260,6 +281,48 @@ func TestUnknownOutcomeBlocksRetryUntilReconciled(t *testing.T) {
 	h.transport.err = nil
 	if res := h.invoker.Invoke(ctx, reserve()); res.Status != capability.StatusExecuted || h.transport.calls != 2 {
 		t.Errorf("retry after proven non-execution: %+v calls=%d", res, h.transport.calls)
+	}
+}
+
+func TestCompletedLedgerEntryCannotBeChanged(t *testing.T) {
+	ctx := context.Background()
+	ledger := capability.NewBaseMemoryLedger()
+	entry, err := ledger.Begin(ctx, "IDEMP-COMPLETE")
+	if err != nil {
+		t.Fatal(err)
+	}
+	done := capability.Result{Status: capability.StatusExecuted, Outcome: "done", LedgerFence: entry.Fence, Err: errors.New("transient")}
+	stored := done
+	stored.LedgerFence = ""
+	stored.Err = nil
+	if err := ledger.Complete(ctx, "IDEMP-COMPLETE", entry.Fence, done); err != nil {
+		t.Fatal(err)
+	}
+	if err := ledger.Complete(ctx, "IDEMP-COMPLETE", entry.Fence, stored); err != nil {
+		t.Errorf("identical completion is not idempotent: %v", err)
+	}
+	if err := ledger.Complete(ctx, "IDEMP-COMPLETE", entry.Fence, capability.Result{Outcome: "changed"}); !errors.Is(err, capability.ErrLedgerTransition) {
+		t.Errorf("completed result changed: %v", err)
+	}
+	if err := ledger.Release(ctx, "IDEMP-COMPLETE", entry.Fence); !errors.Is(err, capability.ErrLedgerTransition) {
+		t.Errorf("completed result released: %v", err)
+	}
+	replay, err := ledger.Begin(ctx, "IDEMP-COMPLETE")
+	if err != nil || replay.Result == nil || replay.Result.LedgerFence != "" || replay.Result.Outcome != "done" {
+		t.Errorf("replay: %+v %v", replay, err)
+	}
+}
+
+func TestMalformedLedgerClaimFailsBeforeExecution(t *testing.T) {
+	for name, ledger := range map[string]capability.Ledger{"unfenced": unfencedLedger{}, "invalid state": invalidStateLedger{}} {
+		t.Run(name, func(t *testing.T) {
+			h := newHarness(t)
+			h.invoker.Ledger = ledger
+			res := h.invoker.Invoke(context.Background(), reserve())
+			if res.Status != capability.StatusUnknown || res.Requirement != "CHR-SEC-008" || res.LedgerFence != "" || h.transport.calls != 0 {
+				t.Errorf("malformed claim reached execution: %+v calls=%d", res, h.transport.calls)
+			}
+		})
 	}
 }
 

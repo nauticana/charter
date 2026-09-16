@@ -153,15 +153,23 @@ func (r *run) execute(ctx context.Context) Result {
 			return r.deny(ctx, "idempotency ledger: "+err.Error(), "CHR-SEC-008")
 		}
 		switch entry.State {
+		case LedgerNew:
+			if entry.Fence == "" {
+				return r.finish(ctx, StatusUnknown, "unknown", fmt.Sprintf("idempotency key %s was claimed without a fence; reconcile before retrying", inv.IdempotencyKey), "CHR-SEC-008")
+			}
+			r.result.LedgerFence = entry.Fence
 		case LedgerCompleted:
 			if entry.Result == nil {
 				return r.finish(ctx, StatusUnknown, "unknown", fmt.Sprintf("idempotency key %s is completed without a stored result; reconcile before retrying", inv.IdempotencyKey), "CHR-SEC-008")
 			}
 			prior := *entry.Result
+			prior.LedgerFence = ""
 			prior.Reason = fmt.Sprintf("replay of idempotency key %s; prior result returned without execution", inv.IdempotencyKey)
 			return prior
 		case LedgerInFlight, LedgerUnknown:
 			return r.finish(ctx, StatusUnknown, "unknown", fmt.Sprintf("idempotency key %s is %s; reconcile before retrying", inv.IdempotencyKey, entry.State), "CHR-SEC-008")
+		default:
+			return r.finish(ctx, StatusUnknown, "unknown", fmt.Sprintf("idempotency key %s has invalid state %q; reconcile before retrying", inv.IdempotencyKey, entry.State), "CHR-SEC-008")
 		}
 	}
 	resp, err := i.Transport.Execute(ctx, binding.Request{Capability: inv.CapabilityID, ContractVersion: contract.ContractVersion, Inputs: inv.Inputs,
@@ -169,24 +177,24 @@ func (r *run) execute(ctx context.Context) Result {
 	if err != nil {
 		r.result.Err = err
 		if errors.Is(err, binding.ErrNotExecuted) {
-			r.ledger(ctx, mutating, i.Ledger.Release)
+			r.ledger(ctx, mutating, true, i.Ledger.Release)
 			return r.finish(ctx, StatusFailed, "failed", err.Error(), "CHR-SEC-007")
 		}
-		r.ledger(ctx, mutating, i.Ledger.MarkUnknown)
+		r.ledger(ctx, mutating, false, i.Ledger.MarkUnknown)
 		return r.finish(ctx, StatusUnknown, "unknown", err.Error(), "CHR-SEC-008")
 	}
 	r.result.Outputs, r.result.ExternalReference = resp.Outputs, resp.ExternalReference
 	r.evidenceIDs = resp.EvidenceRecordIDs
 	if resp.BusinessError != "" {
 		if !slices.Contains(contract.BusinessErrors, resp.BusinessError) {
-			r.ledger(ctx, mutating, i.Ledger.MarkUnknown)
+			r.ledger(ctx, mutating, false, i.Ledger.MarkUnknown)
 			return r.finish(ctx, StatusUnknown, "unknown", "undeclared business error: "+resp.BusinessError, "CHR-CAP-005")
 		}
 		r.result.BusinessError = resp.BusinessError
 		return r.complete(ctx, mutating, StatusBusinessError, resp.BusinessError, "business error: "+resp.BusinessError)
 	}
 	if !slices.Contains(contract.Outcomes, resp.Outcome) {
-		r.ledger(ctx, mutating, i.Ledger.MarkUnknown)
+		r.ledger(ctx, mutating, false, i.Ledger.MarkUnknown)
 		return r.finish(ctx, StatusUnknown, "unknown", "undeclared outcome: "+resp.Outcome, "CHR-CAP-001")
 	}
 	r.result.Outcome = resp.Outcome
@@ -200,17 +208,25 @@ func (r *run) deny(ctx context.Context, reason, requirement string) Result {
 func (r *run) complete(ctx context.Context, mutating bool, status Status, outcome, reason string) Result {
 	res := r.finish(ctx, status, outcome, reason, "")
 	if mutating {
-		if err := r.invoker.Ledger.Complete(ctx, r.inv.IdempotencyKey, res); err != nil {
+		fence := res.LedgerFence
+		stored := res
+		stored.LedgerFence = ""
+		stored.Err = nil
+		if err := r.invoker.Ledger.Complete(ctx, r.inv.IdempotencyKey, fence, stored); err != nil {
 			res.Err = errors.Join(res.Err, err)
+		} else {
+			res.LedgerFence = ""
 		}
 	}
 	return res
 }
 
-func (r *run) ledger(ctx context.Context, mutating bool, op func(context.Context, string) error) {
+func (r *run) ledger(ctx context.Context, mutating, clearFence bool, op func(context.Context, string, string) error) {
 	if mutating {
-		if err := op(ctx, r.inv.IdempotencyKey); err != nil {
+		if err := op(ctx, r.inv.IdempotencyKey, r.result.LedgerFence); err != nil {
 			r.result.Err = errors.Join(r.result.Err, err)
+		} else if clearFence {
+			r.result.LedgerFence = ""
 		}
 	}
 }

@@ -52,7 +52,8 @@ type Invocation struct {
 }
 
 // Result is the structured outcome of a governed invocation; Action is the evidence appended for it, and Exception
-// and Escalation the records appended when the invocation had to stop.
+// and Escalation the records appended when the invocation had to stop. LedgerFence is the claim held on the
+// idempotency key; reconciling an unknown outcome presents it to the Ledger.
 type Result struct {
 	Status            Status
 	Outcome           string
@@ -69,7 +70,8 @@ type Result struct {
 	Action            *model.ActionRecord
 	Exception         *model.Ref
 	Escalation        *model.Ref
-	Err               error
+	LedgerFence       string `json:"-"`
+	Err               error  `json:"-"`
 }
 
 type Invoker interface {
