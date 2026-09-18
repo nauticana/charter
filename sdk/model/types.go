@@ -44,6 +44,8 @@ const (
 	KindEscalation                  Kind = "Escalation"
 	KindInformationDefinition       Kind = "InformationDefinition"
 	KindInformationGovernancePolicy Kind = "InformationGovernancePolicy"
+	KindMediationProfile            Kind = "MediationProfile"
+	KindMediationDecision           Kind = "MediationDecision"
 	KindConformanceClaim            Kind = "ConformanceClaim"
 )
 

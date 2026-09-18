@@ -1,4 +1,4 @@
 rules: [CHR-RULE-CONF-002]
-specification_version: 1.0.0
+specification_version: 1.1.0
 expected: fail
 reason: Role names an organization unit where a responsibility is required; the reference resolves, but not to a Responsibility

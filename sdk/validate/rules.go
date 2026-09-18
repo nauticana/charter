@@ -29,6 +29,10 @@ func NewRuleSet() (RuleSet, error) {
 		DeclaredCapabilityRule{AbstractRule{"CHR-RULE-AGENT-002", []string{"CHR-AGENT-003"}}},
 		SodApprovalRule{AbstractRule{"CHR-RULE-AUTH-003", []string{"CHR-AUTH-007"}}},
 		RecordedOutcomeRule{AbstractRule{"CHR-RULE-CAP-001", []string{"CHR-CAP-001", "CHR-EVID-010"}}},
+		DeclaredOutcomeRule{AbstractRule{"CHR-RULE-MED-001", []string{"CHR-MED-001", "CHR-MED-003", "CHR-MED-009"}}},
+		UnavailableMediatorRule{AbstractRule{"CHR-RULE-MED-002", []string{"CHR-MED-002", "CHR-MED-005", "CHR-MED-006"}}},
+		AttributeProvenanceRule{AbstractRule{"CHR-RULE-MED-003", []string{"CHR-MED-007", "CHR-SEC-004"}}},
+		RepeatedSubmissionRule{AbstractRule{"CHR-RULE-MED-004", []string{"CHR-MED-010"}}},
 	}
 	set := RuleSet{}
 	for _, r := range all {

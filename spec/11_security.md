@@ -1,6 +1,6 @@
 # Security Requirements
 
-Status: Version 1.0.0
+Status: Version 1.1.0
 
 Charter defines security properties that preserve identity, authority, information constraints, and evidence across implementations. It does not certify an implementation as secure.
 

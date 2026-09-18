@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/process/task_instance.schema.json",
   "title": "TaskInstance",
   "description": "Execution state and performer context for one task occurrence.",
-  "x-charter-spec-version": "1.0.0",
+  "x-charter-spec-version": "1.1.0",
   "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-PROC-005",

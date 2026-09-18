@@ -1,11 +1,11 @@
 {
-  "charterSpecVersion": "1.0.0",
+  "charterSpecVersion": "1.1.0",
   "namespace": "nauticana.charter",
-  "id": "CLAIM-1.0.0-agent-runtime",
+  "id": "CLAIM-1.1.0-agent-runtime",
   "kind": "ConformanceClaim",
-  "name": "Reference SDK agent-runtime claim 1.0.0",
+  "name": "Reference SDK agent-runtime claim 1.1.0",
   "conformanceProfile": "agent-runtime",
-  "implementationVersion": "1.0.0",
+  "implementationVersion": "1.1.0",
   "testedRuleIds": [
     "CHR-RULE-RT-001",
     "CHR-RULE-RT-002",
@@ -21,10 +21,10 @@
     "runtime-behavioral"
   ],
   "result": "conforming",
-  "resultDate": "2026-08-25",
+  "resultDate": "2026-09-17",
   "implementation": {
     "kind": "GoModule",
-    "id": "github.com-nauticana-charter",
+    "id": "charter-go-sdk",
     "external": true
   },
   "results": [

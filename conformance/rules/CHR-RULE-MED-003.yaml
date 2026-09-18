@@ -1,0 +1,11 @@
+id: CHR-RULE-MED-003
+title: Asserted attributes do not relax a mediated decision
+requirements: [CHR-MED-007, CHR-SEC-004]
+profile: core-model
+verification: semantic
+applies_to: [MediationProfile, MediationDecision]
+check: >-
+  Every attribute a decision rests on is declared once by its profile, has the declared provenance, and no asserted or tighten-only attribute is recorded as having relaxed the decision.
+fixtures:
+  valid: fixtures/valid/mediated-prompt
+  invalid: fixtures/invalid/mediation-asserted-relax

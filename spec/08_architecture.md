@@ -1,6 +1,6 @@
 # Architecture States, Gaps, and Roadmaps
 
-Status: Version 1.0.0
+Status: Version 1.1.0
 
 Charter represents current and intended enterprise arrangements without requiring a particular enterprise-architecture method.
 

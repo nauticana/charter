@@ -1,5 +1,5 @@
 rules: [CHR-RULE-RT-001]
-specification_version: 1.0.0
+specification_version: 1.1.0
 expected: fail
 reason: The reservation value exceeds the grant's limit; a conforming runtime denies before any external call and records the denied evaluation
 documents: ../../../../examples/harbor-manufacturing/instances

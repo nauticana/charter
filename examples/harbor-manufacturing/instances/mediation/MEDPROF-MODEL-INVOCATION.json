@@ -1,0 +1,58 @@
+{
+  "charterSpecVersion": "1.1.0",
+  "namespace": "harbor.example",
+  "kind": "MediationProfile",
+  "id": "MEDPROF-MODEL-INVOCATION",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Order exception model invocation mediation",
+  "description": "Every model invocation by the order exception coordinator is submitted to Harbor's own mediator before inference.",
+  "lifecycleState": "active",
+  "stage": "model-invocation",
+  "mediator": {
+    "party": "enterprise",
+    "mediatorId": "MEDIATOR-HARBOR-PROMPT-REVIEW",
+    "name": "Harbor prompt review service"
+  },
+  "scope": {
+    "agentIdentityIds": [
+      "AGENT-ORDER-EXCEPTION-COORDINATOR"
+    ],
+    "informationIds": [
+      "INFO-CREDIT-STATUS-SUMMARY"
+    ]
+  },
+  "declaredOutcomes": [
+    "allow",
+    "deny"
+  ],
+  "enforcementMode": "enforce",
+  "failurePolicy": "fail-closed",
+  "decisionBudget": {
+    "value": 2000,
+    "unit": "millisecond"
+  },
+  "coverage": {
+    "submittedShare": 1
+  },
+  "attributeTrust": [
+    {
+      "attribute": "actor.agentIdentity",
+      "provenance": "authenticated",
+      "permittedEffect": "relax-or-tighten"
+    },
+    {
+      "attribute": "submission.clientApplication",
+      "provenance": "asserted",
+      "permittedEffect": "tighten-only"
+    }
+  ],
+  "evidenceObligation": {
+    "retention": "Retained with the order exception process instance evidence.",
+    "informationIds": [
+      "INFO-CREDIT-STATUS-SUMMARY"
+    ]
+  },
+  "boundaryControlIds": [
+    "AUTH-OEC-STOCK-RESERVATION-2026"
+  ]
+}

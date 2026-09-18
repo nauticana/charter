@@ -1,0 +1,513 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/mediation/mediation_decision.schema.json",
+  "title": "MediationDecision",
+  "description": "One decision at a mediation point, reached before the submitted act took effect.",
+  "x-charter-spec-version": "1.1.0",
+  "x-charter-schema-version": "2.1.0",
+  "x-charter-requirements": [
+    "CHR-MED-002",
+    "CHR-MED-003",
+    "CHR-MED-004",
+    "CHR-MED-005",
+    "CHR-MED-006",
+    "CHR-MED-008",
+    "CHR-MED-009",
+    "CHR-MED-010"
+  ],
+  "type": "object",
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "MediationDecision"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
+    },
+    "mediationProfileId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "MediationProfile"
+      ]
+    },
+    "submissionId": {
+      "$ref": "../common.schema.json#/$defs/identifier",
+      "description": "Identifies the submitted act, so that a re-submission is recognizable (CHR-MED-010)."
+    },
+    "actor": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "HumanIdentity",
+            "AgentIdentity"
+          ]
+        }
+      }
+    },
+    "subject": {
+      "description": "Capability and information definitions relevant to this submitted act. The actor identifies the agent when the actor is one. Empty lists state that no such definition applies.",
+      "type": "object",
+      "properties": {
+        "capabilityIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "x-charter-ref-kinds": [
+            "CapabilityContract"
+          ]
+        },
+        "informationIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "x-charter-ref-kinds": [
+            "InformationDefinition"
+          ]
+        }
+      },
+      "required": [
+        "capabilityIds",
+        "informationIds"
+      ],
+      "additionalProperties": false
+    },
+    "runtimeContext": {
+      "type": "object",
+      "properties": {
+        "runtimeInstanceId": {
+          "$ref": "../common.schema.json#/$defs/idRef",
+          "x-charter-ref-kinds": [
+            "AgentRuntime"
+          ]
+        },
+        "executionContextId": {
+          "$ref": "../common.schema.json#/$defs/identifier",
+          "description": "Runtime-local execution identifier; unlike runtimeInstanceId, it need not identify a Charter document."
+        }
+      },
+      "required": [
+        "executionContextId"
+      ],
+      "additionalProperties": false
+    },
+    "stage": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "decidedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actEffective": {
+      "description": "Whether the submitted act had already taken effect when this record was made. A mediated decision requires false (CHR-MED-002).",
+      "type": "boolean"
+    },
+    "enforced": {
+      "description": "Whether this decision governed the act. False under a shadow-mode profile; an unenforced deny or modify did not prevent or alter the act (CHR-MED-002).",
+      "type": "boolean"
+    },
+    "outcome": {
+      "description": "The decision reached, or not-decided when the act proceeded without one (CHR-MED-003, CHR-MED-006).",
+      "enum": [
+        "allow",
+        "deny",
+        "modify",
+        "ask",
+        "defer",
+        "not-decided"
+      ]
+    },
+    "mediatorAvailability": {
+      "description": "Whether the mediator produced a usable decision (CHR-MED-005).",
+      "enum": [
+        "available",
+        "unavailable",
+        "budget-exceeded",
+        "undecidable"
+      ]
+    },
+    "appliedFailurePolicy": {
+      "description": "The failure policy applied when the mediator produced no usable decision.",
+      "enum": [
+        "fail-closed",
+        "fail-open",
+        "observe"
+      ]
+    },
+    "notDecidedReason": {
+      "description": "Why no decision was reached: the act was out of scope, excluded, or not sampled (CHR-MED-006).",
+      "enum": [
+        "out-of-scope",
+        "excluded",
+        "not-sampled",
+        "mediator-unavailable"
+      ]
+    },
+    "subjectReason": {
+      "description": "What the subject can change, shown to the subject (CHR-MED-004).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "auditReference": {
+      "description": "Reference to the internal evaluation, for audit; not shown to the subject (CHR-MED-004).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "obligationsApplied": {
+      "description": "Obligations actually performed, including decision-handling duties such as notification after denial (CHR-MED-008).",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "obligation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "appliedTo": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "targetKind": {"enum": ["act", "decision"]},
+          "authorityExpanded": {
+            "description": "An obligation cannot expand the actor's authority (CHR-MED-008).",
+            "const": false
+          }
+        },
+        "required": [
+          "obligation",
+          "appliedTo",
+          "targetKind",
+          "authorityExpanded"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "obligationsProposed": {
+      "description": "Obligations that would be required if an unenforced decision were applied; these were not performed by mediation (CHR-MED-002, CHR-MED-008).",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/obligation"
+      }
+    },
+    "handoff": {
+      "description": "Where an ask or defer decision sends the act for its next decision (CHR-MED-004).",
+      "type": "object",
+      "properties": {
+        "destination": {"type": "string", "minLength": 1, "maxLength": 200},
+        "request": {"type": "string", "minLength": 1, "maxLength": 500}
+      },
+      "required": ["destination", "request"],
+      "additionalProperties": false
+    },
+    "decisionAttributes": {
+      "description": "Attributes the decision rested on, with the provenance and effect the profile declares (CHR-MED-007).",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "provenance": {
+            "enum": [
+              "authenticated",
+              "asserted"
+            ]
+          },
+          "effect": {
+            "enum": [
+              "tightened",
+              "relaxed",
+              "none"
+            ]
+          }
+        },
+        "required": [
+          "attribute",
+          "provenance",
+          "effect"
+        ],
+        "additionalProperties": false,
+        "if": {
+          "properties": {
+            "provenance": {
+              "const": "asserted"
+            }
+          },
+          "required": [
+            "provenance"
+          ]
+        },
+        "then": {
+          "properties": {
+            "effect": {
+              "enum": [
+                "tightened",
+                "none"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "supersedes": {
+      "description": "The earlier decision for the same submission and mediation profile that this record replaces; decidedAt must be strictly later (CHR-MED-010).",
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "MediationDecision"
+      ]
+    },
+    "actionRecordId": {
+      "description": "The governed action this decision preceded, once one exists.",
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "ActionRecord"
+      ]
+    },
+    "evidenceRecordIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "x-charter-ref-kinds": [
+        "EvidenceRecord"
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "mediationProfileId",
+    "submissionId",
+    "actor",
+    "subject",
+    "runtimeContext",
+    "stage",
+    "decidedAt",
+    "actEffective",
+    "enforced",
+    "outcome",
+    "mediatorAvailability"
+  ],
+  "unevaluatedProperties": false,
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    },
+    {
+      "description": "A mediated decision is reached before the act takes effect (CHR-MED-002).",
+      "properties": {
+        "actEffective": {
+          "const": false
+        }
+      }
+    },
+    {
+      "description": "A non-allow decision carries an audit reference (CHR-MED-004).",
+      "if": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "deny",
+              "modify",
+              "ask",
+              "defer"
+            ]
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "auditReference"
+        ]
+      }
+    },
+    {
+      "description": "Every non-allow decision carries a subject-facing reason (CHR-MED-004).",
+      "if": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "deny",
+              "modify",
+              "ask",
+              "defer"
+            ]
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "subjectReason"
+        ]
+      }
+    },
+    {
+      "description": "An enforced modify carries applied obligations; an unenforced modify carries proposed obligations (CHR-MED-002, CHR-MED-008).",
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "modify"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "if": {"properties": {"enforced": {"const": true}}, "required": ["enforced"]},
+        "then": {"required": ["obligationsApplied"]},
+        "else": {"required": ["obligationsProposed"]}
+      }
+    },
+    {
+      "description": "An act that proceeded without a decision states why, and is never recorded as an allow (CHR-MED-005, CHR-MED-006).",
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "not-decided"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "notDecidedReason"
+        ]
+      }
+    },
+    {
+      "description": "A mediator that produced no usable decision records the failure policy applied, and the outcome is never allow (CHR-MED-005).",
+      "if": {
+        "properties": {
+          "mediatorAvailability": {
+            "enum": [
+              "unavailable",
+              "budget-exceeded",
+              "undecidable"
+            ]
+          }
+        },
+        "required": [
+          "mediatorAvailability"
+        ]
+      },
+      "then": {
+        "required": [
+          "appliedFailurePolicy"
+        ],
+        "properties": {
+          "outcome": {
+            "enum": [
+              "deny",
+              "not-decided"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "An available mediator reached a decision (CHR-MED-003).",
+      "if": {
+        "properties": {
+          "mediatorAvailability": {
+            "const": "available"
+          }
+        },
+        "required": [
+          "mediatorAvailability"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "allow",
+              "deny",
+              "modify",
+              "ask",
+              "defer"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "description": "An unenforced decision cannot report an act-altering obligation as applied (CHR-MED-002).",
+      "if": {
+        "properties": {
+          "enforced": {"const": false}
+        },
+        "required": ["enforced"]
+      },
+      "then": {
+        "properties": {
+          "obligationsApplied": {
+            "items": {"properties": {"targetKind": {"const": "decision"}}}
+          }
+        }
+      }
+    },
+    {
+      "description": "Proposed obligations describe only unenforced decisions (CHR-MED-002).",
+      "if": {"properties": {"enforced": {"const": true}}, "required": ["enforced"]},
+      "then": {"not": {"required": ["obligationsProposed"]}}
+    },
+    {
+      "if": {"properties": {"outcome": {"enum": ["ask", "defer"]}}, "required": ["outcome"]},
+      "then": {"required": ["handoff"]}
+    }
+  ],
+  "$defs": {
+    "obligation": {
+      "type": "object",
+      "properties": {
+        "obligation": {"type": "string", "minLength": 1, "maxLength": 200},
+        "appliedTo": {"type": "string", "minLength": 1, "maxLength": 200},
+        "targetKind": {"enum": ["act", "decision"]},
+        "authorityExpanded": {"const": false}
+      },
+      "required": ["obligation", "appliedTo", "targetKind", "authorityExpanded"],
+      "additionalProperties": false
+    }
+  }
+}

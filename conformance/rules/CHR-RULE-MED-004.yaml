@@ -1,0 +1,11 @@
+id: CHR-RULE-MED-004
+title: Repeated submissions do not produce contradictory decisions
+requirements: [CHR-MED-010]
+profile: core-model
+verification: semantic
+applies_to: [MediationDecision]
+check: >-
+  Within one mediation profile, decisions for the same submission have the same outcome unless a different outcome explicitly supersedes the earlier decision. A superseding decision must have a strictly later decidedAt and its target must belong to the same submission and profile.
+fixtures:
+  valid: fixtures/valid/mediated-prompt
+  invalid: fixtures/invalid/mediation-contradictory-resubmission

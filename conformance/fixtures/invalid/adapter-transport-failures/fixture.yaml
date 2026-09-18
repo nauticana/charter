@@ -1,5 +1,5 @@
 rules: [CHR-RULE-SA-002]
-specification_version: 1.0.0
+specification_version: 1.1.0
 expected: fail
 reason: The vendor fails after the request was sent, then before it could be sent; a conforming adapter reports unknown and not-executed respectively, never a business error or success
 documents: ../../../../examples/harbor-manufacturing/instances

@@ -1,0 +1,46 @@
+{
+  "charterSpecVersion": "1.1.0",
+  "namespace": "fixture.example",
+  "kind": "MediationProfile",
+  "id": "MEDPROF-FX",
+  "enterpriseId": "ENT-FX",
+  "name": "Fixture mediation point",
+  "stage": "model-invocation",
+  "mediator": {
+    "party": "third-party",
+    "mediatorId": "MEDIATOR-FX"
+  },
+  "scope": {
+    "agentIdentityIds": [
+      "AGENT-FX"
+    ]
+  },
+  "declaredOutcomes": [
+    "allow",
+    "deny"
+  ],
+  "enforcementMode": "enforce",
+  "failurePolicy": "fail-closed",
+  "decisionBudget": {
+    "value": 2000,
+    "unit": "millisecond"
+  },
+  "coverage": {
+    "submittedShare": 1
+  },
+  "attributeTrust": [
+    {
+      "attribute": "actor.agentIdentity",
+      "provenance": "authenticated",
+      "permittedEffect": "relax-or-tighten"
+    },
+    {
+      "attribute": "submission.clientApplication",
+      "provenance": "asserted",
+      "permittedEffect": "tighten-only"
+    }
+  ],
+  "evidenceObligation": {
+    "retention": "Retain the mediation decision with fixture evidence."
+  }
+}

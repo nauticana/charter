@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/enterprise/role.schema.json",
   "title": "Role",
   "description": "Groups related responsibilities; not a position, identity, or external permission set.",
-  "x-charter-spec-version": "1.0.0",
+  "x-charter-spec-version": "1.1.0",
   "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ENT-001",

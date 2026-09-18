@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.0.0",
+  "charterSpecVersion": "1.1.0",
   "namespace": "harbor.example",
   "kind": "OrganizationRelationship",
   "id": "REL-PP-PLN-01-REPORTS-TO-PP-MGR-01",

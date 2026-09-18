@@ -1,0 +1,4 @@
+rules: [CHR-RULE-MED-002]
+specification_version: 1.1.0
+expected: fail
+reason: The profile fails closed, so an undecided act must be denied and cannot apply fail-open

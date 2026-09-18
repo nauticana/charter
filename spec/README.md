@@ -1,6 +1,6 @@
 # Charter Specification
 
-Status: Version 1.0.0
+Status: Version 1.1.0
 
 Read the chapters in this order:
 
@@ -16,6 +16,7 @@ Read the chapters in this order:
 10. [Evidence](09_evidence.md)
 11. [Information governance](10_information.md)
 12. [Security](11_security.md)
-13. [Conformance](12_conformance.md)
+13. [Mediation](13_mediation.md)
+14. [Conformance](12_conformance.md)
 
 The chapter numbers provide reading order. Normative citations should use stable `CHR-*` requirement identifiers rather than filenames or section numbers.

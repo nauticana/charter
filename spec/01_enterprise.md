@@ -1,6 +1,6 @@
 # Enterprise Structure and Responsibility
 
-Status: Version 1.0.0
+Status: Version 1.1.0
 
 This chapter defines the organizational context in which people and agents act.
 

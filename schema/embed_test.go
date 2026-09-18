@@ -21,8 +21,8 @@ func TestCatalogEntriesAreEmbeddedWithMatchingIDs(t *testing.T) {
 	if err := json.Unmarshal(b, &cat); err != nil {
 		t.Fatal(err)
 	}
-	if len(cat.Entries) != 44 {
-		t.Errorf("catalog lists %d entries, want common, three conformance formats, and 40 kinds", len(cat.Entries))
+	if len(cat.Entries) != 46 {
+		t.Errorf("catalog lists %d entries, want common, three conformance formats, and 42 kinds", len(cat.Entries))
 	}
 	kinds := map[string]bool{}
 	for _, e := range cat.Entries {

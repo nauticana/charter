@@ -1,5 +1,5 @@
 rules: [CHR-RULE-RT-004]
-specification_version: 1.0.0
+specification_version: 1.1.0
 expected: fail
 reason: The transport returns an outcome the contract does not declare; a conforming runtime treats it as unknown rather than success
 documents: ../../../../examples/harbor-manufacturing/instances

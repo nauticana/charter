@@ -1,5 +1,5 @@
 rules: [CHR-RULE-RT-007]
-specification_version: 1.0.0
+specification_version: 1.1.0
 expected: pass
 documents: ../../../../examples/harbor-manufacturing/instances
 scenario:

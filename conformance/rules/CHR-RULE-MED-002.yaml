@@ -1,0 +1,11 @@
+id: CHR-RULE-MED-002
+title: An undecided act is never evidenced as allowed, and enforcement matches the profile
+requirements: [CHR-MED-002, CHR-MED-005, CHR-MED-006]
+profile: core-model
+verification: semantic
+applies_to: [MediationDecision]
+check: >-
+  When the mediator was unavailable, exceeded its budget, or returned an undecidable result, the decision records the failure policy its profile declares, is denied for fail-closed or recorded as not-decided for fail-open and observe, and is never recorded as allowed; an act recorded as not-decided states a reason its profile's coverage admits; a decision is recorded as enforced exactly when its profile is in enforce mode and an outcome was reached.
+fixtures:
+  valid: fixtures/valid/mediated-prompt
+  invalid: fixtures/invalid/mediation-fail-open-allow

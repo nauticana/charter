@@ -1,4 +1,4 @@
 rules: [CHR-RULE-AGENT-001]
-specification_version: 1.0.0
+specification_version: 1.1.0
 expected: fail
 reason: The action's runtime instance acts as AGENT-OTHER and operates a definition of AGENT-FX, but the record's actor is AGENT-FX

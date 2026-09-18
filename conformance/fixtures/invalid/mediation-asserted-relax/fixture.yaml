@@ -1,0 +1,4 @@
+rules: [CHR-RULE-MED-003]
+specification_version: 1.1.0
+expected: fail
+reason: The client application is asserted by the submitting runtime and tighten-only, so it cannot relax the decision

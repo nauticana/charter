@@ -1,0 +1,40 @@
+{
+  "charterSpecVersion": "1.1.0",
+  "namespace": "harbor.example",
+  "kind": "MediationProfile",
+  "id": "MEDPROF-TOOL-INVOCATION-SHADOW",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Stock reservation tool invocation mediation, shadow",
+  "description": "Tool invocations of the stock reservation capability are submitted to a third-party mediator whose verdicts are evidenced but not yet enforced.",
+  "lifecycleState": "active",
+  "stage": "tool-invocation",
+  "mediator": {
+    "party": "third-party",
+    "mediatorId": "MEDIATOR-EXTERNAL-TOOL-REVIEW",
+    "name": "External tool review service"
+  },
+  "scope": {
+    "capabilityIds": ["CAP-RESERVE-ORDER-STOCK"]
+  },
+  "declaredOutcomes": ["allow", "deny", "modify"],
+  "enforcementMode": "shadow",
+  "failurePolicy": "observe",
+  "decisionBudget": {
+    "value": 1,
+    "unit": "second"
+  },
+  "coverage": {
+    "submittedShare": 0.5
+  },
+  "attributeTrust": [
+    {
+      "attribute": "actor.agentIdentity",
+      "provenance": "authenticated",
+      "permittedEffect": "relax-or-tighten"
+    }
+  ],
+  "evidenceObligation": {
+    "retention": "Retained for the shadow evaluation period and reviewed before enforcement is enabled."
+  },
+  "boundaryControlIds": ["AUTH-OEC-STOCK-RESERVATION-2026"]
+}

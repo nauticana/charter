@@ -1,6 +1,6 @@
 # Evidence, Audit, Exceptions, and Escalation
 
-Status: Version 1.0.0
+Status: Version 1.1.0
 
 Evidence demonstrates what context, authority, decisions, and actions produced an outcome. An audit trail organizes evidence without requiring one storage technology.
 

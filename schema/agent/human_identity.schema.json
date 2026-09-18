@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/human_identity.schema.json",
   "title": "HumanIdentity",
   "description": "A human participant in Charter-governed activity; credentials, sessions, and assignments are separate.",
-  "x-charter-spec-version": "1.0.0",
+  "x-charter-spec-version": "1.1.0",
   "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ID-001",

@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "2.0.0",
+  "catalogVersion": "2.1.0",
   "entries": [
     {
       "name": "common",
@@ -220,6 +220,16 @@
       "name": "conformance-fixture-descriptor",
       "id": "https://nauticana.github.io/charter/schema/conformance/fixture_descriptor.schema.json",
       "path": "conformance/fixture_descriptor.schema.json"
+    },
+    {
+      "kind": "MediationProfile",
+      "id": "https://nauticana.github.io/charter/schema/mediation/mediation_profile.schema.json",
+      "path": "mediation/mediation_profile.schema.json"
+    },
+    {
+      "kind": "MediationDecision",
+      "id": "https://nauticana.github.io/charter/schema/mediation/mediation_decision.schema.json",
+      "path": "mediation/mediation_decision.schema.json"
     }
   ]
 }

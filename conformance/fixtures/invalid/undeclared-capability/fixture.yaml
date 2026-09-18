@@ -1,4 +1,4 @@
 rules: [CHR-RULE-AGENT-002]
-specification_version: 1.0.0
+specification_version: 1.1.0
 expected: fail
 reason: The agent's active definition declares CAP-OTHER, but the action uses CAP-FX

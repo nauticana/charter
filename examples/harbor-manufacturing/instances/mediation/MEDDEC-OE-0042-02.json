@@ -1,0 +1,45 @@
+{
+  "charterSpecVersion": "1.1.0",
+  "namespace": "harbor.example",
+  "kind": "MediationDecision",
+  "id": "MEDDEC-OE-0042-02",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Stock reservation would have been modified, shadow",
+  "mediationProfileId": "MEDPROF-TOOL-INVOCATION-SHADOW",
+  "submissionId": "SUBM-OE-0042-06",
+  "actor": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "subject": {
+    "capabilityIds": ["CAP-RESERVE-ORDER-STOCK"],
+    "informationIds": []
+  },
+  "runtimeContext": {
+    "runtimeInstanceId": "RT-OEC-PROD-01",
+    "executionContextId": "EXEC-OE-0042-06"
+  },
+  "stage": "tool-invocation",
+  "decidedAt": "2026-06-18T17:12:31Z",
+  "actEffective": false,
+  "enforced": false,
+  "outcome": "modify",
+  "mediatorAvailability": "available",
+  "subjectReason": "Shorten the reservation to 48 hours before submitting.",
+  "auditReference": "REVIEW-2026-06-18-4472",
+  "obligationsProposed": [
+    {
+      "obligation": "cap-reservation-duration",
+      "appliedTo": "input.reservationDuration",
+      "targetKind": "act",
+      "authorityExpanded": false
+    }
+  ],
+  "decisionAttributes": [
+    {
+      "attribute": "actor.agentIdentity",
+      "provenance": "authenticated",
+      "effect": "none"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Business Processes and Tasks
 
-Status: Version 1.0.0
+Status: Version 1.1.0
 
 This chapter connects business outcomes to the work performed by humans, agents, and enterprise systems.
 

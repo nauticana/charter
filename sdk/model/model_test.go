@@ -74,6 +74,8 @@ func typed(d *model.Document) (any, error) {
 		model.KindInformationDefinition:       func() (any, error) { return corpus.Decode[model.InformationDefinition](d) },
 		model.KindInformationGovernancePolicy: func() (any, error) { return corpus.Decode[model.InformationGovernancePolicy](d) },
 		model.KindConformanceClaim:            func() (any, error) { return corpus.Decode[model.ConformanceClaim](d) },
+		model.KindMediationProfile:            func() (any, error) { return corpus.Decode[model.MediationProfile](d) },
+		model.KindMediationDecision:           func() (any, error) { return corpus.Decode[model.MediationDecision](d) },
 	}
 	return decode[d.Kind]()
 }

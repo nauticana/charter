@@ -1,6 +1,6 @@
 # Authority, Delegation, and Approval
 
-Status: Version 1.0.0
+Status: Version 1.1.0
 
 Authority determines which actor may perform which operation, on which resources, under which conditions and limits.
 

@@ -1,6 +1,6 @@
 # Charter Agents
 
-Status: Version 1.0.0
+Status: Version 1.1.0
 
 A Charter agent is an identifiable and governed digital actor that pursues assigned business outcomes within bounded authority and produces auditable results.
 

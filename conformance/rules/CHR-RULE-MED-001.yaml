@@ -1,0 +1,11 @@
+id: CHR-RULE-MED-001
+title: A mediated decision names a subject, outcome and stage within its profile
+requirements: [CHR-MED-001, CHR-MED-003, CHR-MED-009]
+profile: core-model
+verification: semantic
+applies_to: [MediationDecision]
+check: >-
+  Every MediationDecision decides at the stage its MediationProfile mediates, identifies the acting agent and scoped capabilities and information definitions relevant to the submitted act, and names an outcome the profile declares; an outcome outside the declared set is not a decision.
+fixtures:
+  valid: fixtures/valid/mediated-prompt
+  invalid: fixtures/invalid/mediation-undeclared-outcome

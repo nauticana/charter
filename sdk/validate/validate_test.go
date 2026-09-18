@@ -181,7 +181,7 @@ func TestEveryIDRefPropertyDeclaresItsKinds(t *testing.T) {
 
 func TestCatalogMetaAndSpecVersion(t *testing.T) {
 	meta, err := (Catalog{}).Meta()
-	if err != nil || meta.SpecVersion != "1.0.0" || meta.CatalogVersion == "" {
+	if err != nil || meta.SpecVersion != "1.1.0" || meta.CatalogVersion == "" {
 		t.Fatalf("meta: %+v %v", meta, err)
 	}
 	c, err := corpus.NewDirLoader(harbor).Load()

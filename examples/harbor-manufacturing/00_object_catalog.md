@@ -44,6 +44,10 @@ This catalogue gives the recurring Harbor Manufacturing objects stable example i
 | Approval | `APPR-OE-2026-0042-CREDIT-01` | Credit decision for the example instance |
 | Information policy | `POL-ORDER-EXCEPTION-INFORMATION` | Governs order-exception and credit information |
 | Information definition | `INFO-ORDER-EXCEPTION` | Order exception information |
+| Mediation profile | `MEDPROF-MODEL-INVOCATION` | Review the coordinator's model invocations before inference |
+| Mediation decision | `MEDDEC-OE-0042-01` | Deny a prompt containing customer bank details |
+| Mediation profile | `MEDPROF-TOOL-INVOCATION-SHADOW` | Observe stock reservation tool invocations in shadow mode before enforcing |
+| Mediation decision | `MEDDEC-OE-0042-02` | Shadow-mode modify that did not alter the reservation |
 | Enterprise system | `SYS-HARBOR-S4` | Harbor's SAP S/4HANA Cloud system |
 | System profile | `SYSPROFILE-HARBOR-S4-2602` | Harbor's example SAP S/4HANA Cloud Public Edition profile |
 | Capability binding | `BIND-S4-RESERVE-ORDER-STOCK-1` | Example reservation binding to SAP |

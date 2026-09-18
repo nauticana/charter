@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/enterprise/organization_unit.schema.json",
   "title": "OrganizationUnit",
   "description": "A structural node in the enterprise's organization-unit tree; `parentUnitId` defines the single rooted hierarchy.",
-  "x-charter-spec-version": "1.0.0",
+  "x-charter-spec-version": "1.1.0",
   "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ENT-001",

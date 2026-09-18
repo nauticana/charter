@@ -1,0 +1,44 @@
+{
+  "charterSpecVersion": "1.1.0",
+  "namespace": "harbor.example",
+  "kind": "MediationDecision",
+  "id": "MEDDEC-OE-0042-01",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Credit summary prompt denied",
+  "mediationProfileId": "MEDPROF-MODEL-INVOCATION",
+  "submissionId": "SUBM-OE-0042-05",
+  "actor": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "runtimeContext": {
+    "runtimeInstanceId": "RT-OEC-PROD-01",
+    "executionContextId": "EXEC-OE-0042-05"
+  },
+  "stage": "model-invocation",
+  "decidedAt": "2026-06-18T17:12:29Z",
+  "actEffective": false,
+  "enforced": true,
+  "outcome": "deny",
+  "mediatorAvailability": "available",
+  "subjectReason": "Remove the customer bank details before asking for a credit summary.",
+  "auditReference": "REVIEW-2026-06-18-4471",
+  "decisionAttributes": [
+    {
+      "attribute": "actor.agentIdentity",
+      "provenance": "authenticated",
+      "effect": "none"
+    },
+    {
+      "attribute": "submission.clientApplication",
+      "provenance": "asserted",
+      "effect": "tightened"
+    }
+  ],
+  "subject": {
+    "capabilityIds": [],
+    "informationIds": [
+      "INFO-CREDIT-STATUS-SUMMARY"
+    ]
+  }
+}

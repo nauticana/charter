@@ -1,0 +1,29 @@
+{
+  "charterSpecVersion": "1.1.0",
+  "namespace": "fixture.example",
+  "kind": "MediationDecision",
+  "id": "MEDDEC-FX-2",
+  "enterpriseId": "ENT-FX",
+  "name": "Fixture decision",
+  "mediationProfileId": "MEDPROF-FX",
+  "submissionId": "SUBM-FX-1",
+  "actor": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-FX"
+  },
+  "runtimeContext": {
+    "executionContextId": "EXEC-FX-1"
+  },
+  "stage": "model-invocation",
+  "decidedAt": "2026-06-18T17:12:29Z",
+  "actEffective": false,
+  "enforced": true,
+  "outcome": "deny",
+  "mediatorAvailability": "available",
+  "subjectReason": "Revise the submitted act.",
+  "auditReference": "REVIEW-FX-2",
+  "subject": {
+    "capabilityIds": [],
+    "informationIds": []
+  }
+}

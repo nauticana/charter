@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/evidence/exception.schema.json",
   "title": "ExceptionRecord",
   "description": "A violated expectation with affected context, disposition, and escalation target.",
-  "x-charter-spec-version": "1.0.0",
+  "x-charter-spec-version": "1.1.0",
   "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-EVID-006"

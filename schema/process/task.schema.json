@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/process/task.schema.json",
   "title": "Task",
   "description": "An assignable unit of work with an accountable responsibility and permitted performer kinds.",
-  "x-charter-spec-version": "1.0.0",
+  "x-charter-spec-version": "1.1.0",
   "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-PROC-001",

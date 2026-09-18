@@ -1,12 +1,12 @@
 # Charter Specification Overview
 
-Status: Version 1.0.0
+Status: Version 1.1.0
 
 This directory contains the normative prose for the Nauticana Charter specification. Charter defines a vendor-neutral model for aligning human accountability, governed agents, business processes, authority, and enterprise-system capabilities.
 
 ## Scope
 
-Charter specifies enterprise and agent identities, responsibilities, processes, authority, capability contracts, external-system bindings, architecture states, evidence, information governance, security expectations, and conformance. It does not prescribe an agent runtime, model provider, workflow engine, enterprise application, transport protocol, or user interface.
+Charter specifies enterprise and agent identities, responsibilities, processes, authority, capability contracts, external-system bindings, architecture states, evidence, information governance, mediation of governed acts, security expectations, and conformance. It does not prescribe an agent runtime, model provider, workflow engine, enterprise application, transport protocol, or user interface.
 
 ## Normative language
 
@@ -35,6 +35,7 @@ Every independently testable normative requirement receives a stable identifier 
 - `EVID`: evidence and audit
 - `INFO`: information governance
 - `SEC`: security
+- `MED`: mediation of governed acts
 - `CONF`: conformance and compatibility
 
 ## General conformance

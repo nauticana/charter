@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/mediation/mediation_profile.schema.json",
+  "title": "MediationProfile",
+  "description": "A declared mediation point: the stage it mediates, the outcomes it may issue, its failure policy, decision budget, coverage, and attribute trust.",
+  "x-charter-spec-version": "1.1.0",
+  "x-charter-schema-version": "2.1.0",
+  "x-charter-requirements": [
+    "CHR-MED-001",
+    "CHR-MED-002",
+    "CHR-MED-003",
+    "CHR-MED-005",
+    "CHR-MED-006",
+    "CHR-MED-007"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "MediationProfile"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
+    },
+    "stage": {
+      "description": "The point at which the act is submitted for decision (CHR-MED-001).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "mediator": {
+      "description": "The party that evaluates the submitted act.",
+      "type": "object",
+      "properties": {
+        "party": {
+          "enum": [
+            "enterprise",
+            "platform",
+            "third-party"
+          ]
+        },
+        "mediatorId": {
+          "$ref": "../common.schema.json#/$defs/identifier",
+          "description": "Stable identifier of the evaluating party within its declared namespace; it need not name a Charter document."
+        },
+        "name": {
+          "$ref": "../common.schema.json#/$defs/displayName"
+        }
+      },
+      "required": [
+        "party",
+        "mediatorId"
+      ],
+      "additionalProperties": false
+    },
+    "scope": {
+      "description": "What this mediation point governs. An empty scope is not permitted; at least one dimension must be stated.",
+      "type": "object",
+      "properties": {
+        "agentIdentityIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "x-charter-ref-kinds": [
+            "AgentIdentity"
+          ]
+        },
+        "capabilityIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "x-charter-ref-kinds": [
+            "CapabilityContract"
+          ]
+        },
+        "informationIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "x-charter-ref-kinds": [
+            "InformationDefinition"
+          ]
+        }
+      },
+      "minProperties": 1,
+      "additionalProperties": false
+    },
+    "declaredOutcomes": {
+      "description": "Outcomes this mediation point may issue. An outcome not declared here must be treated as an unavailable mediator (CHR-MED-003).",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "allow",
+          "deny",
+          "modify",
+          "ask",
+          "defer"
+        ]
+      },
+      "contains": {
+        "const": "allow"
+      }
+    },
+    "enforcementMode": {
+      "description": "Whether decisions govern the act (enforce) or are reached and evidenced while the act proceeds regardless (shadow) (CHR-MED-002).",
+      "enum": [
+        "enforce",
+        "shadow"
+      ]
+    },
+    "failurePolicy": {
+      "description": "Applied when the mediator is unavailable, exceeds its budget, or returns an undecidable result (CHR-MED-005).",
+      "enum": [
+        "fail-closed",
+        "fail-open",
+        "observe"
+      ]
+    },
+    "decisionBudget": {
+      "description": "The time within which a decision must be reached.",
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unit": {
+          "enum": [
+            "millisecond",
+            "second"
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "unit"
+      ],
+      "additionalProperties": false
+    },
+    "coverage": {
+      "description": "What this mediation point leaves undecided (CHR-MED-006).",
+      "type": "object",
+      "properties": {
+        "submittedShare": {
+          "description": "Share of in-scope acts submitted for decision, where 1 is all of them.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "exclusions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "subject": {
+                "$ref": "../common.schema.json#/$defs/objectRef"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              }
+            },
+            "required": [
+              "subject",
+              "reason"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "submittedShare"
+      ],
+      "additionalProperties": false
+    },
+    "attributeTrust": {
+      "description": "Provenance of each attribute a decision may rest on. An asserted attribute may only tighten a constraint (CHR-MED-007).",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "attribute": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "provenance": {
+            "enum": [
+              "authenticated",
+              "asserted"
+            ]
+          },
+          "permittedEffect": {
+            "description": "Whether the attribute may relax a constraint or only tighten one.",
+            "enum": [
+              "tighten-only",
+              "relax-or-tighten"
+            ]
+          }
+        },
+        "required": [
+          "attribute",
+          "provenance",
+          "permittedEffect"
+        ],
+        "additionalProperties": false,
+        "if": {
+          "properties": {
+            "provenance": {
+              "const": "asserted"
+            }
+          },
+          "required": [
+            "provenance"
+          ]
+        },
+        "then": {
+          "properties": {
+            "permittedEffect": {
+              "const": "tighten-only"
+            }
+          }
+        }
+      }
+    },
+    "evidenceObligation": {
+      "description": "Retention or information-governance obligations for the decision record that every mediation point produces (CHR-MED-001, CHR-MED-009).",
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "retention": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "informationIds": {
+          "description": "Information definitions whose governance constrains what the decision record may carry.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "x-charter-ref-kinds": [
+            "InformationDefinition"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "boundaryControlIds": {
+      "description": "Authority, separation-of-duties, or governance constraints enforced at the action boundary independently of this mediation point (CHR-MED-011).",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "x-charter-ref-kinds": [
+        "AuthorityGrant",
+        "SodConstraint",
+        "InformationGovernancePolicy"
+      ]
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "stage",
+    "mediator",
+    "scope",
+    "declaredOutcomes",
+    "enforcementMode",
+    "failurePolicy",
+    "decisionBudget",
+    "coverage",
+    "attributeTrust",
+    "evidenceObligation"
+  ],
+  "unevaluatedProperties": false,
+  "if": {
+    "properties": {
+      "declaredOutcomes": {
+        "contains": {
+          "const": "modify"
+        }
+      }
+    },
+    "required": [
+      "declaredOutcomes"
+    ]
+  },
+  "then": {
+    "required": [
+      "boundaryControlIds"
+    ]
+  }
+}

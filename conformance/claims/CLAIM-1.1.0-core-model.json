@@ -1,11 +1,11 @@
 {
-  "charterSpecVersion": "1.0.0",
+  "charterSpecVersion": "1.1.0",
   "namespace": "nauticana.charter",
-  "id": "CLAIM-1.0.0-core-model",
+  "id": "CLAIM-1.1.0-core-model",
   "kind": "ConformanceClaim",
-  "name": "Reference SDK core-model claim 1.0.0",
+  "name": "Reference SDK core-model claim 1.1.0",
   "conformanceProfile": "core-model",
-  "implementationVersion": "1.0.0",
+  "implementationVersion": "1.1.0",
   "testedRuleIds": [
     "CHR-RULE-AGENT-001",
     "CHR-RULE-AGENT-002",
@@ -24,6 +24,10 @@
     "CHR-RULE-EVID-001",
     "CHR-RULE-ID-001",
     "CHR-RULE-INFO-001",
+    "CHR-RULE-MED-001",
+    "CHR-RULE-MED-002",
+    "CHR-RULE-MED-003",
+    "CHR-RULE-MED-004",
     "CHR-RULE-PROC-001",
     "CHR-RULE-PROC-002",
     "CHR-RULE-PROC-003"
@@ -33,7 +37,7 @@
     "semantic"
   ],
   "result": "conforming",
-  "resultDate": "2026-08-25",
+  "resultDate": "2026-09-17",
   "implementation": {
     "kind": "GoModule",
     "id": "github.com-nauticana-charter",
@@ -137,6 +141,26 @@
     },
     {
       "ruleId": "CHR-RULE-CAP-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-MED-001",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-MED-002",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-MED-003",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-MED-004",
       "verificationType": "semantic",
       "result": "pass"
     }

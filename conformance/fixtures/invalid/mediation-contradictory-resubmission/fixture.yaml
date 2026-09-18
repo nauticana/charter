@@ -1,0 +1,4 @@
+rules: [CHR-RULE-MED-004]
+specification_version: 1.1.0
+expected: fail
+reason: The same submission has allow and deny decisions with no supersession.

@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.0.0",
+  "charterSpecVersion": "1.1.0",
   "namespace": "harbor.example",
   "kind": "ExceptionRecord",
   "id": "EXC-OE-2026-0042-01",

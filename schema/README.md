@@ -1,6 +1,6 @@
 # Charter Schemas
 
-Status: Version 1.0.0; every catalogued schema is normative and every conformance profile is active.
+Status: Version 1.1.0; every catalogued schema is normative and every conformance profile is active.
 
 This directory contains language-independent JSON Schemas for Charter instance documents. Schema structure mirrors the specification domains:
 
@@ -10,6 +10,7 @@ This directory contains language-independent JSON Schemas for Charter instance d
 - `binding/`: system profiles and capability, data, authority, and event bindings
 - `evidence/`: action evidence, decisions, exceptions, audit trails, and information provenance
 - `information/`: information definitions and governance policies
+- `mediation/`: mediation profiles and the decisions taken at them
 - `conformance/`: bounded conformance claims; rule activation remains outside the schema directory
 
 ## Authority and versioning

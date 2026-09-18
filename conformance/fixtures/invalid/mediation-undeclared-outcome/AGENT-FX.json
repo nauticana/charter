@@ -1,0 +1,19 @@
+{
+  "charterSpecVersion": "1.1.0",
+  "namespace": "fixture.example",
+  "kind": "AgentIdentity",
+  "id": "AGENT-FX",
+  "enterpriseId": "ENT-FX",
+  "name": "Fixture Agent",
+  "lifecycleState": "active",
+  "lifecycleHistory": [
+    {
+      "state": "active",
+      "effectiveAt": "2026-01-01T00:00:00Z"
+    }
+  ],
+  "lifecycleAuthority": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-FX"
+  }
+}

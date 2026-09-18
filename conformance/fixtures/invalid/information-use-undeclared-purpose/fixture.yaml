@@ -1,5 +1,5 @@
 rules: [CHR-RULE-RT-007]
-specification_version: 1.0.0
+specification_version: 1.1.0
 expected: fail
 reason: The invocation uses credit information for a purpose its governance policy does not permit; a conforming runtime denies before any external call
 documents: ../../../../examples/harbor-manufacturing/instances

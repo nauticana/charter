@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/conformance/rule_definition.schema.json",
   "title": "ConformanceRuleDefinition",
   "description": "Format of a conformance rule definition under conformance/rules: identity, requirement citations, verification class, and fixtures.",
-  "x-charter-spec-version": "1.0.0",
+  "x-charter-spec-version": "1.1.0",
   "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": ["CHR-CONF-006", "CHR-CONF-007", "CHR-CONF-011"],
   "type": "object",
