@@ -1,6 +1,6 @@
 # Evidence, Audit, Exceptions, and Escalation
 
-Status: Version 1.1.0
+Status: Version 1.2.0
 
 Evidence demonstrates what context, authority, decisions, and actions produced an outcome. An audit trail organizes evidence without requiring one storage technology.
 
@@ -16,5 +16,7 @@ Evidence demonstrates what context, authority, decisions, and actions produced a
 - **CHR-EVID-008:** Evidence retention and access MUST follow the information-governance constraints attached to the underlying data and action.
 - **CHR-EVID-009:** An implementation or conformance profile MUST NOT require disclosure of sensitive reasoning details or model traces when a sufficient decision rationale and evidence record can be produced without them.
 - **CHR-EVID-010:** An attempt at a governed action that is denied, that fails, or whose external outcome is unknown MUST be evidenced with the same attribution as an executed action, MUST state that disposition explicitly rather than only in free text, and MUST record the authority, approval, and information-governance evaluations made before it stopped.
+- **CHR-EVID-011:** The evaluation of a postcondition MUST state one of satisfied, violated, or unknown, the time of observation, and a reason, and a satisfied or violated evaluation MUST reference the observed-fact evidence supporting it. The external system's response and the independently observed state MUST remain distinct evidence records; a provider's acknowledgement is not evidence of the effect.
+- **CHR-EVID-012:** An unknown outcome of a mutating action MAY be reconciled only through a new observation of its declared postconditions. When the observed effects establish a declared outcome, a new action record with executed disposition MUST be appended that identifies the attempt it reconciles, and the operation MUST NOT be submitted again. While the observation is unavailable or contradictory the outcome remains unknown and escalation continues to apply. Reconciliation MUST preserve the original attempt, its external response, and its uncertainty; it never restates the first record as success.
 
 Evidence formats may be centralized, distributed, signed, or externally referenced, provided their declared conformance requirements are met.

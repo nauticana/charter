@@ -1,0 +1,11 @@
+id: CHR-RULE-CAP-002
+title: Executed actions rest on verified postconditions
+requirements: [CHR-CAP-009, CHR-CAP-010, CHR-EVID-011]
+profile: core-model
+verification: semantic
+applies_to: [CapabilityContract, ActionRecord]
+check: >-
+  A CapabilityContract declares each postcondition id once, applies it only to outcomes the contract declares, and maps a violation only to a business error the contract declares. For every ActionRecord whose capabilityId resolves to a CapabilityContract, each evaluated postcondition is one the contract declares, a satisfied or violated evaluation whose evidence resolves rests on observed-fact records, and an executed disposition has a satisfied evaluation of every verification-required postcondition applying to its outcome.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/executed-without-verified-effect

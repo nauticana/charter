@@ -54,12 +54,35 @@ func (f *fakeTransport) Execute(context.Context, binding.Request) (binding.Respo
 	return f.resp, f.err
 }
 
+// fakeObserver reports result for every requested postcondition, evidenced unless unevidenced is set.
+type fakeObserver struct {
+	calls       int
+	result      string
+	outcome     string
+	unevidenced bool
+	err         error
+}
+
+func (f *fakeObserver) Observe(_ context.Context, req binding.ObservationRequest) (binding.Observation, error) {
+	f.calls++
+	obs := binding.Observation{Outcome: f.outcome}
+	for _, p := range req.Postconditions {
+		e := model.PostconditionEvaluation{PostconditionID: p.ID, Result: f.result, Reason: "fake observation"}
+		if !f.unevidenced {
+			e.EvidenceRecordIDs = []model.Ref{{ID: "EVR-0042-RESERVATION-OBSERVED"}}
+		}
+		obs.Evaluations = append(obs.Evaluations, e)
+	}
+	return obs, f.err
+}
+
 type harness struct {
 	t          *testing.T
+	observer   *fakeObserver
 	corpus     *corpus.Corpus
 	sink       *evidence.BaseMemorySink
 	transport  *fakeTransport
-	invoker    *capability.AbstractInvoker
+	invoker    *capability.BaseInvoker
 	structural *validate.Structural
 }
 
@@ -91,7 +114,8 @@ func newHarness(t *testing.T) *harness {
 	}
 	sink := evidence.NewBaseMemorySink()
 	transport := &fakeTransport{resp: binding.Response{Outcome: "reserved", ExternalReference: "0000088421"}}
-	return &harness{t: t, corpus: c, sink: sink, transport: transport, structural: structural, invoker: &capability.AbstractInvoker{
+	observer := &fakeObserver{result: model.PostconditionSatisfied}
+	return &harness{t: t, corpus: c, sink: sink, transport: transport, observer: observer, structural: structural, invoker: &capability.BaseInvoker{
 		Catalog:    capability.NewBaseCatalog(c),
 		Identities: identity.NewBaseResolver(c),
 		Authority:  &authority.AbstractEvaluator{Source: authority.NewDocumentGrantSource(c)},
@@ -99,6 +123,7 @@ func newHarness(t *testing.T) *harness {
 		Sod:        capability.NewBaseSodChecker(c, evidence.NewBaseProvider(sink.Store)),
 		Bindings:   binding.NewBaseProvider(c),
 		Transport:  transport,
+		Observer:   observer,
 		Ledger:     capability.NewBaseMemoryLedger(),
 		Evidence:   sink,
 		IDs:        &capability.BaseCounterIDs{},
@@ -238,7 +263,7 @@ func TestDenialsFailClosedAndAreRecorded(t *testing.T) {
 	if res := h.invoker.Invoke(context.Background(), inv); res.Status != capability.StatusDenied || res.Requirement != "CHR-EVID-001" || res.Action != nil {
 		t.Errorf("unattributable invocation: %+v", res)
 	}
-	if res := (&capability.AbstractInvoker{}).Invoke(context.Background(), reserve()); res.Status != capability.StatusDenied {
+	if res := (&capability.BaseInvoker{}).Invoke(context.Background(), reserve()); res.Status != capability.StatusDenied {
 		t.Error("incomplete invoker must deny")
 	}
 }

@@ -81,7 +81,7 @@ func TestHarborQueries(t *testing.T) {
 	}
 	q := Queries{Provider: NewBaseProvider(c)}
 	ctx := context.Background()
-	if actions, err := q.ActionsBy(ctx, "harbor.example", model.ObjectRef{Kind: model.KindAgentIdentity, ID: "AGENT-ORDER-EXCEPTION-COORDINATOR"}); err != nil || len(actions) != 2 {
+	if actions, err := q.ActionsBy(ctx, "harbor.example", model.ObjectRef{Kind: model.KindAgentIdentity, ID: "AGENT-ORDER-EXCEPTION-COORDINATOR"}); err != nil || len(actions) != 3 {
 		t.Errorf("actions by agent: %d %v", len(actions), err)
 	}
 	if lineage, err := q.Lineage(ctx, "harbor.example", model.Ref{ID: "EVR-0042-STOCK-CORRECTED"}); err != nil || len(lineage) != 2 || lineage[1].ID != "EVR-0042-STOCK-OBSERVED" {
@@ -111,7 +111,7 @@ func TestRedactionAndAssembly(t *testing.T) {
 	}
 	subject := model.ObjectRef{Kind: model.KindProcessInstance, ID: "PROCINST-OE-2026-0042"}
 	refs, err := (Queries{Provider: NewBaseProvider(c)}).RecordsAbout(ctx, "harbor.example", subject)
-	if err != nil || len(refs) != 5 || refs[0].ID != "ACT-0042-READ-1" || refs[1].ID != "EVR-0042-STOCK-OBSERVED" || refs[2].ID != "ACT-0042-EXECUTE-1" {
+	if err != nil || len(refs) != 7 || refs[0].ID != "ACT-0042-READ-1" || refs[1].ID != "EVR-0042-STOCK-OBSERVED" || refs[2].ID != "ACT-0042-EXECUTE-TIMEOUT" || refs[3].ID != "ACT-0042-EXECUTE-1" {
 		t.Errorf("records about the process instance: %v %v", refs, err)
 	}
 	harborSink := &AbstractSink{Store: &memorySource{c}, Digester: BaseSHA256Digester{}}
@@ -119,7 +119,7 @@ func TestRedactionAndAssembly(t *testing.T) {
 	bundle.CharterSpecVersion, bundle.Namespace, bundle.ID = "1.0.0", "harbor.example", "EVID-ASSEMBLED"
 	bundle.EnterpriseID = &model.Ref{ID: "ENT-HARBOR"}
 	assembled, err := harborSink.Assemble(ctx, bundle)
-	if err != nil || len(assembled.RecordIDs) != 5 || assembled.Integrity.Value == "" {
+	if err != nil || len(assembled.RecordIDs) != 7 || assembled.Integrity.Value == "" {
 		t.Fatalf("assemble: %+v %v", assembled, err)
 	}
 	if err := (Verifier{Source: harborSink.Store, Digester: BaseSHA256Digester{}}).Verify(ctx, "harbor.example", model.Ref{ID: "EVID-ASSEMBLED"}); err != nil {
@@ -143,4 +143,28 @@ func (m *memorySource) Append(_ context.Context, d *model.Document) error {
 		return ErrDuplicate
 	}
 	return m.Add(d)
+}
+
+func TestSealedRecordVerifiesOutsideABundle(t *testing.T) {
+	ctx := context.Background()
+	sink := NewBaseMemorySink()
+	sealed := record("EVR-SEALED", model.CategoryObservedFact, "reservation 0000088421 read back", nil)
+	Seal(&sealed, BaseSHA256Digester{})
+	tampered := record("EVR-TAMPERED", model.CategoryObservedFact, "reservation 0000088421 read back", nil)
+	Seal(&tampered, BaseSHA256Digester{})
+	tampered.Content = "reservation 0000099999 read back"
+	for _, r := range []model.EvidenceRecord{sealed, tampered, record("EVR-UNSEALED", model.CategoryObservedFact, "x", nil)} {
+		if err := sink.Record(ctx, r); err != nil {
+			t.Fatal(err)
+		}
+	}
+	v := Verifier{Source: sink.Store, Digester: BaseSHA256Digester{}}
+	if err := v.VerifyRecord(ctx, "t.example", model.Ref{ID: "EVR-SEALED"}); err != nil {
+		t.Errorf("sealed record: %v", err)
+	}
+	for _, id := range []string{"EVR-TAMPERED", "EVR-UNSEALED"} {
+		if err := v.VerifyRecord(ctx, "t.example", model.Ref{ID: id}); !errors.Is(err, ErrIntegrity) {
+			t.Errorf("%s: %v", id, err)
+		}
+	}
 }

@@ -1,0 +1,4 @@
+rules: [CHR-RULE-CAP-002]
+specification_version: 1.2.0
+expected: fail
+reason: The action record claims an executed disposition while POST-FX, which CAP-FX requires to be verified, was evaluated as unknown

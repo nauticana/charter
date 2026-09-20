@@ -1,0 +1,46 @@
+{
+  "charterSpecVersion": "1.2.0",
+  "namespace": "harbor.example",
+  "kind": "ActionRecord",
+  "id": "ACT-0042-EXECUTE-TIMEOUT",
+  "enterpriseId": "ENT-HARBOR",
+  "actor": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "runtimeContext": {
+    "runtimeInstanceId": "RT-OEC-PROD-01",
+    "executionContextId": "EXEC-OE-0042-05"
+  },
+  "assignmentId": "ASGN-OEC-ORDER-EXCEPTION-SUPPORT",
+  "capabilityId": "CAP-RESERVE-ORDER-STOCK",
+  "materialInputsDigest": "sha256:4f1d2a9c7b3e5d6f8a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f",
+  "subjectRefs": [
+    {
+      "kind": "ProcessInstance",
+      "id": "PROCINST-OE-2026-0042"
+    }
+  ],
+  "operationClass": "execute",
+  "actionTime": "2026-06-18T17:12:30Z",
+  "outcome": "unknown",
+  "disposition": "unknown",
+  "authorityEvaluations": [
+    {
+      "authorityGrantId": "AUTH-OEC-STOCK-RESERVATION-2026",
+      "result": "allowed",
+      "reason": "grant active; USD 18,500 within USD 25,000 and 48 hours within 72 hours"
+    }
+  ],
+  "approvalEvaluations": [
+    {
+      "approvalId": "APPR-OE-2026-0042-CREDIT-01",
+      "approvedAction": "CAP-APPROVE-CREDIT-EXCEPTION",
+      "result": "approved",
+      "reason": "material inputs digest matches; approval not expired"
+    }
+  ],
+  "approvalIds": [
+    "APPR-OE-2026-0042-CREDIT-01"
+  ]
+}

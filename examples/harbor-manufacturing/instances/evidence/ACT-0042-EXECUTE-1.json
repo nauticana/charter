@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.1.0",
+  "charterSpecVersion": "1.2.0",
   "namespace": "harbor.example",
   "kind": "ActionRecord",
   "id": "ACT-0042-EXECUTE-1",
@@ -22,7 +22,7 @@
     }
   ],
   "operationClass": "execute",
-  "actionTime": "2026-06-18T17:12:30Z",
+  "actionTime": "2026-06-18T17:15:45Z",
   "outcome": "already-reserved",
   "disposition": "executed",
   "authorityEvaluations": [
@@ -45,6 +45,19 @@
   ],
   "evidenceRecordIds": [
     "EVR-0042-SAP-RESERVATION",
+    "EVR-0042-RESERVATION-OBSERVED",
     "EVR-0042-COVERAGE"
-  ]
+  ],
+  "postconditionEvaluations": [
+    {
+      "postconditionId": "POST-RESERVATION-HELD",
+      "result": "satisfied",
+      "reason": "reservation 0000088421 holds the requested quantities and expiry",
+      "observedAt": "2026-06-18T17:15:42Z",
+      "evidenceRecordIds": [
+        "EVR-0042-RESERVATION-OBSERVED"
+      ]
+    }
+  ],
+  "reconcilesActionId": "ACT-0042-EXECUTE-TIMEOUT"
 }

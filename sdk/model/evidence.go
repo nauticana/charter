@@ -56,24 +56,43 @@ type ApprovalEvaluation struct {
 	Reason         string `json:"reason"`
 }
 
+const (
+	PostconditionSatisfied = "satisfied"
+	PostconditionViolated  = "violated"
+	PostconditionUnknown   = "unknown"
+)
+
+// PostconditionEvaluation is the observed state of one declared postcondition; EvidenceRecordIDs name the observed-fact
+// records supporting it (CHR-EVID-011).
+type PostconditionEvaluation struct {
+	PostconditionID   string    `json:"postconditionId"`
+	Result            string    `json:"result"`
+	Reason            string    `json:"reason"`
+	ObservedAt        time.Time `json:"observedAt"`
+	EvidenceRecordIDs []Ref     `json:"evidenceRecordIds,omitempty"`
+}
+
 type ActionRecord struct {
 	Envelope
-	Actor                  ObjectRef               `json:"actor"`
-	RuntimeContext         RuntimeContext          `json:"runtimeContext"`
-	AssignmentID           *Ref                    `json:"assignmentId,omitempty"`
-	ResponsibilityID       *Ref                    `json:"responsibilityId,omitempty"`
-	CapabilityID           Ref                     `json:"capabilityId"`
-	MaterialInputsDigest   string                  `json:"materialInputsDigest,omitempty"`
-	SubjectRefs            []ObjectRef             `json:"subjectRefs,omitempty"`
-	OperationClass         string                  `json:"operationClass"`
-	ActionTime             time.Time               `json:"actionTime"`
-	Outcome                string                  `json:"outcome"`
-	Disposition            string                  `json:"disposition"`
-	AuthorityEvaluations   []AuthorityEvaluation   `json:"authorityEvaluations,omitempty"`
-	ApprovalEvaluations    []ApprovalEvaluation    `json:"approvalEvaluations,omitempty"`
-	InformationEvaluations []InformationEvaluation `json:"informationEvaluations,omitempty"`
-	ApprovalIDs            []Ref                   `json:"approvalIds,omitempty"`
-	EvidenceRecordIDs      []Ref                   `json:"evidenceRecordIds,omitempty"`
+	Actor                    ObjectRef                 `json:"actor"`
+	RuntimeContext           RuntimeContext            `json:"runtimeContext"`
+	AssignmentID             *Ref                      `json:"assignmentId,omitempty"`
+	ResponsibilityID         *Ref                      `json:"responsibilityId,omitempty"`
+	CapabilityID             Ref                       `json:"capabilityId"`
+	MaterialInputsDigest     string                    `json:"materialInputsDigest,omitempty"`
+	SubjectRefs              []ObjectRef               `json:"subjectRefs,omitempty"`
+	OperationClass           string                    `json:"operationClass"`
+	ActionTime               time.Time                 `json:"actionTime"`
+	Outcome                  string                    `json:"outcome"`
+	Disposition              string                    `json:"disposition"`
+	AuthorityEvaluations     []AuthorityEvaluation     `json:"authorityEvaluations,omitempty"`
+	ApprovalEvaluations      []ApprovalEvaluation      `json:"approvalEvaluations,omitempty"`
+	InformationEvaluations   []InformationEvaluation   `json:"informationEvaluations,omitempty"`
+	ApprovalIDs              []Ref                     `json:"approvalIds,omitempty"`
+	EvidenceRecordIDs        []Ref                     `json:"evidenceRecordIds,omitempty"`
+	PostconditionEvaluations []PostconditionEvaluation `json:"postconditionEvaluations,omitempty"`
+	// ReconcilesActionID names the earlier attempt whose unknown outcome this record resolves (CHR-EVID-012).
+	ReconcilesActionID *Ref `json:"reconcilesActionId,omitempty"`
 }
 
 const (
@@ -92,6 +111,8 @@ type EvidenceRecord struct {
 	Sources         []string  `json:"sources,omitempty"`
 	Transformations []string  `json:"transformations,omitempty"`
 	Supersedes      *Ref      `json:"supersedes,omitempty"`
+	// Integrity digests Content, so one immutable record is verifiable outside a bundle (CHR-EVID-005).
+	Integrity *Integrity `json:"integrity,omitempty"`
 }
 
 type Integrity struct {

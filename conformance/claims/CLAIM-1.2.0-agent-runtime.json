@@ -1,11 +1,11 @@
 {
-  "charterSpecVersion": "1.1.0",
+  "charterSpecVersion": "1.2.0",
   "namespace": "nauticana.charter",
-  "id": "CLAIM-1.1.0-agent-runtime",
+  "id": "CLAIM-1.2.0-agent-runtime",
   "kind": "ConformanceClaim",
-  "name": "Reference SDK agent-runtime claim 1.1.0",
+  "name": "Reference SDK agent-runtime claim 1.2.0",
   "conformanceProfile": "agent-runtime",
-  "implementationVersion": "1.1.0",
+  "implementationVersion": "1.2.0",
   "testedRuleIds": [
     "CHR-RULE-RT-001",
     "CHR-RULE-RT-002",
@@ -14,14 +14,16 @@
     "CHR-RULE-RT-005",
     "CHR-RULE-RT-006",
     "CHR-RULE-RT-007",
-    "CHR-RULE-RT-008"
+    "CHR-RULE-RT-008",
+    "CHR-RULE-RT-009",
+    "CHR-RULE-RT-010"
   ],
   "verificationTypes": [
     "structural",
     "runtime-behavioral"
   ],
   "result": "conforming",
-  "resultDate": "2026-09-17",
+  "resultDate": "2026-09-19",
   "implementation": {
     "kind": "GoModule",
     "id": "charter-go-sdk",
@@ -65,6 +67,16 @@
     },
     {
       "ruleId": "CHR-RULE-RT-008",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-RT-009",
+      "verificationType": "runtime-behavioral",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-RT-010",
       "verificationType": "runtime-behavioral",
       "result": "pass"
     }

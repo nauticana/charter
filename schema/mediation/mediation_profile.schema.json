@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/mediation/mediation_profile.schema.json",
   "title": "MediationProfile",
   "description": "A declared mediation point: the stage it mediates, the outcomes it may issue, its failure policy, decision budget, coverage, and attribute trust.",
-  "x-charter-spec-version": "1.1.0",
+  "x-charter-spec-version": "1.2.0",
   "x-charter-schema-version": "2.1.0",
   "x-charter-requirements": [
     "CHR-MED-001",

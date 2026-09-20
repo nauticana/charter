@@ -1,5 +1,5 @@
 rules: [CHR-RULE-RT-003]
-specification_version: 1.1.0
+specification_version: 1.2.0
 expected: pass
 documents: ../../../../examples/harbor-manufacturing/instances
 scenario:
@@ -28,8 +28,10 @@ scenario:
     - name: first execution
       invoke: {}
       transport: {outcome: reserved, reference: "0000088421"}
+      observation: {postconditions: {POST-RESERVATION-HELD: satisfied}}
       expect: {status: executed, transport_calls: 1, evidence: true}
     - name: replay of the same idempotency key
       invoke: {}
       transport: {outcome: reserved, reference: "0000088421"}
+      observation: {postconditions: {POST-RESERVATION-HELD: satisfied}}
       expect: {status: executed, outcome: reserved, transport_calls: 1}

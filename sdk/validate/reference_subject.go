@@ -20,11 +20,11 @@ type ReferenceSubject struct{}
 
 var _ Subject = ReferenceSubject{}
 
-func (ReferenceSubject) Compose(_ context.Context, documents corpus.Source, transport binding.Executor) (Runtime, error) {
+func (ReferenceSubject) Compose(_ context.Context, documents corpus.Source, external External) (Runtime, error) {
 	sink := evidence.NewBaseMemorySink()
 	ids := &capability.BaseCounterIDs{Prefix: "RT-"}
 	agents, org := agent.NewBaseProvider(documents), organization.NewBaseProvider(documents)
-	invoker := &capability.AbstractInvoker{
+	invoker := &capability.BaseInvoker{
 		Catalog:     capability.NewBaseCatalog(documents),
 		Identities:  identity.NewBaseResolver(documents),
 		Authority:   &authority.AbstractEvaluator{Source: authority.NewDocumentGrantSource(documents)},
@@ -32,12 +32,13 @@ func (ReferenceSubject) Compose(_ context.Context, documents corpus.Source, tran
 		Sod:         capability.NewBaseSodChecker(documents, evidence.NewBaseProvider(sink.Store)),
 		Information: &information.BaseEvaluator{Provider: information.NewBaseProvider(documents)},
 		Bindings:    binding.NewBaseProvider(documents),
-		Transport:   transport,
+		Transport:   external.Transport,
+		Observer:    external.Observer,
 		Ledger:      capability.NewBaseMemoryLedger(),
 		Evidence:    sink,
 		Escalation:  &capability.BaseEscalator{Recipients: &capability.BaseAccountableRecipient{Agents: agents, Organization: org}, IDs: ids},
 		IDs:         ids,
 	}
 	admission := &agent.BaseAdmission{Agents: agents, Assignments: org}
-	return Runtime{Admission: admission, Invoker: invoker, Evidence: evidence.NewBaseProvider(sink.Store)}, nil
+	return Runtime{Admission: admission, Invoker: invoker, Reconciler: invoker, Evidence: evidence.NewBaseProvider(sink.Store)}, nil
 }

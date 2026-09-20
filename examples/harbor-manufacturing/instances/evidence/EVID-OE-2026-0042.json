@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.1.0",
+  "charterSpecVersion": "1.2.0",
   "namespace": "harbor.example",
   "kind": "EvidenceBundle",
   "id": "EVID-OE-2026-0042",
@@ -13,9 +13,11 @@
     "EVR-0042-CLASSIFICATION",
     "EVR-0042-CREDIT-DECISION",
     "EVR-0042-SAP-RESERVATION",
+    "EVR-0042-RESERVATION-OBSERVED",
     "EVR-0042-COVERAGE",
     "EVR-0042-STOCK-CORRECTED",
     "ACT-0042-READ-1",
+    "ACT-0042-EXECUTE-TIMEOUT",
     "ACT-0042-EXECUTE-1",
     "EXC-OE-2026-0042-01",
     "ESC-OE-2026-0042-01"

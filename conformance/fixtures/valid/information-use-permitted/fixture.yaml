@@ -1,5 +1,5 @@
 rules: [CHR-RULE-RT-007]
-specification_version: 1.1.0
+specification_version: 1.2.0
 expected: pass
 documents: ../../../../examples/harbor-manufacturing/instances
 scenario:
@@ -29,4 +29,5 @@ scenario:
       invoke:
         information_uses: [{information: INFO-CREDIT-STATUS-SUMMARY, purpose: governed approval and execution}]
       transport: {outcome: reserved, reference: "0000088421"}
+      observation: {postconditions: {POST-RESERVATION-HELD: satisfied}}
       expect: {status: executed, transport_calls: 1, evidence: true}

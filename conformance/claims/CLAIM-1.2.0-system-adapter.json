@@ -1,11 +1,11 @@
 {
-  "charterSpecVersion": "1.1.0",
+  "charterSpecVersion": "1.2.0",
   "namespace": "nauticana.charter",
-  "id": "CLAIM-1.1.0-system-adapter",
+  "id": "CLAIM-1.2.0-system-adapter",
   "kind": "ConformanceClaim",
-  "name": "Reference SDK system-adapter claim 1.1.0",
+  "name": "Reference SDK system-adapter claim 1.2.0",
   "conformanceProfile": "system-adapter",
-  "implementationVersion": "1.1.0",
+  "implementationVersion": "1.2.0",
   "testedRuleIds": [
     "CHR-RULE-SA-001",
     "CHR-RULE-SA-002",
@@ -17,7 +17,7 @@
     "runtime-behavioral"
   ],
   "result": "conforming",
-  "resultDate": "2026-09-17",
+  "resultDate": "2026-09-19",
   "implementation": {
     "kind": "GoModule",
     "id": "charter-go-sdk",

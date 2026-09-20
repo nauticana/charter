@@ -51,3 +51,27 @@ func (v Verifier) chain(ctx context.Context, b model.EvidenceBundle) (string, er
 	}
 	return v.Digester.Chain(digests), nil
 }
+
+// Seal sets the record's integrity to the digest of its content.
+func Seal(r *model.EvidenceRecord, d Digester) {
+	r.Integrity = &model.Integrity{Method: d.Method(), Value: d.Digest([]byte(r.Content))}
+}
+
+// VerifyRecord recomputes the content digest of one sealed record; an unsealed record fails.
+func (v Verifier) VerifyRecord(ctx context.Context, ownerNamespace string, record model.Ref) error {
+	d, err := v.Source.Fetch(ctx, corpus.KeyOf(ownerNamespace, record))
+	if err != nil {
+		return err
+	}
+	r, err := corpus.Decode[model.EvidenceRecord](d)
+	if err != nil {
+		return err
+	}
+	if r.Integrity == nil || r.Integrity.Method != v.Digester.Method() {
+		return fmt.Errorf("%w: record %s is not sealed with %s", ErrIntegrity, r.ID, v.Digester.Method())
+	}
+	if v.Digester.Digest([]byte(r.Content)) != r.Integrity.Value {
+		return fmt.Errorf("%w: record %s", ErrIntegrity, r.ID)
+	}
+	return nil
+}

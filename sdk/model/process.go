@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 type ValueStream struct {
 	Envelope
@@ -76,6 +79,23 @@ type CapabilityConstraints struct {
 type Idempotency struct {
 	Mutating       bool   `json:"mutating"`
 	RetrySemantics string `json:"retrySemantics"`
+	// RetryWhenEffectAbsent declares that the mutation may be sent again once its effect is observed absent (CHR-CAP-010).
+	RetryWhenEffectAbsent bool `json:"retryWhenEffectAbsent,omitempty"`
+}
+
+// Postcondition is an externally observable effect of a capability. Outcomes limits it to those declared outcomes;
+// empty applies it to every outcome (CHR-CAP-009).
+type Postcondition struct {
+	ID                     string   `json:"id"`
+	Statement              string   `json:"statement"`
+	VerificationRequired   bool     `json:"verificationRequired"`
+	Outcomes               []string `json:"outcomes,omitempty"`
+	ViolationBusinessError string   `json:"violationBusinessError,omitempty"`
+}
+
+// AppliesTo reports whether the postcondition must hold for a declared outcome; an empty outcome matches every postcondition.
+func (p Postcondition) AppliesTo(outcome string) bool {
+	return outcome == "" || len(p.Outcomes) == 0 || slices.Contains(p.Outcomes, outcome)
 }
 
 type CapabilityContract struct {
@@ -92,6 +112,18 @@ type CapabilityContract struct {
 	Constraints          CapabilityConstraints `json:"constraints"`
 	Idempotency          Idempotency           `json:"idempotency"`
 	EvidenceRequirements []string              `json:"evidenceRequirements"`
+	Postconditions       []Postcondition       `json:"postconditions,omitempty"`
+}
+
+// RequiredPostconditions are the postconditions that must be verified before outcome may be recorded as executed.
+func (c CapabilityContract) RequiredPostconditions(outcome string) []Postcondition {
+	var out []Postcondition
+	for _, p := range c.Postconditions {
+		if p.VerificationRequired && p.AppliesTo(outcome) {
+			out = append(out, p)
+		}
+	}
+	return out
 }
 
 const (

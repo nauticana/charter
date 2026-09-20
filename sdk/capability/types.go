@@ -65,6 +65,7 @@ type Result struct {
 	Authority         authority.Decision
 	Approval          authority.ApprovalDecision
 	Information       []information.Decision
+	Postconditions    []model.PostconditionEvaluation
 	SodConflict       *model.Ref
 	Binding           *model.Ref
 	Action            *model.ActionRecord
@@ -76,4 +77,17 @@ type Result struct {
 
 type Invoker interface {
 	Invoke(ctx context.Context, inv Invocation) Result
+}
+
+// Reconciliation resolves the unknown outcome of an earlier attempt. Invocation repeats that attempt's attribution,
+// inputs, and idempotency key at the time of reconciliation; Fence is the claim its Result carried.
+type Reconciliation struct {
+	Invocation Invocation
+	Action     model.Ref
+	Fence      string
+}
+
+// Reconciler settles an unknown outcome from observed effects alone; it never sends the mutation (CHR-EVID-012).
+type Reconciler interface {
+	Reconcile(ctx context.Context, rec Reconciliation) Result
 }

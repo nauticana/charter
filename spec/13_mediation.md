@@ -1,6 +1,6 @@
 # Mediation of Governed Acts
 
-Status: Version 1.1.0
+Status: Version 1.2.0
 
 A mediation point is a place where a governed act is submitted for a decision before it takes effect, and where the decision is made by a party other than the actor performing the act. Platforms that host agents increasingly offer such a callout so that an enterprise can govern acts it does not itself execute.
 

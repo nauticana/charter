@@ -54,7 +54,8 @@ This catalogue gives the recurring Harbor Manufacturing objects stable example i
 | Data binding | `DATABIND-S4-ORDER-EXCEPTION-1` | Order and reservation field mappings |
 | Authority binding | `AUTHBIND-S4-RESERVE-ORDER-STOCK-1` | Grant enforcement ahead of SAP authorization |
 | Event binding | `EVTBIND-S4-ORDER-BLOCKED-1` | Blocked-order event to the agent trigger |
-| Action record | `ACT-0042-EXECUTE-1` | Governed execution of the stock reservation |
+| Action record | `ACT-0042-EXECUTE-TIMEOUT` | Reservation attempt whose outcome was unknown |
+| Action record | `ACT-0042-EXECUTE-1` | Reconciliation of that attempt from the observed reservation |
 | Exception | `EXC-OE-2026-0042-01` | Reservation response timed out |
 | Escalation | `ESC-OE-2026-0042-01` | Unknown outcome escalated to the accountable position |
 | Evidence bundle | `EVID-OE-2026-0042` | Evidence for the example process instance |

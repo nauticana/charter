@@ -3,11 +3,13 @@
   "$id": "https://nauticana.github.io/charter/schema/evidence/evidence_record.schema.json",
   "title": "EvidenceRecord",
   "description": "One categorized record; corrections supersede rather than replace.",
-  "x-charter-spec-version": "1.1.0",
-  "x-charter-schema-version": "2.0.0",
+  "x-charter-spec-version": "1.2.0",
+  "x-charter-schema-version": "2.2.0",
   "x-charter-requirements": [
     "CHR-EVID-003",
     "CHR-EVID-004",
+    "CHR-EVID-005",
+    "CHR-EVID-011",
     "CHR-INFO-004"
   ],
   "type": "object",
@@ -77,6 +79,10 @@
       "x-charter-ref-kinds": [
         "EvidenceRecord"
       ]
+    },
+    "integrity": {
+      "$ref": "../common.schema.json#/$defs/integrity",
+      "description": "Digest of the content member, so one immutable record is verifiable outside a bundle."
     }
   },
   "required": [

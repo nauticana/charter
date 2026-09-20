@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-009
+title: An accepted mutation is executed only once its effect is observed
+requirements: [CHR-CAP-010, CHR-EVID-011]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  For a mutating capability with verification-required postconditions, the runtime observes the external state after the external system accepts the mutation. It reports executed, with the evaluations recorded, only when every required postcondition applying to the outcome is satisfied on observed-fact evidence; failed when one is violated; and unknown when the observation fails or reports a result without evidence. It never sends the mutation again under the same key.
+fixtures:
+  valid: fixtures/valid/verified-effect
+  invalid: fixtures/invalid/unverified-effect

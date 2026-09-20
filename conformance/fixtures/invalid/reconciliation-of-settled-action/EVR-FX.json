@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "1.2.0",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "EvidenceRecord",
+  "id": "EVR-FX",
+  "category": "observed-fact",
+  "content": "fixture effect read back",
+  "recordedAt": "2026-06-18T17:00:05Z",
+  "sources": [
+    "fixture read"
+  ]
+}

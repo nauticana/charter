@@ -3,12 +3,15 @@
   "$id": "https://nauticana.github.io/charter/schema/evidence/action_record.schema.json",
   "title": "ActionRecord",
   "description": "Evidence for one governed action, attributable to identity and runtime context.",
-  "x-charter-spec-version": "1.1.0",
-  "x-charter-schema-version": "2.0.0",
+  "x-charter-spec-version": "1.2.0",
+  "x-charter-schema-version": "2.2.0",
   "x-charter-requirements": [
     "CHR-EVID-001",
     "CHR-EVID-002",
     "CHR-EVID-010",
+    "CHR-EVID-011",
+    "CHR-EVID-012",
+    "CHR-CAP-010",
     "CHR-AGENT-006",
     "CHR-INFO-007"
   ],
@@ -41,6 +44,18 @@
         "required": [
           "materialInputsDigest",
           "subjectRefs"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "reconcilesActionId"
+        ]
+      },
+      "then": {
+        "required": [
+          "postconditionEvaluations"
         ]
       }
     }
@@ -304,6 +319,79 @@
       "x-charter-ref-kinds": [
         "EvidenceRecord"
       ]
+    },
+    "postconditionEvaluations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Observed state of the capability's declared postconditions (CHR-EVID-011).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "postconditionId": {
+            "$ref": "../common.schema.json#/$defs/identifier"
+          },
+          "result": {
+            "enum": [
+              "satisfied",
+              "violated",
+              "unknown"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "evidenceRecordIds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "../common.schema.json#/$defs/idRef"
+            },
+            "x-charter-ref-kinds": [
+              "EvidenceRecord"
+            ],
+            "description": "Observed-fact records of the external state; an external response is not effect evidence."
+          }
+        },
+        "required": [
+          "postconditionId",
+          "result",
+          "reason",
+          "observedAt"
+        ],
+        "additionalProperties": false,
+        "if": {
+          "properties": {
+            "result": {
+              "enum": [
+                "satisfied",
+                "violated"
+              ]
+            }
+          },
+          "required": [
+            "result"
+          ]
+        },
+        "then": {
+          "required": [
+            "evidenceRecordIds"
+          ]
+        }
+      }
+    },
+    "reconcilesActionId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "ActionRecord"
+      ],
+      "description": "The earlier attempt whose unknown outcome this record resolves from observed effects; that record is never rewritten (CHR-EVID-012)."
     }
   },
   "required": [

@@ -1,6 +1,6 @@
 # Charter Schemas
 
-Status: Version 1.1.0; every catalogued schema is normative and every conformance profile is active.
+Status: Version 1.2.0; every catalogued schema is normative and every conformance profile is active.
 
 This directory contains language-independent JSON Schemas for Charter instance documents. Schema structure mirrors the specification domains:
 

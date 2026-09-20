@@ -1,0 +1,11 @@
+id: CHR-RULE-EVID-002
+title: Reconciliation resolves an unknown attempt without rewriting it
+requirements: [CHR-EVID-004, CHR-EVID-012]
+profile: core-model
+verification: semantic
+applies_to: [ActionRecord]
+check: >-
+  For every ActionRecord whose reconcilesActionId resolves to an ActionRecord, the reconciled record has disposition unknown, names the same actor and capability, and does not follow the reconciling record in time.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/reconciliation-of-settled-action

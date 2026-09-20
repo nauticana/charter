@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-010
+title: Unknown outcomes are reconciled from observation, never by re-execution
+requirements: [CHR-CAP-004, CHR-EVID-004, CHR-EVID-012, CHR-SEC-008]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  Reconciling an unknown attempt observes its declared postconditions without calling the transport. When the observed effects establish a declared outcome the runtime appends an executed record naming the attempt it reconciles, and a later replay of the key returns that result. While the observation is unavailable the attempt stays unknown and a retry is refused; an effect observed absent settles the key as failed and is retried under that key only when the contract declares it safe.
+fixtures:
+  valid: fixtures/valid/reconciled-unknown-outcome
+  invalid: fixtures/invalid/blind-retry-after-unknown

@@ -9,7 +9,7 @@ A runtime such as Scout needs one composition that evaluates every action agains
 
 ## Decision
 
-`capability.AbstractInvoker` runs a fixed gate order around an abstract `binding.Executor`:
+`capability.BaseInvoker` runs a fixed gate order around an abstract `binding.Executor`:
 
 1. Contract resolution and version compatibility (`VersionPolicy`; same major, offered minor not older).
 2. Actor lifecycle: the actor must be active at the action time (CHR-ID-005), independently of any admission the runtime performed earlier.
@@ -21,8 +21,11 @@ A runtime such as Scout needs one composition that evaluates every action agains
 8. Idempotency for mutating contracts: a key is required, a completed key replays the prior result without execution, an in-flight or unknown key blocks retry until reconciled through the ledger.
 9. Transport. An error wrapping `binding.ErrNotExecuted` proves nothing happened and releases the key; any other error is an unknown outcome and marks the key unknown.
 10. Verification: an outcome or business error the contract does not declare is reported as unknown, never as success.
-11. Evidence: an `ActionRecord` is appended for every non-replay pipeline decision, including denials. A completed replay returns its previously recorded result without appending another action. A gate that denies before authority was evaluated records the authority evaluation as `error: not evaluated`; an approval that was required but never evaluated is recorded as `missing`. No record is written for pre-contract composition or invocation-shape failures, or when the contract itself cannot be resolved, because no valid operation class is available.
-12. Escalation: after evidence is recorded, a composed `Escalator` may append an exception and escalation for configured stopped dispositions; escalation failures are returned rather than suppressed.
+11. Effect verification for mutating contracts that declare postconditions: a `binding.Observer` reads the external state after an accepted mutation. Executed requires every verification-required postcondition applying to the outcome to be satisfied on observed-fact evidence; a violation is failed (or its mapped business error) and settles the key, released for retry only when the contract declares that safe; a failed or unevidenced observation is unknown (CHR-CAP-010, CHR-EVID-011). A contract with required postconditions is denied before the transport when no observer is composed.
+12. Evidence: an `ActionRecord` is appended for every non-replay pipeline decision, including denials. A completed replay returns its previously recorded result without appending another action. A gate that denies before authority was evaluated records the authority evaluation as `error: not evaluated`; an approval that was required but never evaluated is recorded as `missing`. No record is written for pre-contract composition or invocation-shape failures, or when the contract itself cannot be resolved, because no valid operation class is available.
+13. Escalation: after evidence is recorded, a composed `Escalator` may append an exception and escalation for configured stopped dispositions; escalation failures are returned rather than suppressed.
+
+`BaseInvoker.Reconcile` settles an unknown attempt through the same gates followed by the ledger fence and the observer, never the transport, and appends a record naming the attempt it reconciles (CHR-EVID-012).
 
 Approval evaluation lives in `authority`, not `capability`, because approvals are authority semantics; the separation-of-duties primitives live there for the same reason.
 

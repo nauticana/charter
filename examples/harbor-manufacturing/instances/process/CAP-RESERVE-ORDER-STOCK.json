@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.1.0",
+  "charterSpecVersion": "1.2.0",
   "namespace": "harbor.example",
   "kind": "CapabilityContract",
   "id": "CAP-RESERVE-ORDER-STOCK",
@@ -65,5 +65,16 @@
     "authority and approval decisions",
     "execution reference",
     "verified outcome"
+  ],
+  "postconditions": [
+    {
+      "id": "POST-RESERVATION-HELD",
+      "statement": "The system of record holds a reservation for the order's eligible lines with the requested quantities and expiry",
+      "verificationRequired": true,
+      "outcomes": [
+        "reserved",
+        "already-reserved"
+      ]
+    }
   ]
 }

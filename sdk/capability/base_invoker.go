@@ -14,11 +14,11 @@ import (
 	"github.com/nauticana/charter/sdk/model"
 )
 
-// AbstractInvoker runs the governed invocation pipeline around an abstract binding.Executor: contract and version,
+// BaseInvoker runs the governed invocation pipeline around an abstract binding.Executor: contract and version,
 // actor lifecycle, authority, approval, separation of duties, information governance, binding feature support,
-// idempotency, execution, outcome verification, evidence, and escalation of stopped actions. Every gate fails closed
+// idempotency, execution, outcome and effect verification, evidence, and escalation of stopped actions. Every gate fails closed
 // and every governed decision is recorded (CHR-AUTH-010, CHR-AGENT-008).
-type AbstractInvoker struct {
+type BaseInvoker struct {
 	Catalog     Catalog
 	Versions    VersionPolicy
 	Identities  identity.Resolver
@@ -29,53 +29,67 @@ type AbstractInvoker struct {
 	Information information.Evaluator
 	Bindings    binding.Provider
 	Transport   binding.Executor
-	Ledger      Ledger
-	Evidence    evidence.Sink
-	Escalation  Escalator
-	IDs         IDGenerator
+	// Observer reads external effects; a mutating contract with required postconditions is denied without one.
+	Observer   binding.Observer
+	Ledger     Ledger
+	Evidence   evidence.Sink
+	Escalation Escalator
+	IDs        IDGenerator
 	// ReadWithoutGrant lets a read-class contract proceed on its assignment when no grant exists; denials still deny.
 	ReadWithoutGrant bool
 }
 
-var _ Invoker = (*AbstractInvoker)(nil)
+var _ Invoker = (*BaseInvoker)(nil)
 
-func (i *AbstractInvoker) Invoke(ctx context.Context, inv Invocation) Result {
-	if i.Catalog == nil || i.Identities == nil || i.Authority == nil || i.Bindings == nil || i.Transport == nil || i.Evidence == nil || i.IDs == nil {
-		return Result{Status: StatusDenied, Reason: "invoker is not fully composed", Requirement: "CHR-AUTH-010"}
-	}
-	if inv.AssignmentID == nil && inv.ResponsibilityID == nil {
-		return Result{Status: StatusDenied, Reason: "invocation names neither assignment nor responsibility", Requirement: "CHR-EVID-001"}
-	}
-	contract, err := i.Catalog.Contract(ctx, inv.Namespace, inv.CapabilityID)
-	if err != nil {
-		return Result{Status: StatusDenied, Reason: "capability contract: " + err.Error(), Requirement: "CHR-CAP-001", Err: err}
-	}
-	r := &run{invoker: i, inv: inv, contract: contract}
-	if !contract.Constraints.ApprovalRequired {
-		r.result.Approval = authority.ApprovalDecision{Result: authority.ApprovalResult(model.ApprovalNotRequired), Reason: "contract requires no approval"}
+func (i *BaseInvoker) Invoke(ctx context.Context, inv Invocation) Result {
+	r, refused := i.newInvocationRun(ctx, inv)
+	if r == nil {
+		return refused
 	}
 	return r.execute(ctx)
 }
 
-type run struct {
-	invoker     *AbstractInvoker
+// newInvocationRun refuses, without evidence, an invocation that cannot be attributed or whose contract cannot be read.
+func (i *BaseInvoker) newInvocationRun(ctx context.Context, inv Invocation) (*invocationRun, Result) {
+	if i.Catalog == nil || i.Identities == nil || i.Authority == nil || i.Bindings == nil || i.Transport == nil || i.Evidence == nil || i.IDs == nil {
+		return nil, Result{Status: StatusDenied, Reason: "invoker is not fully composed", Requirement: "CHR-AUTH-010"}
+	}
+	if inv.AssignmentID == nil && inv.ResponsibilityID == nil {
+		return nil, Result{Status: StatusDenied, Reason: "invocation names neither assignment nor responsibility", Requirement: "CHR-EVID-001"}
+	}
+	contract, err := i.Catalog.Contract(ctx, inv.Namespace, inv.CapabilityID)
+	if err != nil {
+		return nil, Result{Status: StatusDenied, Reason: "capability contract: " + err.Error(), Requirement: "CHR-CAP-001", Err: err}
+	}
+	r := &invocationRun{invoker: i, inv: inv, contract: contract}
+	if !contract.Constraints.ApprovalRequired {
+		r.result.Approval = authority.ApprovalDecision{Result: authority.ApprovalResult(model.ApprovalNotRequired), Reason: "contract requires no approval"}
+	}
+	return r, Result{}
+}
+
+// invocationRun is the state of one pass of an invocation through the pipeline: the decisions made so far and the evidence they cite.
+type invocationRun struct {
+	invoker     *BaseInvoker
 	inv         Invocation
 	contract    model.CapabilityContract
 	result      Result
 	evidenceIDs []model.Ref
+	reconciles  *model.Ref
 }
 
-func (r *run) execute(ctx context.Context) Result {
+// gate runs every decision that precedes the external system; false stops the run with the recorded denial.
+func (r *invocationRun) gate(ctx context.Context) (Result, bool) {
 	i, inv, contract := r.invoker, r.inv, r.contract
 	versions := i.Versions
 	if versions == nil {
 		versions = BaseVersionPolicy{}
 	}
 	if err := versions.Compatible(inv.ContractVersion, contract.ContractVersion); err != nil {
-		return r.deny(ctx, err.Error(), "CHR-CAP-008")
+		return r.deny(ctx, err.Error(), "CHR-CAP-008"), false
 	}
 	if _, err := i.Identities.ActiveAt(ctx, inv.Namespace, inv.Actor, inv.At); err != nil {
-		return r.deny(ctx, "actor: "+err.Error(), "CHR-ID-005")
+		return r.deny(ctx, "actor: "+err.Error(), "CHR-ID-005"), false
 	}
 	r.result.Authority = i.Authority.Evaluate(ctx, authority.Request{Namespace: inv.Namespace, EnterpriseID: inv.EnterpriseID, Actor: inv.Actor,
 		CapabilityID: inv.CapabilityID, ResourceScope: inv.ResourceScope, At: inv.At, OrganizationalContext: inv.OrganizationalContext, Measures: inv.Measures,
@@ -84,17 +98,17 @@ func (r *run) execute(ctx context.Context) Result {
 	case authority.Allowed:
 	case authority.Missing:
 		if !(i.ReadWithoutGrant && contract.OperationClass == model.OperationRead && inv.AssignmentID != nil) {
-			return r.deny(ctx, "authority: "+r.result.Authority.Reason, "CHR-AUTH-002")
+			return r.deny(ctx, "authority: "+r.result.Authority.Reason, "CHR-AUTH-002"), false
 		}
 	default:
-		return r.deny(ctx, "authority: "+r.result.Authority.Reason, "CHR-AUTH-010")
+		return r.deny(ctx, "authority: "+r.result.Authority.Reason, "CHR-AUTH-010"), false
 	}
 	if contract.Constraints.ApprovalRequired || i.Delegations.ApprovalRequired(inv.AuthorityChain) {
 		if i.Approvals == nil {
-			return r.deny(ctx, "approval required but no approval gate is composed", "CHR-AUTH-009")
+			return r.deny(ctx, "approval required but no approval gate is composed", "CHR-AUTH-009"), false
 		}
 		if inv.MaterialInputsDigest == "" || len(inv.SubjectRefs) == 0 {
-			return r.deny(ctx, "approval requires material inputs digest and subjects", "CHR-AUTH-009")
+			return r.deny(ctx, "approval requires material inputs digest and subjects", "CHR-AUTH-009"), false
 		}
 		action := inv.ApprovedAction
 		if action == "" {
@@ -104,42 +118,54 @@ func (r *run) execute(ctx context.Context) Result {
 			ApprovedAction: action, MaterialInputsDigest: inv.MaterialInputsDigest, SubjectRefs: inv.SubjectRefs, At: inv.At, Measures: inv.Measures,
 			AuthorityChain: inv.AuthorityChain})
 		if r.result.Approval.Result != authority.Approved {
-			return r.deny(ctx, "approval: "+r.result.Approval.Reason, "CHR-AUTH-009")
+			return r.deny(ctx, "approval: "+r.result.Approval.Reason, "CHR-AUTH-009"), false
 		}
 	}
 	if len(contract.Constraints.SodConstraintIDs) > 0 {
 		if i.Sod == nil {
-			return r.deny(ctx, "separation of duties declared but no checker is composed", "CHR-AUTH-007")
+			return r.deny(ctx, "separation of duties declared but no checker is composed", "CHR-AUTH-007"), false
 		}
 		ref, conflict, err := i.Sod.Conflict(ctx, inv, contract.Constraints.SodConstraintIDs)
 		if err != nil {
-			return r.deny(ctx, "separation of duties: "+err.Error(), "CHR-AUTH-007")
+			return r.deny(ctx, "separation of duties: "+err.Error(), "CHR-AUTH-007"), false
 		}
 		if conflict {
 			r.result.SodConflict = &ref
-			return r.deny(ctx, "separation of duties: conflicts with "+ref.ID, "CHR-AUTH-007")
+			return r.deny(ctx, "separation of duties: conflicts with "+ref.ID, "CHR-AUTH-007"), false
 		}
 	}
 	if len(inv.InformationUses) > 0 {
 		if i.Information == nil {
-			return r.deny(ctx, "information use declared but no governance evaluator is composed", "CHR-INFO-008")
+			return r.deny(ctx, "information use declared but no governance evaluator is composed", "CHR-INFO-008"), false
 		}
 		for _, use := range inv.InformationUses {
 			d := i.Information.Use(ctx, information.UseRequest{Namespace: inv.Namespace, Information: use.Information, Purpose: use.Purpose, At: inv.At})
 			r.result.Information = append(r.result.Information, d)
 			if d.Result != information.Allowed {
-				return r.deny(ctx, fmt.Sprintf("information %s for %q: %s", use.Information.ID, use.Purpose, d.Reason), d.Requirement)
+				return r.deny(ctx, fmt.Sprintf("information %s for %q: %s", use.Information.ID, use.Purpose, d.Reason), d.Requirement), false
 			}
 		}
 	}
 	bind, err := (binding.Lookup{Provider: i.Bindings}).CapabilityBindingFor(ctx, inv.Namespace, inv.CapabilityID, inv.SystemProfileID)
 	if err != nil {
-		return r.deny(ctx, "binding: "+err.Error(), "CHR-BIND-009")
+		return r.deny(ctx, "binding: "+err.Error(), "CHR-BIND-009"), false
 	}
 	r.result.Binding = &model.Ref{Namespace: bind.Namespace, ID: bind.ID}
 	if err := binding.Features(bind.FeatureSupport).Require(inv.RequiredFeatures...); err != nil {
-		return r.deny(ctx, "binding "+bind.ID+": "+err.Error(), "CHR-BIND-006")
+		return r.deny(ctx, "binding "+bind.ID+": "+err.Error(), "CHR-BIND-006"), false
 	}
+	mutating := contract.Idempotency.Mutating
+	if mutating && len(contract.RequiredPostconditions("")) > 0 && i.Observer == nil {
+		return r.deny(ctx, "capability declares required postconditions but no effect observer is composed", "CHR-CAP-010"), false
+	}
+	return Result{}, true
+}
+
+func (r *invocationRun) execute(ctx context.Context) Result {
+	if denied, ok := r.gate(ctx); !ok {
+		return denied
+	}
+	i, inv, contract := r.invoker, r.inv, r.contract
 	mutating := contract.Idempotency.Mutating
 	if mutating {
 		if inv.IdempotencyKey == "" {
@@ -162,10 +188,7 @@ func (r *run) execute(ctx context.Context) Result {
 			if entry.Result == nil {
 				return r.finish(ctx, StatusUnknown, "unknown", fmt.Sprintf("idempotency key %s is completed without a stored result; reconcile before retrying", inv.IdempotencyKey), "CHR-SEC-008")
 			}
-			prior := *entry.Result
-			prior.LedgerFence = ""
-			prior.Reason = fmt.Sprintf("replay of idempotency key %s; prior result returned without execution", inv.IdempotencyKey)
-			return prior
+			return replay(*entry.Result, inv.IdempotencyKey)
 		case LedgerInFlight, LedgerUnknown:
 			return r.finish(ctx, StatusUnknown, "unknown", fmt.Sprintf("idempotency key %s is %s; reconcile before retrying", inv.IdempotencyKey, entry.State), "CHR-SEC-008")
 		default:
@@ -191,22 +214,33 @@ func (r *run) execute(ctx context.Context) Result {
 			return r.finish(ctx, StatusUnknown, "unknown", "undeclared business error: "+resp.BusinessError, "CHR-CAP-005")
 		}
 		r.result.BusinessError = resp.BusinessError
-		return r.complete(ctx, mutating, StatusBusinessError, resp.BusinessError, "business error: "+resp.BusinessError)
+		return r.complete(ctx, mutating, StatusBusinessError, resp.BusinessError, "business error: "+resp.BusinessError, "")
 	}
 	if !slices.Contains(contract.Outcomes, resp.Outcome) {
 		r.ledger(ctx, mutating, false, i.Ledger.MarkUnknown)
 		return r.finish(ctx, StatusUnknown, "unknown", "undeclared outcome: "+resp.Outcome, "CHR-CAP-001")
 	}
+	if mutating {
+		if stopped, ok := r.verifyEffect(ctx, resp.Outcome); !ok {
+			return stopped
+		}
+	}
 	r.result.Outcome = resp.Outcome
-	return r.complete(ctx, mutating, StatusExecuted, resp.Outcome, "")
+	return r.complete(ctx, mutating, StatusExecuted, resp.Outcome, "", "")
 }
 
-func (r *run) deny(ctx context.Context, reason, requirement string) Result {
+func replay(prior Result, key string) Result {
+	prior.LedgerFence = ""
+	prior.Reason = fmt.Sprintf("replay of idempotency key %s; prior result returned without execution", key)
+	return prior
+}
+
+func (r *invocationRun) deny(ctx context.Context, reason, requirement string) Result {
 	return r.finish(ctx, StatusDenied, "denied", reason, requirement)
 }
 
-func (r *run) complete(ctx context.Context, mutating bool, status Status, outcome, reason string) Result {
-	res := r.finish(ctx, status, outcome, reason, "")
+func (r *invocationRun) complete(ctx context.Context, mutating bool, status Status, outcome, reason, requirement string) Result {
+	res := r.finish(ctx, status, outcome, reason, requirement)
 	if mutating {
 		fence := res.LedgerFence
 		stored := res
@@ -221,7 +255,7 @@ func (r *run) complete(ctx context.Context, mutating bool, status Status, outcom
 	return res
 }
 
-func (r *run) ledger(ctx context.Context, mutating, clearFence bool, op func(context.Context, string, string) error) {
+func (r *invocationRun) ledger(ctx context.Context, mutating, clearFence bool, op func(context.Context, string, string) error) {
 	if mutating {
 		if err := op(ctx, r.inv.IdempotencyKey, r.result.LedgerFence); err != nil {
 			r.result.Err = errors.Join(r.result.Err, err)
@@ -232,13 +266,14 @@ func (r *run) ledger(ctx context.Context, mutating, clearFence bool, op func(con
 }
 
 // finish records the action with its authority and approval evaluations, then returns the result (CHR-EVID-001, CHR-EVID-002).
-func (r *run) finish(ctx context.Context, status Status, outcome, reason, requirement string) Result {
+func (r *invocationRun) finish(ctx context.Context, status Status, outcome, reason, requirement string) Result {
 	r.result.Status, r.result.Reason, r.result.Requirement = status, reason, requirement
 	inv := r.inv
 	record := model.ActionRecord{Actor: inv.Actor, RuntimeContext: inv.Runtime, AssignmentID: inv.AssignmentID, ResponsibilityID: inv.ResponsibilityID,
 		CapabilityID: inv.CapabilityID, MaterialInputsDigest: inv.MaterialInputsDigest, SubjectRefs: inv.SubjectRefs, OperationClass: r.contract.OperationClass,
 		ActionTime: inv.At, Outcome: clip(outcome), Disposition: string(status), AuthorityEvaluations: []model.AuthorityEvaluation{authorityEvaluation(r.result.Authority)},
-		ApprovalEvaluations: []model.ApprovalEvaluation{approvalEvaluation(r.result.Approval)}, EvidenceRecordIDs: r.evidenceIDs}
+		ApprovalEvaluations: []model.ApprovalEvaluation{approvalEvaluation(r.result.Approval)}, EvidenceRecordIDs: r.evidenceIDs,
+		PostconditionEvaluations: r.result.Postconditions, ReconcilesActionID: r.reconciles}
 	if r.result.Approval.ApprovalRef != nil {
 		record.ApprovalIDs = []model.Ref{*r.result.Approval.ApprovalRef}
 	}
@@ -260,7 +295,7 @@ func (r *run) finish(ctx context.Context, status Status, outcome, reason, requir
 }
 
 // escalate appends the exception and escalation for a stopped action when an Escalator is composed (CHR-AGENT-004).
-func (r *run) escalate(ctx context.Context) {
+func (r *invocationRun) escalate(ctx context.Context) {
 	e := r.invoker.Escalation
 	if e == nil || !e.Applies(r.result.Status) {
 		return

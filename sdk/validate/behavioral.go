@@ -20,16 +20,24 @@ import (
 )
 
 // Subject is the runtime under test for runtime-behavioral rules. It composes its governed runtime over the
-// scenario's documents; the harness scripts the external transport and reads back the evidence the runtime records.
+// scenario's documents; the harness scripts the external system and reads back the evidence the runtime records.
 type Subject interface {
-	Compose(ctx context.Context, documents corpus.Source, transport binding.Executor) (Runtime, error)
+	Compose(ctx context.Context, documents corpus.Source, external External) (Runtime, error)
 }
 
-// Runtime is what a Subject exposes: admission of work, governed invocation, and read access to recorded evidence.
+// External is the scripted external system: the transport that mutates it and the observer that reads its state.
+type External struct {
+	Transport binding.Executor
+	Observer  binding.Observer
+}
+
+// Runtime is what a Subject exposes: admission of work, governed invocation, reconciliation of unknown outcomes, and
+// read access to recorded evidence.
 type Runtime struct {
-	Admission agent.Admission
-	Invoker   capability.Invoker
-	Evidence  evidence.Provider
+	Admission  agent.Admission
+	Invoker    capability.Invoker
+	Reconciler capability.Reconciler
+	Evidence   evidence.Provider
 }
 
 // AdapterSubject is the system adapter under test for system-adapter rules: it realizes the capability binding the
@@ -153,6 +161,15 @@ type TransportSpec struct {
 	Error         string `yaml:"error"`
 }
 
+// ObservationSpec scripts what the effect observer sees: the declared outcome the state corresponds to and a result per
+// postcondition id. Error makes the observation fail; Unevidenced reports results without observed-fact records.
+type ObservationSpec struct {
+	Outcome        string            `yaml:"outcome"`
+	Postconditions map[string]string `yaml:"postconditions"`
+	Error          string            `yaml:"error"`
+	Unevidenced    bool              `yaml:"unevidenced"`
+}
+
 // Expectation lists what the subject must produce; empty fields are not compared. Result is the admission result for
 // runtime steps and the response class (outcome, business-error, unknown, not-executed) for adapter steps.
 type Expectation struct {
@@ -165,21 +182,29 @@ type Expectation struct {
 	BusinessError  string `yaml:"business_error"`
 	Reference      string `yaml:"reference"`
 	TransportCalls *int   `yaml:"transport_calls"`
-	VendorCalls    *int   `yaml:"vendor_calls"`
-	Evidence       *bool  `yaml:"evidence"`
-	Escalated      *bool  `yaml:"escalated"`
-	Recipient      string `yaml:"recipient"`
+	ObserverCalls  *int   `yaml:"observer_calls"`
+	// Postconditions are the recorded evaluation results by postcondition id; Reconciled whether the record names the
+	// unknown attempt it resolves.
+	Postconditions map[string]string `yaml:"postconditions"`
+	Reconciled     *bool             `yaml:"reconciled"`
+	VendorCalls    *int              `yaml:"vendor_calls"`
+	Evidence       *bool             `yaml:"evidence"`
+	Escalated      *bool             `yaml:"escalated"`
+	Recipient      string            `yaml:"recipient"`
 }
 
-// Step admits a context, invokes a capability, or sends a request to an adapter; absent ones are zero Nodes.
+// Step admits a context, invokes a capability, reconciles the last unknown attempt of its idempotency key, or sends a
+// request to an adapter; absent ones are zero Nodes.
 type Step struct {
-	Name      string         `yaml:"name"`
-	Admit     yaml.Node      `yaml:"admit"`
-	Invoke    yaml.Node      `yaml:"invoke"`
-	Request   yaml.Node      `yaml:"request"`
-	Transport *TransportSpec `yaml:"transport"`
-	Vendor    *VendorSpec    `yaml:"vendor"`
-	Expect    Expectation    `yaml:"expect"`
+	Name        string           `yaml:"name"`
+	Admit       yaml.Node        `yaml:"admit"`
+	Invoke      yaml.Node        `yaml:"invoke"`
+	Reconcile   yaml.Node        `yaml:"reconcile"`
+	Request     yaml.Node        `yaml:"request"`
+	Transport   *TransportSpec   `yaml:"transport"`
+	Observation *ObservationSpec `yaml:"observation"`
+	Vendor      *VendorSpec      `yaml:"vendor"`
+	Expect      Expectation      `yaml:"expect"`
 }
 
 // BehavioralRule executes a fixture's scenario against the subject its Kind names and reports every deviation.
@@ -200,6 +225,8 @@ func NewBehavioralRuleSet() BehavioralRuleSet {
 		{AbstractRule{"CHR-RULE-RT-006", []string{"CHR-ID-005", "CHR-SEC-009"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-RT-007", []string{"CHR-INFO-002", "CHR-INFO-007", "CHR-INFO-008"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-RT-008", []string{"CHR-AGENT-004", "CHR-EVID-006", "CHR-EVID-007"}}, SubjectRuntime},
+		{AbstractRule{"CHR-RULE-RT-009", []string{"CHR-CAP-010", "CHR-EVID-011"}}, SubjectRuntime},
+		{AbstractRule{"CHR-RULE-RT-010", []string{"CHR-CAP-004", "CHR-EVID-004", "CHR-EVID-012", "CHR-SEC-008"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-SA-001", []string{"CHR-BIND-002", "CHR-BIND-006", "CHR-BIND-009"}}, SubjectAdapter},
 		{AbstractRule{"CHR-RULE-SA-002", []string{"CHR-CAP-005", "CHR-BIND-005", "CHR-SEC-007", "CHR-SEC-008"}}, SubjectAdapter},
 		{AbstractRule{"CHR-RULE-SA-003", []string{"CHR-CAP-001", "CHR-CAP-007"}}, SubjectAdapter},
@@ -223,14 +250,14 @@ func (r BehavioralRule) runRuntime(ctx context.Context, subject Subject, documen
 	if subject == nil {
 		return []Finding{r.behavioral("", "no runtime under test")}
 	}
-	transport := &scriptedTransport{}
-	rt, err := subject.Compose(ctx, documents, transport)
+	external := &scriptedExternal{unknown: map[string]capability.Result{}}
+	rt, err := subject.Compose(ctx, documents, External{Transport: &external.transport, Observer: &external.observer})
 	if err != nil {
 		return []Finding{r.behavioral("", "compose: "+err.Error())}
 	}
 	var out []Finding
 	for i, step := range sc.Steps {
-		for _, msg := range r.runStep(ctx, rt, transport, sc, step) {
+		for _, msg := range r.runStep(ctx, rt, external, sc, step) {
 			out = append(out, r.behavioral(stepName(i, step), msg))
 		}
 	}
@@ -313,7 +340,8 @@ func stepName(i int, step Step) string {
 	return fmt.Sprintf("step %d", i+1)
 }
 
-func (r BehavioralRule) runStep(ctx context.Context, rt Runtime, transport *scriptedTransport, sc *Scenario, step Step) []string {
+func (r BehavioralRule) runStep(ctx context.Context, rt Runtime, external *scriptedExternal, sc *Scenario, step Step) []string {
+	transport := &external.transport
 	var mismatches []string
 	expect := func(label string, got, want string) {
 		if want != "" && got != want {
@@ -333,18 +361,42 @@ func (r BehavioralRule) runStep(ctx context.Context, rt Runtime, transport *scri
 		d := rt.Admission.Admit(ctx, spec.context(sc))
 		expect("result", string(d.Result)+" ("+d.Reason+")", withReason(e.Result, d))
 		expect("requirement", d.Requirement, e.Requirement)
-	case step.Invoke.Kind != 0:
-		if rt.Invoker == nil {
-			return []string{"subject exposes no invoker"}
+	case step.Invoke.Kind != 0 || step.Reconcile.Kind != 0:
+		node, reconciling := &step.Invoke, step.Reconcile.Kind != 0
+		if reconciling {
+			node = &step.Reconcile
 		}
-		spec, err := sc.Invocation.override(&step.Invoke)
+		spec, err := sc.Invocation.override(node)
 		if err != nil {
-			return []string{"invoke: " + err.Error()}
+			return []string{"invocation: " + err.Error()}
 		}
 		if step.Transport != nil {
 			transport.script(*step.Transport)
 		}
-		res := rt.Invoker.Invoke(ctx, spec.invocation(sc))
+		if step.Observation != nil {
+			external.observer.script(*step.Observation)
+		}
+		inv := spec.invocation(sc)
+		var res capability.Result
+		switch prior, pending := external.unknown[inv.IdempotencyKey]; {
+		case !reconciling && rt.Invoker == nil:
+			return []string{"subject exposes no invoker"}
+		case !reconciling:
+			res = rt.Invoker.Invoke(ctx, inv)
+		case rt.Reconciler == nil:
+			return []string{"subject exposes no reconciler"}
+		case !pending:
+			return []string{"no unknown attempt of " + inv.IdempotencyKey + " to reconcile"}
+		default:
+			res = rt.Reconciler.Reconcile(ctx, capability.Reconciliation{Invocation: inv, Action: model.Ref{ID: prior.Action.ID}, Fence: prior.LedgerFence})
+			reconciled := res.Action != nil && res.Action.ReconcilesActionID != nil && res.Action.ReconcilesActionID.ID == prior.Action.ID
+			if e.Reconciled != nil && reconciled != *e.Reconciled {
+				mismatches = append(mismatches, fmt.Sprintf("record names the reconciled attempt %v, want %v", reconciled, *e.Reconciled))
+			}
+		}
+		if res.Status == capability.StatusUnknown && res.Action != nil && res.LedgerFence != "" && !reconciling {
+			external.unknown[inv.IdempotencyKey] = res
+		}
 		expect("status", string(res.Status), e.Status)
 		expect("requirement", res.Requirement, e.Requirement)
 		expect("authority", string(res.Authority.Result), e.Authority)
@@ -352,6 +404,16 @@ func (r BehavioralRule) runStep(ctx context.Context, rt Runtime, transport *scri
 		expect("outcome", res.Outcome, e.Outcome)
 		if e.TransportCalls != nil && transport.calls != *e.TransportCalls {
 			mismatches = append(mismatches, fmt.Sprintf("transport called %d times, want %d", transport.calls, *e.TransportCalls))
+		}
+		if e.ObserverCalls != nil && external.observer.calls != *e.ObserverCalls {
+			mismatches = append(mismatches, fmt.Sprintf("observer called %d times, want %d", external.observer.calls, *e.ObserverCalls))
+		}
+		for id, want := range e.Postconditions {
+			got := "not evaluated"
+			if k := slices.IndexFunc(res.Postconditions, func(p model.PostconditionEvaluation) bool { return p.PostconditionID == id }); k >= 0 {
+				got = res.Postconditions[k].Result
+			}
+			expect("postcondition "+id, got, want)
 		}
 		if e.Evidence != nil {
 			recorded := res.Action != nil
@@ -381,7 +443,7 @@ func (r BehavioralRule) runStep(ctx context.Context, rt Runtime, transport *scri
 			mismatches = append(mismatches, "runtime said: "+res.Reason)
 		}
 	default:
-		return []string{"step declares neither admit nor invoke"}
+		return []string{"step declares no admit, invoke, or reconcile"}
 	}
 	return mismatches
 }
@@ -510,6 +572,43 @@ func (v *scriptedVendor) script(spec VendorSpec) {
 	default:
 		v.err = errors.New(spec.Error)
 	}
+}
+
+// scriptedExternal is the external system of one scenario, with the unknown attempts awaiting reconciliation by key.
+type scriptedExternal struct {
+	transport scriptedTransport
+	observer  scriptedObserver
+	unknown   map[string]capability.Result
+}
+
+type scriptedObserver struct {
+	calls int
+	spec  ObservationSpec
+}
+
+var _ binding.Observer = (*scriptedObserver)(nil)
+
+func (o *scriptedObserver) script(spec ObservationSpec) { o.spec = spec }
+
+// Observe reports unscripted postconditions as unknown, so a runtime is never handed a success it did not observe.
+func (o *scriptedObserver) Observe(_ context.Context, req binding.ObservationRequest) (binding.Observation, error) {
+	o.calls++
+	if o.spec.Error != "" {
+		return binding.Observation{}, errors.New(o.spec.Error)
+	}
+	obs := binding.Observation{Outcome: o.spec.Outcome}
+	for _, p := range req.Postconditions {
+		result, ok := o.spec.Postconditions[p.ID]
+		if !ok {
+			continue
+		}
+		e := model.PostconditionEvaluation{PostconditionID: p.ID, Result: result, Reason: "scripted observation"}
+		if !o.spec.Unevidenced {
+			e.EvidenceRecordIDs = []model.Ref{{ID: fmt.Sprintf("OBS-%s-%d", p.ID, o.calls)}}
+		}
+		obs.Evaluations = append(obs.Evaluations, e)
+	}
+	return obs, nil
 }
 
 type scriptedTransport struct {

@@ -1,0 +1,4 @@
+rules: [CHR-RULE-EVID-002]
+specification_version: 1.2.0
+expected: fail
+reason: ACT-FX-RECONCILE reconciles ACT-FX, whose disposition is executed; only an unknown outcome is reconciled, and a settled record is never restated

@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/conformance/fixture_descriptor.schema.json",
   "title": "ConformanceFixtureDescriptor",
   "description": "Format of fixture.yaml: the rules a fixture exercises, its expected result, its documents, and, for runtime-behavioral rules, the scenario driven against the implementation under test.",
-  "x-charter-spec-version": "1.1.0",
-  "x-charter-schema-version": "2.0.0",
+  "x-charter-spec-version": "1.2.0",
+  "x-charter-schema-version": "2.2.0",
   "x-charter-requirements": [
     "CHR-CONF-007",
     "CHR-CONF-008",
@@ -305,6 +305,25 @@
         },
         "recipient": {
           "$ref": "#/$defs/identifier"
+        },
+        "observer_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "postconditions": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "satisfied",
+              "violated",
+              "unknown",
+              "not evaluated"
+            ]
+          }
+        },
+        "reconciled": {
+          "type": "boolean",
+          "description": "the appended record names the unknown attempt it resolves"
         }
       },
       "additionalProperties": false
@@ -333,6 +352,13 @@
         },
         "vendor": {
           "$ref": "#/$defs/vendor"
+        },
+        "reconcile": {
+          "$ref": "#/$defs/invocation",
+          "description": "Reconciles the last unknown attempt of the idempotency key from observation alone."
+        },
+        "observation": {
+          "$ref": "#/$defs/observation"
         }
       },
       "required": [
@@ -347,6 +373,11 @@
         {
           "required": [
             "invoke"
+          ]
+        },
+        {
+          "required": [
+            "reconcile"
           ]
         },
         {
@@ -439,6 +470,36 @@
             "not-executed",
             "failed"
           ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "observation": {
+      "description": "What the scripted effect observer sees: the declared outcome the external state corresponds to and a result per postcondition id; unscripted postconditions are unknown.",
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "minLength": 1
+        },
+        "postconditions": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "satisfied",
+              "violated",
+              "unknown"
+            ]
+          }
+        },
+        "error": {
+          "type": "string",
+          "minLength": 1,
+          "description": "the observation fails"
+        },
+        "unevidenced": {
+          "type": "boolean",
+          "description": "results are reported without observed-fact records"
         }
       },
       "additionalProperties": false

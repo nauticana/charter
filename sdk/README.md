@@ -1,6 +1,6 @@
 # Go Reference SDK
 
-Status: The reference SDK supports Charter specification 1.1.0 and schema catalogue 2.1.0. Every package is tested against the Harbor instances and the conformance fixtures; the optional Keel adapter targets keel v1.2.64.
+Status: The reference SDK supports Charter specification 1.2.0 and schema catalogue 2.2.0. Every package is tested against the Harbor instances and the conformance fixtures; the optional Keel adapter targets keel v1.2.68.
 
 The Go reference SDK is platform-neutral. Optional adapters may connect its contracts to Keel, Scout, or another implementation, while independent implementations can conform without importing this SDK. Keel never depends on Charter, and Charter never depends on Scout.
 
@@ -9,7 +9,7 @@ Packages:
 - `model`: schema-aligned structs for every catalogued kind, with no behavior
 - `corpus`, `temporal`: document loading and indexing, the `Source` and `AbstractDocumentProvider` foundation every provider embeds; validity evaluation
 - `identity`, `organization`, `agent`, `process`, `architecture`: provider and resolution contracts with corpus-backed `Base*` defaults and reusable views (lifecycle at time, coverage, admission, task context, gap consistency)
-- `authority`, `capability`, `binding`: governed decision and invocation contracts: grant and approval evaluation, the `AbstractInvoker` pipeline, binding feature support and fail-closed execution
+- `authority`, `capability`, `binding`: governed decision and invocation contracts: grant and approval evaluation, the `BaseInvoker` pipeline, binding feature support and fail-closed execution
 - `evidence`, `information`: append-only evidence with supersession and integrity; information-governance decisions
 - `validate`: structural/semantic validation, fixture execution, and conformance claims
 - `adapter/keel`: the optional bridge to keel's principal and tenant context, RBAC permission checks, trust guards, table change log, message publishing, metrics, and request ids; only this package imports keel

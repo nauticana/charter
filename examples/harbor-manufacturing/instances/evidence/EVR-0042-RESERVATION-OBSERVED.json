@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "1.2.0",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-0042-RESERVATION-OBSERVED",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "observed-fact",
+  "content": "Reservation 0000088421 read back from SAP S/4HANA Cloud: order lines, quantities, and 48-hour expiry match the request",
+  "recordedAt": "2026-06-18T17:15:42Z",
+  "sources": [
+    "SYSPROFILE-HARBOR-S4-2602 reservation-document-read at 17:15:42Z"
+  ]
+}

@@ -3,8 +3,8 @@
   "$id": "https://nauticana.github.io/charter/schema/common.schema.json",
   "title": "Charter Common Definitions",
   "description": "Shared definitions for Charter domain schemas.",
-  "x-charter-spec-version": "1.1.0",
-  "x-charter-schema-version": "2.0.0",
+  "x-charter-spec-version": "1.2.0",
+  "x-charter-schema-version": "2.2.0",
   "x-charter-requirements": [
     "CHR-CONF-001",
     "CHR-CONF-002",
@@ -355,6 +355,30 @@
         "namespace",
         "id"
       ]
+    },
+    "integrity": {
+      "description": "Integrity method and value; on an EvidenceBundle the value chains its records, on an EvidenceRecord it digests the content member (CHR-EVID-005).",
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "verifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "method"
+      ],
+      "additionalProperties": false
     }
   }
 }

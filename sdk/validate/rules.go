@@ -29,6 +29,8 @@ func NewRuleSet() (RuleSet, error) {
 		DeclaredCapabilityRule{AbstractRule{"CHR-RULE-AGENT-002", []string{"CHR-AGENT-003"}}},
 		SodApprovalRule{AbstractRule{"CHR-RULE-AUTH-003", []string{"CHR-AUTH-007"}}},
 		RecordedOutcomeRule{AbstractRule{"CHR-RULE-CAP-001", []string{"CHR-CAP-001", "CHR-EVID-010"}}},
+		VerifiedEffectRule{AbstractRule{"CHR-RULE-CAP-002", []string{"CHR-CAP-009", "CHR-CAP-010", "CHR-EVID-011"}}},
+		ReconciliationRule{AbstractRule{"CHR-RULE-EVID-002", []string{"CHR-EVID-004", "CHR-EVID-012"}}},
 		DeclaredOutcomeRule{AbstractRule{"CHR-RULE-MED-001", []string{"CHR-MED-001", "CHR-MED-003", "CHR-MED-009"}}},
 		UnavailableMediatorRule{AbstractRule{"CHR-RULE-MED-002", []string{"CHR-MED-002", "CHR-MED-005", "CHR-MED-006"}}},
 		AttributeProvenanceRule{AbstractRule{"CHR-RULE-MED-003", []string{"CHR-MED-007", "CHR-SEC-004"}}},

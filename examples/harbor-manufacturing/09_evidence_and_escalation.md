@@ -10,6 +10,7 @@ Status: Conceptual, non-normative example
 | Agent assertion | `EVR-0042-CLASSIFICATION` | The exception was classified as material-and-credit |
 | Human decision | `EVR-0042-CREDIT-DECISION` | Credit Manager approved exposure up to USD 18,500 until the recorded expiry |
 | External response | `EVR-0042-SAP-RESERVATION` | SAP S/4HANA Cloud returned reservation `0000088421` during reconciliation |
+| Observed fact | `EVR-0042-RESERVATION-OBSERVED` | Reservation `0000088421` read back with matching lines, quantities, and expiry; supports postcondition `POST-RESERVATION-HELD` |
 | Derived conclusion | `EVR-0042-COVERAGE` | The requested 30 units are covered after subtracting 8 existing allocations from the 40 observed |
 
 Every governed action record links the actor identity, runtime and execution context, assignment or responsibility, capability, time, authority and approval evaluations, binding, material inputs, and outcome. Source references and transformations make provenance verifiable to the declared level.
@@ -18,6 +19,6 @@ When a late goods issue reduced availability to 38 units, `EVR-0042-STOCK-CORREC
 
 ## Exception and escalation example
 
-`EXC-OE-2026-0042-01` states that the stock-reservation response was not received within the expected time, affects `TASKINST-OE-0042-EXECUTE`, names the Sales Operations Manager as escalation target, and moved through disposition `reconciling` to `resolved`. Its escalation `ESC-OE-2026-0042-01` records the ambiguous outcome, urgency, requested decision, attempted operation, idempotency key, and known evidence. Reconciliation links the SAP response and closes the disposition without deleting the exception history.
+`EXC-OE-2026-0042-01` states that the stock-reservation response was not received within the expected time, affects `TASKINST-OE-0042-EXECUTE`, names the Sales Operations Manager as escalation target, and moved through disposition `reconciling` to `resolved`. Its escalation `ESC-OE-2026-0042-01` records the ambiguous outcome, urgency, requested decision, attempted operation, idempotency key, and known evidence. The timed-out attempt stays recorded as `ACT-0042-EXECUTE-TIMEOUT` with disposition `unknown`. `ACT-0042-EXECUTE-1` reconciles it (`reconcilesActionId`): SAP's response and the independently read-back reservation are separate records, only the second satisfies `POST-RESERVATION-HELD`, and the mutation is not sent again. The disposition closes without deleting the exception history.
 
 Retention and access follow the underlying order, customer, approval, and security classifications. A sufficient business rationale is retained; secrets and sensitive private reasoning traces are not required.

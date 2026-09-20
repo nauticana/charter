@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/mediation/mediation_decision.schema.json",
   "title": "MediationDecision",
   "description": "One decision at a mediation point, reached before the submitted act took effect.",
-  "x-charter-spec-version": "1.1.0",
+  "x-charter-spec-version": "1.2.0",
   "x-charter-schema-version": "2.1.0",
   "x-charter-requirements": [
     "CHR-MED-002",
