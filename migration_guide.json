@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.2.1",
+      "title": "Keel 1.2.75 compatibility",
+      "tags": [
+        "additive"
+      ],
+      "summary": "Updates the optional Keel adapter from keel v1.2.68 to v1.2.75. No adapter source changes. The Charter specification, schema catalogue, conformance profiles, and document formats are unchanged from 1.2.0.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`charterSpecVersion`, `x-charter-spec-version`) | 1.2.0 |\n| Schema catalogue (`catalogVersion`) | 2.2.0 |\n| Conformance manifest (`specification.version`) | 1.2.0 |\n| Go module `github.com/nauticana/charter` | v1.2.1 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.2.75 |\n\n## Compatibility impact\n\nNone. keel v1.2.69 to v1.2.75 are additive for the adapter's surface (`common`, `guard`, `idempotency`, `model`, `port`); only the module requirement changes. keel's breaking changes in that range (`client.CredentialStore.UpsertConnection`, the `/inbox` → `/notifications` routes, `payment.ChargeAuthenticationRequired`) are outside what the adapter imports.\n\n## Adoption\n\n1. `go get github.com/nauticana/charter@v1.2.1`; with `sdk/adapter/keel`, keel v1.2.75.\n2. Run the downstream test suite. No Charter documents, schemas, fixtures, or conformance claims require migration.\n"
+    },
+    {
       "version": "1.2.0",
       "title": "Verified capability effects and reconciliation of unknown outcomes",
       "tags": [

@@ -1,6 +1,6 @@
 # Go Reference SDK
 
-Status: The reference SDK supports Charter specification 1.2.0 and schema catalogue 2.2.0. Every package is tested against the Harbor instances and the conformance fixtures; the optional Keel adapter targets keel v1.2.68.
+Status: The reference SDK supports Charter specification 1.2.0 and schema catalogue 2.2.0. Every package is tested against the Harbor instances and the conformance fixtures; the optional Keel adapter targets keel v1.2.75.
 
 The Go reference SDK is platform-neutral. Optional adapters may connect its contracts to Keel, Scout, or another implementation, while independent implementations can conform without importing this SDK. Keel never depends on Charter, and Charter never depends on Scout.
 
