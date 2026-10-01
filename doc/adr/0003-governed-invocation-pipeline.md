@@ -31,8 +31,8 @@ Approval evaluation lives in `authority`, not `capability`, because approvals ar
 
 ## Consequences
 
-A runtime composes the invoker with its own sources, ledger, sink, and transport; platform adapters decorate it (trust guards, metrics) rather than reimplementing gates. Reconciliation after an unknown outcome is the adapter's responsibility, completed through `Ledger.Complete`. Reasons and outcomes are clipped to the schema's 500-character limit. The behavioral harness (ADR 0005) found that the lifecycle gate was missing from the first version; it is now step 2.
+A runtime composes the invoker with its own sources, ledger, sink, and transport; platform adapters decorate it (trust guards, metrics) rather than reimplementing gates. An unknown outcome is settled through `BaseInvoker.Reconcile`, never by completing the ledger directly. Reasons and outcomes are clipped to the schema's 500-character limit. The behavioral harness (ADR 0005) found that the lifecycle gate was missing from the first version; it is now step 2.
 
 ## Specification impact
 
-CHR-EVID-010 now requires a denied, failed, or unknown attempt to be evidenced like an executed action with an explicit disposition and the evaluations made before it stopped; `action_record.schema.json` carries the required `disposition` and optional `informationEvaluations`, and CHR-RULE-CAP-001 checks recorded outcomes against the contract. Step 11 above implements that requirement.
+CHR-EVID-010 now requires a denied, failed, or unknown attempt to be evidenced like an executed action with an explicit disposition and the evaluations made before it stopped; `action_record.schema.json` carries the required `disposition` and optional `informationEvaluations`, and CHR-RULE-CAP-001 checks recorded outcomes against the contract. Step 12 above implements that requirement.

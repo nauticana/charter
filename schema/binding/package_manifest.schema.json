@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/binding/package_manifest.schema.json",
+  "title": "BindingPackageManifest",
+  "description": "Portable format for one versioned realization of a capability contract.",
+  "x-charter-spec-version": "1.2.0",
+  "x-charter-schema-version": "2.3.0",
+  "type": "object",
+  "properties": {
+    "formatVersion": { "const": 1 },
+    "id": { "$ref": "../common.schema.json#/$defs/identifier" },
+    "version": { "type": "string", "minLength": 1, "maxLength": 60 },
+    "capabilityId": { "$ref": "../common.schema.json#/$defs/idRef" },
+    "contractVersion": { "type": "string", "minLength": 1, "maxLength": 60 },
+    "adapterRef": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "observerRef": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "parameterSchema": {
+      "type": "object",
+      "description": "JSON Schema applied to installation parameters before materialization."
+    },
+    "bindingTemplates": {
+      "type": "array",
+      "minItems": 1,
+      "contains": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "object",
+            "properties": { "kind": { "const": "CapabilityBinding" } },
+            "required": ["kind"]
+          }
+        },
+        "required": ["document"]
+      },
+      "items": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "object",
+            "properties": {
+              "kind": { "enum": ["CapabilityBinding", "DataBinding", "AuthorityBinding", "EventBinding"] },
+              "id": { "$ref": "../common.schema.json#/$defs/identifier" },
+              "bindingVersion": { "type": "string", "minLength": 1, "maxLength": 60 }
+            },
+            "required": ["kind", "id", "bindingVersion"]
+          },
+          "parameters": {
+            "type": "object",
+            "propertyNames": { "pattern": "^/(?:[^/~]|~[01])+(?:/(?:[^/~]|~[01])+)*$" },
+            "additionalProperties": { "type": "string", "minLength": 1 }
+          }
+        },
+        "required": ["document"],
+        "additionalProperties": false
+      }
+    },
+    "features": { "$ref": "../common.schema.json#/$defs/featureSupport" },
+    "lossyMappings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "mapping": { "type": "string", "minLength": 1, "maxLength": 500 },
+          "effect": { "type": "string", "minLength": 1, "maxLength": 500 }
+        },
+        "required": ["mapping", "effect"],
+        "additionalProperties": false
+      }
+    },
+    "conformanceCases": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 500 }
+    }
+  },
+  "required": ["formatVersion", "id", "version", "capabilityId", "contractVersion", "adapterRef", "parameterSchema", "bindingTemplates", "features", "lossyMappings", "conformanceCases"],
+  "additionalProperties": false
+}

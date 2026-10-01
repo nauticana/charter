@@ -1,0 +1,24 @@
+table: charter_document
+comment: A tenant's Charter document, addressed by namespace and id; its kind never changes
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: namespace
+    type: VARCHAR(200)
+  - name: document_id
+    type: VARCHAR(120)
+  - name: document_kind
+    type: VARCHAR(40)
+  - name: created_at
+    type: TIMESTAMP
+    default: CURRENT_TIMESTAMP
+primary_key: [partner_id, namespace, document_id]
+indexes:
+  - name: charter_document_kind_ix
+    columns: [partner_id, document_kind]
+foreign_keys:
+  - name: partner_charter_documents
+    columns: [partner_id]
+    references:
+      table: business_partner
+      columns: [id]

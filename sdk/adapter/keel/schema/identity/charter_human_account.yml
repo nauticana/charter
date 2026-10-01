@@ -1,0 +1,47 @@
+table: charter_human_account
+comment: Which Charter HumanIdentity a keel partner membership acts as; periods never overlap per human or per user
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: human_namespace
+    type: VARCHAR(200)
+  - name: human_id
+    type: VARCHAR(120)
+  - name: user_id
+    type: BIGINT
+  - name: partner_user_begda
+    type: TIMESTAMP
+  - name: begda
+    type: TIMESTAMP
+    default: CURRENT_TIMESTAMP
+  - name: endda
+    type: TIMESTAMP
+    nullable: true
+primary_key: [partner_id, human_namespace, human_id, begda]
+indexes:
+  - name: charter_human_account_user_ix
+    columns: [partner_id, user_id]
+  - name: charter_human_account_open_human_ux
+    columns: [partner_id, human_namespace, human_id]
+    unique: true
+    where: endda IS NULL
+  - name: charter_human_account_open_user_ux
+    columns: [partner_id, user_id]
+    unique: true
+    where: endda IS NULL
+foreign_keys:
+  - name: partner_user_human_accounts
+    columns: [partner_id, user_id, partner_user_begda]
+    references:
+      table: partner_user
+      columns: [partner_id, user_id, begda]
+  - name: human_identity_accounts
+    columns: [partner_id, human_namespace, human_id]
+    references:
+      table: charter_document
+      columns: [partner_id, namespace, document_id]
+checks:
+  - name: charter_human_account_period_ck
+    expression: endda IS NULL OR endda > begda
+  - name: charter_human_account_membership_ck
+    expression: begda >= partner_user_begda

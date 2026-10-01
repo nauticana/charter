@@ -1,13 +1,13 @@
 # Charter Schemas
 
-Status: Version 1.2.0; every catalogued schema is normative and every conformance profile is active.
+Status: Specification 1.2.0, schema catalogue 2.3.0; every catalogued schema is normative and every conformance profile is active.
 
 This directory contains language-independent JSON Schemas for Charter instance documents. Schema structure mirrors the specification domains:
 
 - `enterprise/`: enterprises, organization-unit trees, position types, positions, roles, responsibilities, and assignments
 - `agent/`: identities, agent definitions and runtimes, authority, approval, and separation of duties
 - `process/`: value streams, process and task definitions and instances, capabilities, relationships, and architecture states
-- `binding/`: system profiles and capability, data, authority, and event bindings
+- `binding/`: system profiles, capability, data, authority, and event bindings, and the binding-package manifest format
 - `evidence/`: action evidence, decisions, exceptions, audit trails, and information provenance
 - `information/`: information definitions and governance policies
 - `mediation/`: mediation profiles and the decisions taken at them

@@ -1,0 +1,38 @@
+table: charter_document_revision
+comment: Append-only revisions of a Charter document; the highest revision is current and a declared definition version names one content forever
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: namespace
+    type: VARCHAR(200)
+  - name: document_id
+    type: VARCHAR(120)
+  - name: revision
+    type: INT
+  - name: definition_version
+    type: VARCHAR(60)
+    nullable: true
+    comment: The version a versioned definition kind declares; NULL for kinds that declare none
+  - name: content
+    type: TEXT
+  - name: content_digest
+    type: CHAR(64)
+  - name: created_at
+    type: TIMESTAMP
+    default: CURRENT_TIMESTAMP
+primary_key: [partner_id, namespace, document_id, revision]
+indexes:
+  - name: charter_document_revision_version_ux
+    columns: [partner_id, namespace, document_id, definition_version]
+    unique: true
+foreign_keys:
+  - name: charter_document_revisions
+    columns: [partner_id, namespace, document_id]
+    references:
+      table: charter_document
+      columns: [partner_id, namespace, document_id]
+checks:
+  - name: charter_document_revision_ck
+    expression: revision > 0
+  - name: charter_document_revision_digest_ck
+    expression: CHAR_LENGTH(content_digest) = 64

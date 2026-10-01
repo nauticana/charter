@@ -1,0 +1,13 @@
+# Charter keel schema modules. Pass the selected group directories to keel's schemagen -input after keel's core,
+# geo, and tenant_management. depends_on lists direct table-FK dependencies and fixes DDL order.
+version: 1
+groups:
+  - name: charter_document
+    path: document
+    depends_on: [tenant_management]
+    seed_depends_on: []
+
+  - name: charter_identity
+    path: identity
+    depends_on: [tenant_management, charter_document]
+    seed_depends_on: []
