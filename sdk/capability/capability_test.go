@@ -13,6 +13,7 @@ import (
 	"github.com/nauticana/charter/sdk/authority"
 	"github.com/nauticana/charter/sdk/binding"
 	"github.com/nauticana/charter/sdk/capability"
+	"github.com/nauticana/charter/sdk/capability/ledgertest"
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/evidence"
 	"github.com/nauticana/charter/sdk/identity"
@@ -36,6 +37,7 @@ func (malformedLedger) Begin(context.Context, string) (capability.LedgerEntry, e
 func (malformedLedger) Complete(context.Context, string, string, capability.Result) error { return nil }
 func (malformedLedger) Release(context.Context, string, string) error                     { return nil }
 func (malformedLedger) MarkUnknown(context.Context, string, string) error                 { return nil }
+func (malformedLedger) ReclaimUnknown(context.Context, string) (string, error)            { return "", nil }
 
 type unfencedLedger struct{ malformedLedger }
 
@@ -336,6 +338,13 @@ func TestCompletedLedgerEntryCannotBeChanged(t *testing.T) {
 	if err != nil || replay.Result == nil || replay.Result.LedgerFence != "" || replay.Result.Outcome != "done" {
 		t.Errorf("replay: %+v %v", replay, err)
 	}
+	if _, err := ledger.ReclaimUnknown(ctx, "IDEMP-COMPLETE"); !errors.Is(err, capability.ErrLedgerTransition) {
+		t.Errorf("completed key reclaimed: %v", err)
+	}
+}
+
+func TestBaseMemoryLedgerContract(t *testing.T) {
+	ledgertest.Run(t, func(*testing.T) capability.Ledger { return capability.NewBaseMemoryLedger() })
 }
 
 func TestMalformedLedgerClaimFailsBeforeExecution(t *testing.T) {

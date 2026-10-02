@@ -39,6 +39,9 @@ type Ledger interface {
 	// Release forgets a key whose operation provably did not execute.
 	Release(ctx context.Context, key, fence string) error
 	MarkUnknown(ctx context.Context, key, fence string) error
+	// ReclaimUnknown fences an unknown key for a reconciler, superseding any earlier fence; the key stays unknown to
+	// Begin. Any other state is ErrLedgerTransition.
+	ReclaimUnknown(ctx context.Context, key string) (string, error)
 }
 
 // BaseMemoryLedger keeps ledger entries in memory.
@@ -87,6 +90,19 @@ func (l *BaseMemoryLedger) MarkUnknown(_ context.Context, key, fence string) err
 
 func (l *BaseMemoryLedger) Release(_ context.Context, key, fence string) error {
 	return l.write(key, fence, LedgerEntry{})
+}
+
+func (l *BaseMemoryLedger) ReclaimUnknown(_ context.Context, key string) (string, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	e, ok := l.entries[key]
+	if !ok || e.State != LedgerUnknown {
+		return "", ErrLedgerTransition
+	}
+	l.seq++
+	e.Fence = strconv.FormatUint(l.seq, 10)
+	l.entries[key] = e
+	return e.Fence, nil
 }
 
 // write replaces the entry of a held key, or forgets the key when next is LedgerNew.

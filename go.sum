@@ -2,8 +2,8 @@ github.com/dlclark/regexp2 v1.11.0 h1:G/nrcoOa7ZXlpoa/91N3X7mM3r8eIlMBBJZvsz/mxK
 github.com/dlclark/regexp2 v1.11.0/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
 github.com/golang-jwt/jwt/v5 v5.3.1 h1:kYf81DTWFe7t+1VvL7eS+jKFVWaUnK9cB1qbwn63YCY=
 github.com/golang-jwt/jwt/v5 v5.3.1/go.mod h1:fxCRLWMO43lRc8nhHWY6LGqRcf+1gQWArsqaEUEa5bE=
-github.com/nauticana/keel v1.2.86 h1:OJt2Znb9EzkfzVpqbMg87Fsdz5iNoLXiuT10gWpFnbQ=
-github.com/nauticana/keel v1.2.86/go.mod h1:Y7BAqY8UYRGEC1w0keS3PKDn7R7DnmdSvvql8uli/cI=
+github.com/nauticana/keel v1.2.87 h1:RVaVzePcBARm1VfVp/7WATm+v3xeB1GwCm9pEdZdfB4=
+github.com/nauticana/keel v1.2.87/go.mod h1:Y7BAqY8UYRGEC1w0keS3PKDn7R7DnmdSvvql8uli/cI=
 github.com/santhosh-tekuri/jsonschema/v6 v6.0.3 h1:1EYB5IzjZawrrnELUi78f9fPu57HuXjmddZPjrls/28=
 github.com/santhosh-tekuri/jsonschema/v6 v6.0.3/go.mod h1:JXeL+ps8p7/KNMjDQk3TCwPpBy0wYklyWTfbkIzdIFU=
 golang.org/x/net v0.52.0 h1:He/TN1l0e4mmR3QqHMT2Xab3Aj3L9qjbhRm78/6jrW0=

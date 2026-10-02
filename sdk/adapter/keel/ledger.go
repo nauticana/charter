@@ -65,3 +65,10 @@ func (l *Ledger) MarkUnknown(ctx context.Context, key, fence string) error {
 	}
 	return l.Keel.MarkUnknown(ctx, key, fence)
 }
+
+func (l *Ledger) ReclaimUnknown(ctx context.Context, key string) (string, error) {
+	if l.Keel == nil {
+		return "", ErrNoLedger
+	}
+	return l.Keel.ReclaimUnknown(ctx, key)
+}

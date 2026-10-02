@@ -20,8 +20,10 @@ import (
 
 	"github.com/nauticana/charter/sdk/authority"
 	"github.com/nauticana/charter/sdk/capability"
+	"github.com/nauticana/charter/sdk/capability/ledgertest"
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/evidence"
+	"github.com/nauticana/charter/sdk/evidence/evidencetest"
 	"github.com/nauticana/charter/sdk/identity"
 	"github.com/nauticana/charter/sdk/model"
 )
@@ -448,10 +450,17 @@ func TestGateAtHTTPTableActionAndWorkerBoundaries(t *testing.T) {
 	}
 }
 
+func TestLedgerContract(t *testing.T) {
+	ledgertest.Run(t, func(*testing.T) capability.Ledger { return &Ledger{Keel: &idempotency.MemoryLedger{}} })
+}
+
 func TestLedgerStoresResultsInKeelLedger(t *testing.T) {
 	ctx := context.Background()
 	if _, err := (&Ledger{}).Begin(ctx, "k"); !errors.Is(err, ErrNoLedger) {
 		t.Errorf("incomplete ledger: %v", err)
+	}
+	if _, err := (&Ledger{}).ReclaimUnknown(ctx, "k"); !errors.Is(err, ErrNoLedger) {
+		t.Errorf("incomplete ledger reclaim: %v", err)
 	}
 	ledger := &Ledger{Keel: &idempotency.MemoryLedger{}}
 	entry, err := ledger.Begin(ctx, "IDEMP-1")
@@ -490,6 +499,11 @@ func TestLedgerStoresResultsInKeelLedger(t *testing.T) {
 	if released, err := ledger.Begin(ctx, "IDEMP-2"); err != nil || released.State != capability.LedgerNew {
 		t.Errorf("released key must be claimable: %+v %v", released, err)
 	}
+}
+
+func TestTableLogStoreContract(t *testing.T) {
+	evidencetest.Run(t, func(*testing.T) evidence.Store { return &TableLogStore{Logger: &memoryLogger{}} },
+		func(s evidence.Store) evidence.Provider { return evidence.NewBaseProvider(s) })
 }
 
 func TestTableLogStorePreservesNamespacesAndExtensions(t *testing.T) {

@@ -5,12 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/model"
 )
 
-var ErrSupersessionCycle = errors.New("supersession chain is cyclic")
+var (
+	ErrSupersessionCycle  = errors.New("supersession chain is cyclic")
+	ErrNoExecutionContext = errors.New("owner namespace and execution context are required")
+)
 
 // Queries derives provenance and attribution views from any Provider.
 type Queries struct {
@@ -31,6 +35,20 @@ func (q Queries) ActionsBy(ctx context.Context, ownerNamespace string, actor mod
 		}
 	}
 	return out, nil
+}
+
+// ActionsIn lists, in time order, the actions recorded in one execution context, including denials, unknown
+// outcomes, and the reconciliations that settled them.
+func (q Queries) ActionsIn(ctx context.Context, ownerNamespace, executionContextID string) ([]model.ActionRecord, error) {
+	if strings.TrimSpace(ownerNamespace) == "" || strings.TrimSpace(executionContextID) == "" {
+		return nil, ErrNoExecutionContext
+	}
+	actions, err := q.Provider.ActionsIn(ctx, ownerNamespace, executionContextID)
+	if err != nil {
+		return nil, err
+	}
+	sort.SliceStable(actions, func(i, j int) bool { return actions[i].ActionTime.Before(actions[j].ActionTime) })
+	return actions, nil
 }
 
 // RecordsAbout lists, in time order, the action records whose subjects include the subject, each followed by the

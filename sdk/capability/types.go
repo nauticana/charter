@@ -80,7 +80,8 @@ type Invoker interface {
 }
 
 // Reconciliation resolves the unknown outcome of an earlier attempt. Invocation repeats that attempt's attribution,
-// inputs, and idempotency key at the time of reconciliation; Fence is the claim its Result carried.
+// inputs, and idempotency key at the time of reconciliation; Fence is the claim its Result carried, or empty to reclaim
+// a key left unknown, superseding any earlier reconciler.
 type Reconciliation struct {
 	Invocation Invocation
 	Action     model.Ref

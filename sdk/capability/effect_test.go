@@ -179,4 +179,70 @@ func TestReconciliationSettlesUnknownFromObservation(t *testing.T) {
 			t.Fatalf("the probed key was left claimed: %s (%s)", res.Status, res.Reason)
 		}
 	})
+	t.Run("a reconciler without the attempt's fence reclaims only an unknown key", func(t *testing.T) {
+		h, rec := timedOut(t)
+		first, second := rec, rec
+		first.Fence, second.Fence = "", ""
+		if res := h.invoker.Reconcile(ctx, first); res.Status != capability.StatusUnknown || res.LedgerFence == "" || res.LedgerFence == rec.Fence {
+			t.Fatalf("reclaim got %s fence %q (%s)", res.Status, res.LedgerFence, res.Reason)
+		}
+		if res := h.invoker.Reconcile(ctx, rec); res.Status != capability.StatusDenied || !errors.Is(res.Err, capability.ErrLedgerFence) {
+			t.Fatalf("the attempt's superseded fence got %s err %v", res.Status, res.Err)
+		}
+		h.observer.outcome = "already-reserved"
+		if res := h.invoker.Reconcile(ctx, second); res.Status != capability.StatusExecuted || res.LedgerFence != "" || h.transport.calls != 1 {
+			t.Fatalf("later reclaim got %s (%s) after %d transport calls", res.Status, res.Reason, h.transport.calls)
+		}
+		inFlight := newHarness(t)
+		if _, err := inFlight.invoker.Ledger.Begin(ctx, rec.Invocation.IdempotencyKey); err != nil {
+			t.Fatal(err)
+		}
+		if res := inFlight.invoker.Reconcile(ctx, second); res.Status != capability.StatusDenied || res.Requirement != "CHR-SEC-008" || inFlight.observer.calls != 0 {
+			t.Fatalf("in-flight key without its fence got %s %s", res.Status, res.Requirement)
+		}
+	})
+	t.Run("a superseded reconciler does not publish a terminal record", func(t *testing.T) {
+		stale := func(t *testing.T, res capability.Result) {
+			t.Helper()
+			if res.Status != capability.StatusUnknown || res.Requirement != "CHR-SEC-008" || res.Outcome != "" || res.BusinessError != "" ||
+				!errors.Is(res.Err, capability.ErrLedgerFence) {
+				t.Fatalf("stale reconciliation got %s %s outcome %q err %v", res.Status, res.Requirement, res.Outcome, res.Err)
+			}
+		}
+		h, rec := timedOut(t)
+		h.observer.outcome = "already-reserved"
+		h.invoker.Ledger = &staleLedger{Ledger: h.invoker.Ledger}
+		res := h.invoker.Reconcile(ctx, rec)
+		stale(t, res)
+		checked := res
+		checked.Err = nil
+		if record := h.recorded(checked); record.Disposition != model.DispositionUnknown {
+			t.Fatalf("stale reconciliation published %s", record.Disposition)
+		}
+
+		h, rec = timedOut(t)
+		h.amend(func(c *model.CapabilityContract) { c.Idempotency.RetryWhenEffectAbsent = true })
+		h.observer.result = model.PostconditionViolated
+		h.invoker.Ledger = &staleLedger{Ledger: h.invoker.Ledger}
+		res = h.invoker.Reconcile(ctx, rec)
+		stale(t, res)
+		checked = res
+		checked.Err = nil
+		if record := h.recorded(checked); record.Disposition != model.DispositionUnknown {
+			t.Fatalf("stale release published %s", record.Disposition)
+		}
+	})
+}
+
+// staleLedger refuses every terminal write, as a ledger does once a later reclaim supersedes the fence.
+type staleLedger struct {
+	capability.Ledger
+}
+
+func (*staleLedger) Complete(context.Context, string, string, capability.Result) error {
+	return capability.ErrLedgerFence
+}
+
+func (*staleLedger) Release(context.Context, string, string) error {
+	return capability.ErrLedgerFence
 }

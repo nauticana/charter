@@ -13,6 +13,8 @@ type Provider interface {
 	Escalation(ctx context.Context, ownerNamespace string, ref model.Ref) (model.Escalation, error)
 	Bundle(ctx context.Context, ownerNamespace string, ref model.Ref) (model.EvidenceBundle, error)
 	Actions(ctx context.Context) ([]model.ActionRecord, error)
+	// ActionsIn lists the actions recorded in one execution context; a durable store answers it from an index.
+	ActionsIn(ctx context.Context, ownerNamespace, executionContextID string) ([]model.ActionRecord, error)
 	Records(ctx context.Context) ([]model.EvidenceRecord, error)
 	Exceptions(ctx context.Context) ([]model.ExceptionRecord, error)
 	Escalations(ctx context.Context) ([]model.Escalation, error)

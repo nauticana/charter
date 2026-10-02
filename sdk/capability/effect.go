@@ -19,8 +19,8 @@ func (i *BaseInvoker) Reconcile(ctx context.Context, rec Reconciliation) Result 
 	if r == nil {
 		return refused
 	}
-	if rec.Action.ID == "" || rec.Fence == "" {
-		return Result{Status: StatusDenied, Reason: "reconciliation names no action or holds no ledger fence", Requirement: "CHR-EVID-012"}
+	if rec.Action.ID == "" {
+		return Result{Status: StatusDenied, Reason: "reconciliation names no action", Requirement: "CHR-EVID-012"}
 	}
 	action := rec.Action
 	r.reconciles, r.result.LedgerFence = &action, rec.Fence
@@ -42,7 +42,18 @@ func (r *invocationRun) reconcile(ctx context.Context) Result {
 		return r.deny(ctx, "idempotency ledger: "+err.Error(), "CHR-SEC-008")
 	}
 	switch entry.State {
-	case LedgerInFlight, LedgerUnknown:
+	case LedgerInFlight:
+		if held == "" {
+			return r.deny(ctx, fmt.Sprintf("idempotency key %s is in flight; only its claim holder may reconcile it", key), "CHR-SEC-008")
+		}
+	case LedgerUnknown:
+		if held == "" {
+			if held, err = i.Ledger.ReclaimUnknown(ctx, key); err != nil {
+				r.result.Err = err
+				return r.deny(ctx, "idempotency ledger: "+err.Error(), "CHR-SEC-008")
+			}
+			r.result.LedgerFence = held
+		}
 	case LedgerCompleted:
 		if entry.Result != nil {
 			return replay(*entry.Result, key)
@@ -105,7 +116,13 @@ func (r *invocationRun) effectAbsent(ctx context.Context, p model.Postcondition)
 		return r.complete(ctx, true, StatusBusinessError, p.ViolationBusinessError, reason, "CHR-CAP-010")
 	}
 	if r.contract.Idempotency.RetryWhenEffectAbsent {
-		r.ledger(ctx, true, true, r.invoker.Ledger.Release)
+		if r.reconciles == nil {
+			r.ledger(ctx, true, true, r.invoker.Ledger.Release)
+		} else if err := r.invoker.Ledger.Release(ctx, r.inv.IdempotencyKey, r.result.LedgerFence); err != nil {
+			return r.uncommitted(ctx, err)
+		} else {
+			r.result.LedgerFence = ""
+		}
 		return r.finish(ctx, StatusFailed, "failed", reason, "CHR-CAP-010")
 	}
 	return r.complete(ctx, true, StatusFailed, "failed", reason, "CHR-CAP-010")

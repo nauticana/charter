@@ -84,6 +84,16 @@ func TestHarborQueries(t *testing.T) {
 	if actions, err := q.ActionsBy(ctx, "harbor.example", model.ObjectRef{Kind: model.KindAgentIdentity, ID: "AGENT-ORDER-EXCEPTION-COORDINATOR"}); err != nil || len(actions) != 3 {
 		t.Errorf("actions by agent: %d %v", len(actions), err)
 	}
+	if actions, err := q.ActionsIn(ctx, "harbor.example", "EXEC-OE-0042-05"); err != nil || len(actions) != 2 ||
+		actions[0].ID != "ACT-0042-EXECUTE-TIMEOUT" || actions[1].ID != "ACT-0042-EXECUTE-1" {
+		t.Errorf("actions in execution context: %v %v", actions, err)
+	}
+	if actions, err := q.ActionsIn(ctx, "other.example", "EXEC-OE-0042-05"); err != nil || len(actions) != 0 {
+		t.Errorf("another namespace's context: %v %v", actions, err)
+	}
+	if _, err := q.ActionsIn(ctx, "harbor.example", " "); !errors.Is(err, ErrNoExecutionContext) {
+		t.Errorf("blank execution context: %v", err)
+	}
 	if lineage, err := q.Lineage(ctx, "harbor.example", model.Ref{ID: "EVR-0042-STOCK-CORRECTED"}); err != nil || len(lineage) != 2 || lineage[1].ID != "EVR-0042-STOCK-OBSERVED" {
 		t.Errorf("harbor lineage: %v %v", lineage, err)
 	}

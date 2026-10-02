@@ -9,6 +9,16 @@
   },
   "migrations": [
     {
+      "version": "1.2.3",
+      "title": "Reclaimed reconciliation and execution-context actions",
+      "tags": [
+        "breaking",
+        "additive"
+      ],
+      "summary": "A reconciler without the attempt's ledger fence reclaims an unknown key, and evidence providers list the actions of one execution context. Updates the optional keel adapter to keel v1.2.87.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`charterSpecVersion`, `x-charter-spec-version`) | 1.2.0 |\n| Schema catalogue (`catalogVersion`) | 2.3.0 |\n| Conformance manifest (`specification.version`) | 1.2.0 |\n| Go module `github.com/nauticana/charter` | v1.2.3 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.2.87 |\n\n## Compatibility impact\n\nBreaking for custom `capability.Ledger` and `evidence.Provider` implementations only; Charter documents, schemas, fixtures, and conformance claims are unchanged. keel v1.2.87 changes `outbox.EnqueueTx`, which the adapter does not import, and adds `port.IdempotencyLedger.ReclaimUnknown`, which `keel.Ledger` now calls.\n\n## Go SDK — breaking\n\n| Symbol | Change |\n|---|---|\n| `capability.Ledger.ReclaimUnknown(ctx, key) (fence, error)` | Fences an unknown key for a reconciler, superseding any earlier fence; the key stays unknown to `Begin`, and any other state is `ErrLedgerTransition`. `BaseMemoryLedger` and `keel.Ledger` implement it. |\n| `evidence.Provider.ActionsIn(ctx, ownerNamespace, executionContextID)` | Lists the actions of one execution context, so a durable provider can answer from an index. `BaseProvider` scans its source. |\n\n## Go SDK — behavior and new\n\n| Symbol | Purpose |\n|---|---|\n| `capability.Reconciliation.Fence` | May be empty: `Reconcile` then reclaims a key the ledger holds as unknown, so a key left unknown by a crash, a restart, or an earlier process can be reconciled by a later sweep. An in-flight key still needs its holder's fence. |\n| `evidence.Queries.ActionsIn` | Returns the actions of one execution context in time order; a blank namespace or context is `ErrNoExecutionContext`. |\n| `capability/ledgertest`, `evidence/evidencetest` | Contract suites a `Ledger`, `Store`, or `Provider` implementation runs from its own tests. |\n\n## Adoption\n\n1. `go get github.com/nauticana/charter@v1.2.3`; with `sdk/adapter/keel`, keel v1.2.87.\n2. A custom `Ledger` adds `ReclaimUnknown` and runs `ledgertest.Run`; a custom `Provider` adds `ActionsIn`, answered from an index where the store has one.\n3. A reconciliation sweep that lost the attempt's fence passes an empty `Fence`; code that filtered `Provider.Actions` by execution context calls `Queries.ActionsIn`.\n"
+    },
+    {
       "version": "1.2.2",
       "title": "Stored documents, account links, and binding packages",
       "tags": [

@@ -240,6 +240,19 @@ func (r *invocationRun) deny(ctx context.Context, reason, requirement string) Re
 }
 
 func (r *invocationRun) complete(ctx context.Context, mutating bool, status Status, outcome, reason, requirement string) Result {
+	if mutating && r.reconciles != nil {
+		// A later reclaim may supersede this run, so commit its fence before publishing a terminal record.
+		r.prepare(status, outcome, reason, requirement)
+		fence := r.result.LedgerFence
+		stored := r.result
+		stored.LedgerFence = ""
+		stored.Err = nil
+		if err := r.invoker.Ledger.Complete(ctx, r.inv.IdempotencyKey, fence, stored); err != nil {
+			return r.uncommitted(ctx, err)
+		}
+		r.result.LedgerFence = ""
+		return r.record(ctx)
+	}
 	res := r.finish(ctx, status, outcome, reason, requirement)
 	if mutating {
 		fence := res.LedgerFence
@@ -255,6 +268,13 @@ func (r *invocationRun) complete(ctx context.Context, mutating bool, status Stat
 	return res
 }
 
+// uncommitted leaves a reconciliation whose ledger write failed unknown, publishing none of its undecided outcome.
+func (r *invocationRun) uncommitted(ctx context.Context, err error) Result {
+	r.result.Action, r.result.Outcome, r.result.BusinessError = nil, "", ""
+	r.result.Err = errors.Join(r.result.Err, err)
+	return r.finish(ctx, StatusUnknown, "unknown", "the reconciliation could not commit its ledger result before publication", "CHR-SEC-008")
+}
+
 func (r *invocationRun) ledger(ctx context.Context, mutating, clearFence bool, op func(context.Context, string, string) error) {
 	if mutating {
 		if err := op(ctx, r.inv.IdempotencyKey, r.result.LedgerFence); err != nil {
@@ -267,6 +287,11 @@ func (r *invocationRun) ledger(ctx context.Context, mutating, clearFence bool, o
 
 // finish records the action with its authority and approval evaluations, then returns the result (CHR-EVID-001, CHR-EVID-002).
 func (r *invocationRun) finish(ctx context.Context, status Status, outcome, reason, requirement string) Result {
+	r.prepare(status, outcome, reason, requirement)
+	return r.record(ctx)
+}
+
+func (r *invocationRun) prepare(status Status, outcome, reason, requirement string) {
 	r.result.Status, r.result.Reason, r.result.Requirement = status, reason, requirement
 	inv := r.inv
 	record := model.ActionRecord{Actor: inv.Actor, RuntimeContext: inv.Runtime, AssignmentID: inv.AssignmentID, ResponsibilityID: inv.ResponsibilityID,
@@ -286,10 +311,13 @@ func (r *invocationRun) finish(ctx context.Context, status Status, outcome, reas
 		record.InformationEvaluations = append(record.InformationEvaluations, model.InformationEvaluation{InformationID: r.inv.InformationUses[k].Information,
 			Purpose: clip(r.inv.InformationUses[k].Purpose), Result: string(d.Result), Reason: clip(d.Reason)})
 	}
-	if err := r.invoker.Evidence.Action(ctx, record); err != nil {
+	r.result.Action = &record
+}
+
+func (r *invocationRun) record(ctx context.Context) Result {
+	if err := r.invoker.Evidence.Action(ctx, *r.result.Action); err != nil {
 		r.result.Err = errors.Join(r.result.Err, fmt.Errorf("evidence: %w", err))
 	}
-	r.result.Action = &record
 	r.escalate(ctx)
 	return r.result
 }
