@@ -1,5 +1,6 @@
 table: charter_human_account
 comment: Which Charter HumanIdentity a keel partner membership acts as; periods never overlap per human or per user
+extensions: [btree_gist]
 columns:
   - name: partner_id
     type: BIGINT
@@ -21,14 +22,6 @@ primary_key: [partner_id, human_namespace, human_id, begda]
 indexes:
   - name: charter_human_account_user_ix
     columns: [partner_id, user_id]
-  - name: charter_human_account_open_human_ux
-    columns: [partner_id, human_namespace, human_id]
-    unique: true
-    where: endda IS NULL
-  - name: charter_human_account_open_user_ux
-    columns: [partner_id, user_id]
-    unique: true
-    where: endda IS NULL
 foreign_keys:
   - name: partner_user_human_accounts
     columns: [partner_id, user_id, partner_user_begda]
@@ -45,3 +38,10 @@ checks:
     expression: endda IS NULL OR endda > begda
   - name: charter_human_account_membership_ck
     expression: begda >= partner_user_begda
+exclusions:
+  - name: charter_human_account_human_no_overlap
+    using: gist
+    expression: "partner_id WITH =, human_namespace WITH =, human_id WITH =, tsrange(begda, endda) WITH &&"
+  - name: charter_human_account_user_no_overlap
+    using: gist
+    expression: "partner_id WITH =, user_id WITH =, tsrange(begda, endda) WITH &&"

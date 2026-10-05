@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.2.4",
+      "title": "Database-enforced account link periods",
+      "tags": [
+        "breaking"
+      ],
+      "summary": "PostgreSQL refuses overlapping human account links per human and per user through exclusion constraints. Updates the optional keel adapter to keel v1.2.93.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`charterSpecVersion`, `x-charter-spec-version`) | 1.2.0 |\n| Schema catalogue (`catalogVersion`) | 2.3.0 |\n| Conformance manifest (`specification.version`) | 1.2.0 |\n| Go module `github.com/nauticana/charter` | v1.2.4 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.2.93 |\n\n## Compatibility impact\n\nBreaking for stored `charter_human_account` data only; Charter documents, schemas, fixtures, conformance claims, and Go APIs are unchanged. keel v1.2.88 to v1.2.93 do not change the adapter's Go surface (`common`, `guard`, `idempotency`, `model`, `port`); keel v1.2.92 lets a user hold one partner membership at a time, makes ended `partner_user` rows read-only, and adds schema exclusion constraints, which the adapter's module now uses.\n\n## Keel schema module — breaking\n\n| Object | Change |\n|---|---|\n| `charter_human_account` | Requires the `btree_gist` extension. Exclusion constraints `charter_human_account_human_no_overlap` and `charter_human_account_user_no_overlap` refuse links whose half-open `[begda, endda)` periods overlap for the same human or the same user in a partner, and replace the partial unique indexes `charter_human_account_open_human_ux` and `charter_human_account_open_user_ux`. `HumanAccounts.Link` still reports `ErrAccountLinkOverlap` before the database does. |\n\n## Adoption\n\n1. `go get github.com/nauticana/charter@v1.2.4`; with `sdk/adapter/keel`, keel v1.2.93, adopting keel's own v1.2.88 to v1.2.93 guidance first, including the `partner_user` overlap constraint.\n2. Regenerate the module with keel's `schemagen`, or apply it to stored data: drop the two partial unique indexes, create `btree_gist`, and add the two exclusion constraints. Links written through `HumanAccounts` already satisfy them; end or remove any overlapping rows written another way first.\n"
+    },
+    {
       "version": "1.2.3",
       "title": "Reclaimed reconciliation and execution-context actions",
       "tags": [
