@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.2.5",
+      "title": "Partner-scoped generic CRUD for the keel schema module",
+      "tags": [
+        "breaking"
+      ],
+      "summary": "keel v1.2.104 scopes generic CRUD through composite keys, so `charter_document_revision` and `charter_human_account` are pinned to the caller's partner like `charter_document`. Updates the optional keel adapter to keel v1.2.104.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`charterSpecVersion`, `x-charter-spec-version`) | 1.2.0 |\n| Schema catalogue (`catalogVersion`) | 2.3.0 |\n| Conformance manifest (`specification.version`) | 1.2.0 |\n| Go module `github.com/nauticana/charter` | v1.2.5 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.2.104 |\n\n## Compatibility impact\n\nCharter documents, schemas, fixtures, conformance claims, Go APIs, and the keel schema module are unchanged. keel v1.2.94 to v1.2.104 do not change the adapter's Go surface (`common`, `data`, `guard`, `idempotency`, `model`, `port`, `schema`). Breaking only for a downstream that exposes the module tables through keel's generic CRUD.\n\n## Keel schema module — generic CRUD scope\n\nkeel v1.2.104 treats a table as partner-specific when a foreign key carrying its `partner_id` reaches `business_partner`, directly or through partner-specific parents in a composite key. Generic CRUD now pins every module table to the caller's partner:\n\n| Table | Path to `business_partner` | Before | Now |\n|---|---|---|---|\n| `charter_document` | `partner_charter_documents` | scoped | scoped |\n| `charter_document_revision` | `charter_document_revisions` → `charter_document` | unscoped | scoped |\n| `charter_human_account` | `partner_user_human_accounts` → `partner_user`; `human_identity_accounts` → `charter_document` | unscoped | scoped |\n\nBefore, a TABLE grant on either unscoped table served and accepted every tenant's rows. `DocumentStore` and `HumanAccounts` use named queries bound to an explicit partner and behave as before.\n\n## Grants\n\nkeel v1.2.102 adds `bypass_scope` to every grant-catalog read and honors it on `'*'` grants. A grant source registered through `BaseGrantCatalog`, including the agent source (`AgentPrincipalKind`), needs no change; a hand-written `GrantCatalog` returns `bypass_scope` as the fifth `ReadQuery` column. `PermissionGate` ignores `ownScope`, so its decisions are unchanged.\n\n## Adoption\n\n1. `go get github.com/nauticana/charter@v1.2.5`; with `sdk/adapter/keel`, keel v1.2.104, adopting keel's own v1.2.94 to v1.2.104 guidance first.\n2. Review TABLE grants on `charter_document_revision` and `charter_human_account`: a downstream that granted them to partner roles now serves only the caller's partner, and one that withheld them for lack of scoping may now grant them.\n"
+    },
+    {
       "version": "1.2.4",
       "title": "Database-enforced account link periods",
       "tags": [

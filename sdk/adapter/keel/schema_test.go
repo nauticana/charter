@@ -1,11 +1,14 @@
 package keel
 
 import (
+	"context"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/nauticana/keel/data"
+	kmodel "github.com/nauticana/keel/model"
 	"github.com/nauticana/keel/schema"
 	"github.com/nauticana/keel/schema/dialect"
 )
@@ -30,6 +33,31 @@ func TestHumanAccountPeriodsCannotOverlap(t *testing.T) {
 	} {
 		if !strings.Contains(ddl, want) {
 			t.Errorf("charter_human_account DDL lacks %q:\n%s", want, ddl)
+		}
+	}
+}
+
+// TestGenericCRUDScopesModuleTablesToPartner checks that keel's foreign-key
+// resolution pins every module table to the caller's partner, including those
+// that reach the partner only through composite keys.
+func TestGenericCRUDScopesModuleTablesToPartner(t *testing.T) {
+	s := moduleSchema(t)
+	repo := &data.AbstractRepository{TableDefinitions: map[string]*kmodel.TableDefinition{}}
+	res := &kmodel.QueryResult{}
+	for _, table := range s.Tables {
+		repo.TableDefinitions[table.Name] = &kmodel.TableDefinition{TableName: table.Name}
+		for _, fk := range table.ForeignKeys {
+			for i, column := range fk.Columns {
+				res.Rows = append(res.Rows, []any{fk.Name, table.Name, int64(i + 1), column, fk.References.Table})
+			}
+		}
+	}
+	if err := repo.LoadForeignKeys(context.Background(), res, nil); err != nil {
+		t.Fatal(err)
+	}
+	for _, table := range []string{"charter_document", "charter_document_revision", "charter_human_account"} {
+		if !repo.TableDefinitions[table].PartnerSpecific {
+			t.Errorf("%s is not partner-specific; generic CRUD would serve every tenant's rows", table)
 		}
 	}
 }
