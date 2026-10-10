@@ -1,4 +1,3 @@
 rules: [CHR-RULE-ID-001]
-specification_version: 1.3.0
 expected: fail
 reason: The acting agent identity is suspended

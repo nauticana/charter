@@ -2,6 +2,7 @@ package validate
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/model"
@@ -12,12 +13,14 @@ type UnitTreeRule struct{ AbstractRule }
 type PositionPlacementRule struct{ AbstractRule }
 type ValidityOrderedRule struct{ AbstractRule }
 type HumanOccupancyRule struct{ AbstractRule }
+type ApplicabilityRule struct{ AbstractRule }
 
 var (
 	_ Rule = UnitTreeRule{}
 	_ Rule = PositionPlacementRule{}
 	_ Rule = ValidityOrderedRule{}
 	_ Rule = HumanOccupancyRule{}
+	_ Rule = ApplicabilityRule{}
 )
 
 func (r UnitTreeRule) Validate(c *corpus.Corpus) []Finding {
@@ -122,4 +125,40 @@ func (r HumanOccupancyRule) Validate(c *corpus.Corpus) []Finding {
 		}
 	}
 	return out
+}
+
+// Validate finds two assignments of one target and participation, at least one declaring applicability, that may both
+// apply to the same work at the same time without exactly one of them being the default (CHR-ENT-012).
+func (r ApplicabilityRule) Validate(c *corpus.Corpus) []Finding {
+	var out []Finding
+	all := allOf[model.Assignment](c, model.KindAssignment)
+	for i, a := range all {
+		for _, b := range all[i+1:] {
+			if a.Applicability == nil && b.Applicability == nil || a.Participation != b.Participation || a.Target.Kind != b.Target.Kind ||
+				corpus.ObjectKeyOf(a.Namespace, a.Target) != corpus.ObjectKeyOf(b.Namespace, b.Target) ||
+				a.Validity == nil || b.Validity == nil || !temporal.NewPeriod(*a.Validity).Overlaps(temporal.NewPeriod(*b.Validity)) ||
+				!applicabilityOverlaps(a.Applicability, b.Applicability) || isDefault(a) != isDefault(b) {
+				continue
+			}
+			out = append(out, r.finding(a.Namespace, a.ID, fmt.Sprintf("applies to the same work as %s and exactly one must be the default", b.ID)))
+		}
+	}
+	return out
+}
+
+func isDefault(a model.Assignment) bool { return a.Applicability != nil && a.Applicability.Default }
+
+// applicabilityOverlaps is false only when a dimension both constrain has no value in common; an absent applicability matches everything.
+func applicabilityOverlaps(a, b *model.Applicability) bool {
+	if a == nil || b == nil {
+		return true
+	}
+	for _, x := range a.Criteria {
+		for _, y := range b.Criteria {
+			if x.Dimension == y.Dimension && !slices.ContainsFunc(x.Values, func(v string) bool { return slices.Contains(y.Values, v) }) {
+				return false
+			}
+		}
+	}
+	return true
 }

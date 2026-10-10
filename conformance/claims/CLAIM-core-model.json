@@ -1,9 +1,9 @@
 {
   "charterSpecVersion": "1.3.0",
   "namespace": "nauticana.charter",
-  "id": "CLAIM-1.3.0-core-model",
+  "id": "CLAIM-core-model",
   "kind": "ConformanceClaim",
-  "name": "Reference SDK core-model claim 1.3.0",
+  "name": "Reference SDK core-model claim",
   "conformanceProfile": "core-model",
   "implementationVersion": "1.3.0",
   "testedRuleIds": [

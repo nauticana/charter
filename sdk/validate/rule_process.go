@@ -54,6 +54,9 @@ func (r InstanceAssignmentRule) Validate(c *corpus.Corpus) []Finding {
 		if !organization.Current(asg, at) {
 			out = append(out, r.finding(ti.Namespace, ti.ID, fmt.Sprintf("assignment %s is not effective at %s", asg.ID, at.Format("2006-01-02"))))
 		}
+		if process.Exceeds(ti.Participation, asg.Participation) {
+			out = append(out, r.finding(ti.Namespace, ti.ID, fmt.Sprintf("participation %s exceeds %s of assignment %s", ti.Participation, asg.Participation, asg.ID)))
+		}
 	}
 	return out
 }

@@ -87,6 +87,9 @@ func (r *BaseContextResolver) TaskContext(ctx context.Context, owner string, ref
 	if !organization.Current(asg, at) {
 		return TaskContext{}, fmt.Errorf("%w: %s is not effective at %s", ErrAssignment, asg.ID, at.Format(time.RFC3339))
 	}
+	if Exceeds(ti.Participation, asg.Participation) {
+		return TaskContext{}, fmt.Errorf("%w: %s exceeds %s of %s", ErrParticipation, ti.Participation, asg.Participation, asg.ID)
+	}
 	return TaskContext{Instance: ti, Task: task, Process: proc, ProcessInstance: pi, Assignment: asg, At: at}, nil
 }
 
@@ -99,4 +102,19 @@ func PerformerKind(k model.Kind) string {
 		return model.PerformerAgent
 	}
 	return ""
+}
+
+var levels = []string{model.ParticipationObserves, model.ParticipationRecommends, model.ParticipationPrepares, model.ParticipationPerforms, model.ParticipationExecutes}
+
+// Level orders participation from observes to executes (CHR-PROC-008); approves, supports, and occupies are not levels.
+func Level(participation string) (int, bool) {
+	l := slices.Index(levels, participation)
+	return l, l >= 0
+}
+
+// Exceeds reports whether participation is a higher level than the one it is bounded by.
+func Exceeds(participation, bound string) bool {
+	l, ok := Level(participation)
+	b, boundOK := Level(bound)
+	return ok && boundOK && l > b
 }

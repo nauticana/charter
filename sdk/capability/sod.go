@@ -15,7 +15,8 @@ type SodChecker interface {
 	Conflict(ctx context.Context, inv Invocation, constraints []model.Ref) (model.Ref, bool, error)
 }
 
-// BaseSodChecker evaluates the contract's constraints against the performed actions of the actor and every delegator, scoping by subjects.
+// BaseSodChecker evaluates the contract's constraints, less the one a presented exception relieves, against the performed
+// actions of the actor and every delegator, scoping by subjects.
 type BaseSodChecker struct {
 	Definitions corpus.AbstractDocumentProvider
 	Actions     evidence.Provider
@@ -34,7 +35,7 @@ func NewBaseSodChecker(definitions corpus.Source, actions evidence.Provider) *Ba
 }
 
 func (c *BaseSodChecker) Conflict(ctx context.Context, inv Invocation, refs []model.Ref) (model.Ref, bool, error) {
-	if len(refs) == 0 {
+	if len(refs) == 0 && inv.SodExceptionID == nil {
 		return model.Ref{}, false, nil
 	}
 	if c.Actions == nil {
@@ -47,6 +48,15 @@ func (c *BaseSodChecker) Conflict(ctx context.Context, inv Invocation, refs []mo
 			return model.Ref{}, false, err
 		}
 		constraints = append(constraints, sc)
+	}
+	if inv.SodExceptionID != nil {
+		e, err := corpus.ResolveAs[model.SodException](ctx, &c.Definitions, inv.Namespace, *inv.SodExceptionID, model.KindSodException)
+		if err != nil {
+			return model.Ref{}, false, err
+		}
+		if constraints, err = authority.Excuse(constraints, e, inv.Namespace, inv.Actor, inv.At); err != nil {
+			return model.Ref{}, false, err
+		}
 	}
 	actors := []model.ObjectRef{inv.Actor}
 	for _, hop := range inv.AuthorityChain {

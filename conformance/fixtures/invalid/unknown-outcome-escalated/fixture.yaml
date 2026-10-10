@@ -1,5 +1,4 @@
 rules: [CHR-RULE-RT-008]
-specification_version: 1.3.0
 expected: fail
 reason: The external outcome is unknown, so the agent must stop; a conforming runtime records an exception and escalates to the accountable authority of the agent's definition
 documents: ../../../../examples/harbor-manufacturing/instances

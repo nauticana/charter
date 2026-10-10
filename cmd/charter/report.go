@@ -11,7 +11,6 @@ import (
 
 type validationReport struct {
 	SpecVersion     string             `json:"specVersion"`
-	CatalogVersion  string             `json:"catalogVersion"`
 	Profile         string             `json:"profile,omitempty"`
 	Documents       int                `json:"documents"`
 	Rules           []string           `json:"rules"`
@@ -27,13 +26,11 @@ type conformanceReport struct {
 }
 
 type versionReport struct {
-	Charter             string   `json:"charter"`
-	SpecVersion         string   `json:"specVersion"`
-	CatalogVersion      string   `json:"catalogVersion"`
-	ImplementedRules    []string `json:"implementedRules"`
-	ManifestSpecVersion string   `json:"manifestSpecVersion,omitempty"`
-	ActiveProfiles      []string `json:"activeProfiles,omitempty"`
-	ActiveRules         []string `json:"activeRules,omitempty"`
+	Charter          string   `json:"charter"`
+	SpecVersion      string   `json:"specVersion"`
+	ImplementedRules []string `json:"implementedRules"`
+	ActiveProfiles   []string `json:"activeProfiles,omitempty"`
+	ActiveRules      []string `json:"activeRules,omitempty"`
 }
 
 func writeJSON(w io.Writer, v any) error {
@@ -56,7 +53,7 @@ func writeValidation(w io.Writer, format string, r validationReport) error {
 	if format == "json" {
 		return writeJSON(w, r)
 	}
-	fmt.Fprintf(w, "charter validate: %d documents against specification %s (schema catalog %s), %d rules\n", r.Documents, r.SpecVersion, r.CatalogVersion, len(r.Rules))
+	fmt.Fprintf(w, "charter validate: %d documents against specification %s, %d rules\n", r.Documents, r.SpecVersion, len(r.Rules))
 	for _, f := range r.Findings {
 		fmt.Fprintln(w, findingLine(f))
 	}
@@ -111,9 +108,9 @@ func writeVersion(w io.Writer, format string, v versionReport) error {
 	if format == "json" {
 		return writeJSON(w, v)
 	}
-	fmt.Fprintf(w, "charter %s\nspecification %s\nschema catalog %s\nimplemented rules %d\n", v.Charter, v.SpecVersion, v.CatalogVersion, len(v.ImplementedRules))
-	if v.ManifestSpecVersion != "" {
-		fmt.Fprintf(w, "manifest specification %s\nactive profiles %s\nactive rules %d\n", v.ManifestSpecVersion, strings.Join(v.ActiveProfiles, ", "), len(v.ActiveRules))
+	fmt.Fprintf(w, "charter %s\nspecification %s\nimplemented rules %d\n", v.Charter, v.SpecVersion, len(v.ImplementedRules))
+	if len(v.ActiveProfiles) > 0 {
+		fmt.Fprintf(w, "active profiles %s\nactive rules %d\n", strings.Join(v.ActiveProfiles, ", "), len(v.ActiveRules))
 	}
 	return nil
 }

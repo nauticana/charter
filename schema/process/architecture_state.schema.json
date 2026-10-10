@@ -3,13 +3,12 @@
   "$id": "https://nauticana.github.io/charter/schema/process/architecture_state.schema.json",
   "title": "ArchitectureState",
   "description": "A time-bounded baseline or target description; target states name their decision authority.",
-  "x-charter-spec-version": "1.2.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ARCH-001",
     "CHR-ARCH-002",
     "CHR-ARCH-003",
-    "CHR-ARCH-006"
+    "CHR-ARCH-006",
+    "CHR-INFO-009"
   ],
   "type": "object",
   "allOf": [
@@ -26,6 +25,18 @@
     "lifecycleState": true,
     "validity": true,
     "extensions": true,
+    "sourceEvidence": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "x-charter-ref-kinds": [
+        "EvidenceRecord"
+      ],
+      "description": "Evidence the modeled facts rest on; required when they were derived rather than entered by their accountable owner (CHR-INFO-009)."
+    },
     "kind": {
       "const": "ArchitectureState"
     },

@@ -1,11 +1,11 @@
 id: CHR-RULE-AUTH-001
 title: Allowed authority evaluations cite a grant effective for the actor at action time
-requirements: [CHR-AUTH-005, CHR-EVID-002]
+requirements: [CHR-AUTH-005, CHR-AUTH-011, CHR-EVID-002]
 profile: core-model
 verification: semantic
 applies_to: [ActionRecord]
 check: >-
-  For every ActionRecord authorityEvaluation with result allowed, authorityGrantId resolves to an AuthorityGrant whose actor equals the record actor and whose validity contains the actionTime date.
+  For every ActionRecord authorityEvaluation with result allowed, authorityGrantId resolves to an AuthorityGrant whose actor equals the record actor and whose validity contains the actionTime date and whose certification, if any, was made by another identity and is not overdue at actionTime.
 fixtures:
   valid: fixtures/valid/harbor
   invalid: fixtures/invalid/expired-grant

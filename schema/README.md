@@ -1,11 +1,11 @@
 # Charter Schemas
 
-Status: Specification 1.2.0, schema catalogue 2.3.0; every catalogued schema is normative and every conformance profile is active.
+Status: Every catalogued schema is normative and every conformance profile is active.
 
 This directory contains language-independent JSON Schemas for Charter instance documents. Schema structure mirrors the specification domains:
 
 - `enterprise/`: enterprises, organization-unit trees, position types, positions, roles, responsibilities, and assignments
-- `agent/`: identities, agent definitions and runtimes, authority, approval, and separation of duties
+- `agent/`: identities, agent definitions and runtimes, authority, approval, separation of duties and its exceptions, and the authority-explanation format
 - `process/`: value streams, process and task definitions and instances, capabilities, relationships, and architecture states
 - `binding/`: system profiles, capability, data, authority, and event bindings, and the binding-package manifest format
 - `evidence/`: action evidence, decisions, exceptions, audit trails, and information provenance
@@ -17,9 +17,9 @@ This directory contains language-independent JSON Schemas for Charter instance d
 
 Schemas and normative prose are jointly authoritative. Schemas determine structural instance validity but do not override behavioral requirements in `spec/`.
 
-Every schema has a stable `$id`, the specification version it targets, its own artifact version, requirement references, and:
+Every schema has a stable `$id`, requirement references, and:
 
-- A versioned entry in the schema catalogue
+- An entry in the schema catalogue, which records the one specification version of the whole set
 - Explicitly documented extension points
 - Valid and invalid fixtures for every active structural rule
 - Semantic rules for constraints that JSON Schema cannot establish across documents
@@ -47,16 +47,19 @@ flowchart LR
     process -->|sodConstraintIds| agent
     process -->|accountableResponsibilityId, performer, assignmentId| enterprise
     evidence -->|capabilityId| process
-    evidence -->|actor, runtimeInstanceId, authorityGrantId, approvalId| agent
+    evidence -->|actor, runtimeInstanceId, authorityGrantId, approvalId, sodExceptionId| agent
     evidence -->|assignmentId, responsibilityId| enterprise
     enterprise -->|Assignment.subject| agent
     agent -->|accountable, responsibilityIds| enterprise
     agent -->|capabilityIds, constrainedActions| process
+    agent -->|certification.evidenceRecordId| evidence
+    enterprise -->|sourceEvidence| evidence
+    process -->|sourceEvidence| evidence
 
     binding["binding<br/>EnterpriseSystem, SystemProfile, CapabilityBinding,<br/>DataBinding, AuthorityBinding, EventBinding,<br/>BindingConformance"]
     information["information<br/>InformationDefinition,<br/>InformationGovernancePolicy"]
     enterprise["enterprise<br/>Enterprise, OrganizationUnit, PositionType,<br/>Position, Role, Responsibility,<br/>OrganizationRelationship, Assignment"]
-    agent["agent<br/>HumanIdentity, AgentIdentity, AgentDefinition,<br/>AgentRuntime, AuthorityGrant, Approval, SodConstraint"]
+    agent["agent<br/>HumanIdentity, AgentIdentity, AgentDefinition,<br/>AgentRuntime, AuthorityGrant, Approval, SodConstraint,<br/>SodException"]
     process["process<br/>ValueStream, BusinessProcess, Task, ProcessRelationship,<br/>ProcessInstance, TaskInstance, CapabilityContract,<br/>ArchitectureState, Gap, RoadmapItem"]
     evidence["evidence<br/>EvidenceRecord, ActionRecord, ExceptionRecord,<br/>Escalation, EvidenceBundle"]
     conformance["conformance<br/>ConformanceClaim"]

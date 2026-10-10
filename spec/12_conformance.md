@@ -1,7 +1,5 @@
 # Conformance and Compatibility
 
-Status: Version 1.3.0
-
 Conformance allows independent implementations to make bounded, testable claims about the parts of Charter they support.
 
 ## Profiles
@@ -16,7 +14,7 @@ Profiles are not active until their required rules are listed in `conformance/ma
 
 ## Requirements
 
-- **CHR-CONF-001:** A conforming artifact or implementation MUST identify the Charter specification version and conformance profile it targets.
+- **CHR-CONF-001:** A conforming artifact or implementation MUST identify the Charter specification version and conformance profile it targets. An implementation of a release MUST accept a document that targets the same or an earlier release of its major version.
 - **CHR-CONF-002:** Extensions MUST use a namespace that cannot collide with Charter-defined properties and MUST NOT change or cause reinterpretation of Charter-defined semantics.
 - **CHR-CONF-003:** An implementation MUST reject input that violates a required structural or semantic constraint rather than silently coercing it into conformance.
 - **CHR-CONF-004:** Identifiers intended to persist across integrations or audit records MUST be stable within their declared namespace.

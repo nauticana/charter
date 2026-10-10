@@ -53,7 +53,7 @@ func usage(w io.Writer) {
   validate <dir>...   validate instance documents structurally and against the semantic rules
   conformance         run every fixture of the conformance manifest
   claim               run the manifest and print a ConformanceClaim document
-  version             print the supported specification, schema catalog, and rule versions
+  version             print the module and specification versions and the implemented rules
 
 Run "charter <command> -h" for the command's flags. Exit status: 0 conforming, 1 findings or failures, 2 usage or error.
 `)
@@ -73,12 +73,12 @@ func validateCmd(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "charter validate: at least one document directory is required")
 		return exitUsage
 	}
-	meta, err := (validate.Catalog{}).Meta()
-	if err != nil {
-		return fail(stderr, err)
-	}
 	if *specVersion == "" {
-		*specVersion = meta.SpecVersion
+		version, err := (validate.Catalog{}).SpecVersion()
+		if err != nil {
+			return fail(stderr, err)
+		}
+		*specVersion = version
 	}
 	structural, err := validate.NewStructural()
 	if err != nil {
@@ -97,7 +97,7 @@ func validateCmd(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		return fail(stderr, err)
 	}
-	report := validationReport{SpecVersion: *specVersion, CatalogVersion: meta.CatalogVersion, Documents: c.Len(), Rules: ruleIDs(rules)}
+	report := validationReport{SpecVersion: *specVersion, Documents: c.Len(), Rules: ruleIDs(rules)}
 	if *conf != "" {
 		report.Profile = *profile
 	}
@@ -136,7 +136,7 @@ func conformanceCmd(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		return fail(stderr, err)
 	}
-	manifest, err := runner.Manifest.Manifest()
+	version, err := (validate.Catalog{}).SpecVersion()
 	if err != nil {
 		return fail(stderr, err)
 	}
@@ -144,7 +144,7 @@ func conformanceCmd(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		return fail(stderr, err)
 	}
-	report := conformanceReport{SpecVersion: manifest.Specification.Version, Fixtures: results, Result: model.ResultConforming}
+	report := conformanceReport{SpecVersion: version, Fixtures: results, Result: model.ResultConforming}
 	for _, r := range results {
 		if !r.Passed {
 			report.Result = model.ResultNonconforming
@@ -202,11 +202,11 @@ func versionCmd(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("version", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	format := fs.String("format", "text", "report format: text or json")
-	conf := fs.String("conformance", "", "conformance directory; reports its manifest version and active rules")
+	conf := fs.String("conformance", "", "conformance directory; reports its active profiles and rules")
 	if err := fs.Parse(args); err != nil {
 		return exitUsage
 	}
-	meta, err := (validate.Catalog{}).Meta()
+	version, err := (validate.Catalog{}).SpecVersion()
 	if err != nil {
 		return fail(stderr, err)
 	}
@@ -214,13 +214,12 @@ func versionCmd(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		return fail(stderr, err)
 	}
-	v := versionReport{Charter: moduleVersion(), SpecVersion: meta.SpecVersion, CatalogVersion: meta.CatalogVersion, ImplementedRules: ruleIDs(rules)}
+	v := versionReport{Charter: moduleVersion(), SpecVersion: version, ImplementedRules: ruleIDs(rules)}
 	if *conf != "" {
 		manifest, err := (validate.ManifestReader{Dir: *conf}).Manifest()
 		if err != nil {
 			return fail(stderr, err)
 		}
-		v.ManifestSpecVersion = manifest.Specification.Version
 		for _, p := range manifest.Profiles {
 			if p.Status == "active" {
 				v.ActiveProfiles = append(v.ActiveProfiles, p.ID)

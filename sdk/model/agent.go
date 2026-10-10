@@ -18,17 +18,26 @@ type AgentDefinition struct {
 	Envelope
 	AgentIdentityID Ref `json:"agentIdentityId"`
 	// DefinitionVersion is the version an AgentRuntime must name to operate this definition.
-	DefinitionVersion    string    `json:"definitionVersion"`
-	Purpose              string    `json:"purpose"`
-	Accountable          ObjectRef `json:"accountable"`
-	ResponsibilityIDs    []Ref     `json:"responsibilityIds"`
-	Triggers             []string  `json:"triggers"`
-	RequiredInputs       []string  `json:"requiredInputs"`
-	ExpectedOutcomes     []string  `json:"expectedOutcomes"`
-	CapabilityIDs        []Ref     `json:"capabilityIds"`
-	Policies             []string  `json:"policies"`
-	EscalationConditions []string  `json:"escalationConditions"`
-	ConfidenceBoundaries []string  `json:"confidenceBoundaries"`
+	DefinitionVersion    string      `json:"definitionVersion"`
+	Purpose              string      `json:"purpose"`
+	Accountable          ObjectRef   `json:"accountable"`
+	ResponsibilityIDs    []Ref       `json:"responsibilityIds"`
+	Triggers             []string    `json:"triggers"`
+	RequiredInputs       []string    `json:"requiredInputs"`
+	ExpectedOutcomes     []string    `json:"expectedOutcomes"`
+	CapabilityIDs        []Ref       `json:"capabilityIds"`
+	Policies             []string    `json:"policies"`
+	EscalationConditions []string    `json:"escalationConditions"`
+	ConfidenceBoundaries []string    `json:"confidenceBoundaries"`
+	DerivedFrom          *Provenance `json:"derivedFrom,omitempty"`
+	OperatingLimits      []Limit     `json:"operatingLimits,omitempty"`
+}
+
+// Provenance names the definition, template, or import a definition version was derived from (CHR-AGENT-010).
+type Provenance struct {
+	Source  ObjectRef `json:"source"`
+	Version string    `json:"version"`
+	Digest  string    `json:"digest"`
 }
 
 type AgentRuntime struct {
@@ -37,6 +46,8 @@ type AgentRuntime struct {
 	AgentDefinitionID Ref       `json:"agentDefinitionId"`
 	DefinitionVersion string    `json:"definitionVersion"`
 	Operator          ObjectRef `json:"operator"`
+	// OperatingLimits add to the definition's, which keep applying; none may be looser (CHR-AGENT-011).
+	OperatingLimits []Limit `json:"operatingLimits,omitempty"`
 }
 
 type Delegation struct {
@@ -60,12 +71,21 @@ type AuthorityHop struct {
 
 type AuthorityGrant struct {
 	Envelope
-	Actor                 ObjectRef   `json:"actor"`
-	CapabilityID          Ref         `json:"capabilityId"`
-	ResourceScope         string      `json:"resourceScope"`
-	OrganizationalContext string      `json:"organizationalContext"`
-	Limits                []Limit     `json:"limits"`
-	Delegation            *Delegation `json:"delegation,omitempty"`
+	Actor                 ObjectRef      `json:"actor"`
+	CapabilityID          Ref            `json:"capabilityId"`
+	ResourceScope         string         `json:"resourceScope"`
+	OrganizationalContext string         `json:"organizationalContext"`
+	Limits                []Limit        `json:"limits"`
+	Delegation            *Delegation    `json:"delegation,omitempty"`
+	Certification         *Certification `json:"certification,omitempty"`
+}
+
+// Certification is the last recertification of a grant; the grant is suspended once IntervalDays have passed (CHR-AUTH-011).
+type Certification struct {
+	IntervalDays     int       `json:"intervalDays"`
+	CertifiedAt      time.Time `json:"certifiedAt"`
+	CertifiedBy      ObjectRef `json:"certifiedBy"`
+	EvidenceRecordID Ref       `json:"evidenceRecordId"`
 }
 
 const (
@@ -86,10 +106,22 @@ type Approval struct {
 	ValidityMode           string      `json:"validityMode"`
 	ExpiresAt              *time.Time  `json:"expiresAt,omitempty"`
 	OpenEndedJustification string      `json:"openEndedJustification,omitempty"`
+	SodExceptionID         *Ref        `json:"sodExceptionId,omitempty"`
 }
 
 type SodConstraint struct {
 	Envelope
 	ConstrainedActions []Ref  `json:"constrainedActions"`
 	Scope              string `json:"scope,omitempty"`
+}
+
+// SodException relieves one beneficiary of one constraint for a bounded period (CHR-AUTH-012).
+type SodException struct {
+	Envelope
+	SodConstraintID    Ref        `json:"sodConstraintId"`
+	Beneficiary        ObjectRef  `json:"beneficiary"`
+	Grantor            ObjectRef  `json:"grantor"`
+	Reason             string     `json:"reason"`
+	CompensatingReview string     `json:"compensatingReview"`
+	RevokedAt          *time.Time `json:"revokedAt,omitempty"`
 }

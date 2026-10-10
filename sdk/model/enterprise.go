@@ -33,11 +33,24 @@ type Responsibility struct {
 
 type Assignment struct {
 	Envelope
-	Subject       ObjectRef `json:"subject"`
-	Target        ObjectRef `json:"target"`
-	Participation string    `json:"participation"`
-	Condition     string    `json:"condition,omitempty"`
-	Reason        string    `json:"reason,omitempty"`
+	Subject       ObjectRef      `json:"subject"`
+	Target        ObjectRef      `json:"target"`
+	Participation string         `json:"participation"`
+	Condition     string         `json:"condition,omitempty"`
+	Reason        string         `json:"reason,omitempty"`
+	Applicability *Applicability `json:"applicability,omitempty"`
+}
+
+// Applicability narrows the work an assignment applies to among assignments sharing its target and participation.
+type Applicability struct {
+	Criteria   []Criterion `json:"criteria,omitempty"`
+	Classifier *ObjectRef  `json:"classifier,omitempty"`
+	Default    bool        `json:"default,omitempty"`
+}
+
+type Criterion struct {
+	Dimension string   `json:"dimension"`
+	Values    []string `json:"values"`
 }
 
 type OrganizationRelationship struct {

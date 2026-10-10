@@ -1,9 +1,12 @@
 {
-  "charterSpecVersion": "1.2.0",
+  "charterSpecVersion": "1.3.0",
   "namespace": "harbor.example",
   "kind": "Gap",
   "id": "GAP-ORDER-EXCEPTION-EVIDENCE",
   "enterpriseId": "ENT-HARBOR",
+  "sourceEvidence": [
+    "EVR-GAP-EVIDENCE-DISCOVERY"
+  ],
   "baselineStateId": "ARCH-BASELINE-2026-Q1",
   "targetStateId": "ARCH-TARGET-2026-Q4",
   "classification": "missing",

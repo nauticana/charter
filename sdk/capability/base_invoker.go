@@ -91,6 +91,11 @@ func (r *invocationRun) gate(ctx context.Context) (Result, bool) {
 	if _, err := i.Identities.ActiveAt(ctx, inv.Namespace, inv.Actor, inv.At); err != nil {
 		return r.deny(ctx, "actor: "+err.Error(), "CHR-ID-005"), false
 	}
+	for _, l := range inv.OperatingLimits {
+		if l.Result != model.LimitWithin {
+			return r.deny(ctx, "operating limit "+l.LimitKind+": "+l.Reason, "CHR-AGENT-011"), false
+		}
+	}
 	r.result.Authority = i.Authority.Evaluate(ctx, authority.Request{Namespace: inv.Namespace, EnterpriseID: inv.EnterpriseID, Actor: inv.Actor,
 		CapabilityID: inv.CapabilityID, ResourceScope: inv.ResourceScope, At: inv.At, OrganizationalContext: inv.OrganizationalContext, Measures: inv.Measures,
 		AuthorityChain: inv.AuthorityChain})
@@ -121,7 +126,7 @@ func (r *invocationRun) gate(ctx context.Context) (Result, bool) {
 			return r.deny(ctx, "approval: "+r.result.Approval.Reason, "CHR-AUTH-009"), false
 		}
 	}
-	if len(contract.Constraints.SodConstraintIDs) > 0 {
+	if len(contract.Constraints.SodConstraintIDs) > 0 || inv.SodExceptionID != nil {
 		if i.Sod == nil {
 			return r.deny(ctx, "separation of duties declared but no checker is composed", "CHR-AUTH-007"), false
 		}
@@ -294,11 +299,12 @@ func (r *invocationRun) finish(ctx context.Context, status Status, outcome, reas
 func (r *invocationRun) prepare(status Status, outcome, reason, requirement string) {
 	r.result.Status, r.result.Reason, r.result.Requirement = status, reason, requirement
 	inv := r.inv
-	record := model.ActionRecord{Actor: inv.Actor, RuntimeContext: inv.Runtime, AssignmentID: inv.AssignmentID, ResponsibilityID: inv.ResponsibilityID,
+	record := model.ActionRecord{Actor: inv.Actor, RuntimeContext: inv.Runtime, AssignmentID: inv.AssignmentID, AssignmentBasis: inv.AssignmentBasis, ResponsibilityID: inv.ResponsibilityID,
 		CapabilityID: inv.CapabilityID, MaterialInputsDigest: inv.MaterialInputsDigest, SubjectRefs: inv.SubjectRefs, OperationClass: r.contract.OperationClass,
 		ActionTime: inv.At, Outcome: clip(outcome), Disposition: string(status), AuthorityEvaluations: []model.AuthorityEvaluation{authorityEvaluation(r.result.Authority)},
 		ApprovalEvaluations: []model.ApprovalEvaluation{approvalEvaluation(r.result.Approval)}, EvidenceRecordIDs: r.evidenceIDs,
-		PostconditionEvaluations: r.result.Postconditions, ReconcilesActionID: r.reconciles}
+		PostconditionEvaluations: r.result.Postconditions, ReconcilesActionID: r.reconciles, SodExceptionID: inv.SodExceptionID,
+		OperatingLimitEvaluations: inv.OperatingLimits}
 	if r.result.Approval.ApprovalRef != nil {
 		record.ApprovalIDs = []model.Ref{*r.result.Approval.ApprovalRef}
 	}

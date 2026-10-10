@@ -3,15 +3,16 @@
   "$id": "https://nauticana.github.io/charter/schema/enterprise/assignment.schema.json",
   "title": "Assignment",
   "description": "Connects a human or agent identity to a position, responsibility, role, or work context for an effective period.",
-  "x-charter-spec-version": "1.2.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ENT-003",
     "CHR-ENT-005",
     "CHR-ENT-006",
     "CHR-ENT-011",
     "CHR-AGENT-007",
-    "CHR-PROC-006"
+    "CHR-PROC-006",
+    "CHR-INFO-009",
+    "CHR-ENT-012",
+    "CHR-PROC-008"
   ],
   "type": "object",
   "properties": {
@@ -23,6 +24,18 @@
     "lifecycleState": true,
     "validity": true,
     "extensions": true,
+    "sourceEvidence": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "x-charter-ref-kinds": [
+        "EvidenceRecord"
+      ],
+      "description": "Evidence the modeled facts rest on; required when they were derived rather than entered by their accountable owner (CHR-INFO-009)."
+    },
     "kind": {
       "const": "Assignment"
     },
@@ -90,6 +103,54 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 120
+    },
+    "applicability": {
+      "description": "The work this assignment applies to when several assignments share its target and participation (CHR-ENT-012).",
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "dimension": {
+                "$ref": "../common.schema.json#/$defs/identifier",
+                "description": "Such as audience, region, language, product-line, or customer-segment."
+              },
+              "values": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                }
+              }
+            },
+            "required": [
+              "dimension",
+              "values"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "classifier": {
+          "description": "Decides applicability at run time; the action records its choice as classified.",
+          "allOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/objectRef"
+            }
+          ]
+        },
+        "default": {
+          "type": "boolean",
+          "description": "Chosen when no overlapping assignment matches more specifically."
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": [

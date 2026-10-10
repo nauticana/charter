@@ -405,24 +405,30 @@ func approve() capability.Invocation {
 	}
 }
 
-func TestSeparationOfDuties(t *testing.T) {
-	ctx := context.Background()
+// approverHarness lets HUMAN-TEST approve credit exceptions, optionally after preparing the proposal it approves.
+func approverHarness(t *testing.T, prepared bool) *harness {
 	grant := model.AuthorityGrant{Actor: approve().Actor, CapabilityID: approve().CapabilityID, ResourceScope: "credit exceptions", OrganizationalContext: "OU-CREDIT-CONTROL"}
 	grant.Namespace, grant.ID, grant.Kind = "harbor.example", "AUTH-ALEX-APPROVE", model.KindAuthorityGrant
 	grant.EnterpriseID, grant.Validity = &model.Ref{ID: "ENT-HARBOR"}, &model.Validity{From: "2026-01-01"}
-	for _, prepared := range []bool{false, true} {
-		h := newHarness(t)
-		h.invoker.Authority = &authority.AbstractEvaluator{Source: &authority.BaseGrantSource{Items: []model.AuthorityGrant{grant}}}
-		h.transport.resp = binding.Response{Outcome: "approved"}
-		if prepared {
-			proposal := model.ActionRecord{Actor: approve().Actor, RuntimeContext: approve().Runtime, ResponsibilityID: approve().ResponsibilityID,
-				CapabilityID: model.Ref{ID: "CAP-PROPOSE-ORDER-RESOLUTION"}, SubjectRefs: approve().SubjectRefs, OperationClass: model.OperationPropose,
-				ActionTime: at.Add(-time.Hour), Outcome: "proposal-prepared", AuthorityEvaluations: []model.AuthorityEvaluation{{Result: model.AuthorityAllowed, Reason: "test"}}}
-			proposal.CharterSpecVersion, proposal.Namespace, proposal.ID = "1.0.0", "harbor.example", "ACT-ALEX-PROPOSE"
-			if err := h.sink.Action(ctx, proposal); err != nil {
-				t.Fatal(err)
-			}
+	h := newHarness(t)
+	h.invoker.Authority = &authority.AbstractEvaluator{Source: &authority.BaseGrantSource{Items: []model.AuthorityGrant{grant}}}
+	h.transport.resp = binding.Response{Outcome: "approved"}
+	if prepared {
+		proposal := model.ActionRecord{Actor: approve().Actor, RuntimeContext: approve().Runtime, ResponsibilityID: approve().ResponsibilityID,
+			CapabilityID: model.Ref{ID: "CAP-PROPOSE-ORDER-RESOLUTION"}, SubjectRefs: approve().SubjectRefs, OperationClass: model.OperationPropose,
+			ActionTime: at.Add(-time.Hour), Outcome: "proposal-prepared", AuthorityEvaluations: []model.AuthorityEvaluation{{Result: model.AuthorityAllowed, Reason: "test"}}}
+		proposal.CharterSpecVersion, proposal.Namespace, proposal.ID = "1.0.0", "harbor.example", "ACT-ALEX-PROPOSE"
+		if err := h.sink.Action(context.Background(), proposal); err != nil {
+			t.Fatal(err)
 		}
+	}
+	return h
+}
+
+func TestSeparationOfDuties(t *testing.T) {
+	ctx := context.Background()
+	for _, prepared := range []bool{false, true} {
+		h := approverHarness(t, prepared)
 		res := h.invoker.Invoke(ctx, approve())
 		switch {
 		case prepared && (res.Status != capability.StatusDenied || res.Requirement != "CHR-AUTH-007" || res.SodConflict == nil || res.SodConflict.ID != "SOD-PREPARE-APPROVE-CREDIT"):
@@ -447,6 +453,45 @@ func TestSeparationOfDuties(t *testing.T) {
 	delegated.AuthorityChain = model.AuthorityChain{{GrantRef: model.Ref{ID: "GRANT-DELEGATED-APPROVAL"}, Delegator: delegator, Validity: &model.Validity{From: "2026-01-01"}}}
 	if ref, conflict, err := h.invoker.Sod.Conflict(ctx, delegated, []model.Ref{{ID: "SOD-PREPARE-APPROVE-CREDIT"}}); err != nil || !conflict || ref.ID != "SOD-PREPARE-APPROVE-CREDIT" {
 		t.Errorf("delegator history must participate in separation of duties: %s %t %v", ref.ID, conflict, err)
+	}
+}
+
+func TestSodExceptionIsCheckedAndEvidenced(t *testing.T) {
+	ctx := context.Background()
+	for _, grantor := range []string{"HUMAN-ELENA-TORRES", "HUMAN-TEST"} {
+		h := approverHarness(t, true)
+		d, err := (corpus.Parser{}).Parse([]byte(`{"charterSpecVersion":"1.3.0","namespace":"harbor.example","kind":"SodException","id":"SODEX-1","enterpriseId":"ENT-HARBOR",
+			"sodConstraintId":"SOD-PREPARE-APPROVE-CREDIT","beneficiary":{"kind":"HumanIdentity","id":"HUMAN-TEST"},"grantor":{"kind":"HumanIdentity","id":"` + grantor + `"},
+			"reason":"sole credit approver on leave","compensatingReview":"weekly review by the CFO","validity":{"from":"2026-06-01","to":"2026-06-30"}}`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := h.corpus.Add(d); err != nil {
+			t.Fatal(err)
+		}
+		inv := approve()
+		inv.SodExceptionID = &model.Ref{ID: "SODEX-1"}
+		res := h.invoker.Invoke(ctx, inv)
+		self := grantor == "HUMAN-TEST"
+		if self && (res.Status != capability.StatusDenied || res.Requirement != "CHR-AUTH-007") || !self && res.Status != capability.StatusExecuted {
+			t.Errorf("exception granted by %s: %+v", grantor, res)
+		}
+		if a := h.recorded(res); a.SodExceptionID == nil || a.SodExceptionID.ID != "SODEX-1" {
+			t.Errorf("exception not evidenced: %+v", a)
+		}
+	}
+}
+
+func TestExceededOperatingLimitDenies(t *testing.T) {
+	h := newHarness(t)
+	inv := reserve()
+	inv.OperatingLimits = []model.OperatingLimitEvaluation{{LimitKind: "actions-per-hour", Result: model.LimitExceeded, Reason: "61 of 60 actions this hour"}}
+	res := h.invoker.Invoke(context.Background(), inv)
+	if res.Status != capability.StatusDenied || res.Requirement != "CHR-AGENT-011" || h.transport.calls != 0 {
+		t.Fatalf("exceeded limit: %+v", res)
+	}
+	if a := h.recorded(res); len(a.OperatingLimitEvaluations) != 1 || a.Disposition != model.DispositionDenied {
+		t.Errorf("limit not evidenced: %+v", a)
 	}
 }
 

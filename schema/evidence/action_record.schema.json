@@ -3,8 +3,6 @@
   "$id": "https://nauticana.github.io/charter/schema/evidence/action_record.schema.json",
   "title": "ActionRecord",
   "description": "Evidence for one governed action, attributable to identity and runtime context.",
-  "x-charter-spec-version": "1.2.0",
-  "x-charter-schema-version": "2.2.0",
   "x-charter-requirements": [
     "CHR-EVID-001",
     "CHR-EVID-002",
@@ -13,7 +11,10 @@
     "CHR-EVID-012",
     "CHR-CAP-010",
     "CHR-AGENT-006",
-    "CHR-INFO-007"
+    "CHR-INFO-007",
+    "CHR-ENT-012",
+    "CHR-AGENT-011",
+    "CHR-AUTH-012"
   ],
   "type": "object",
   "allOf": [
@@ -57,6 +58,41 @@
         "required": [
           "postconditionEvaluations"
         ]
+      }
+    },
+    {
+      "dependentRequired": {
+        "assignmentBasis": [
+          "assignmentId"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "operatingLimitEvaluations": {
+            "contains": {
+              "properties": {
+                "result": {
+                  "const": "exceeded"
+                }
+              },
+              "required": [
+                "result"
+              ]
+            }
+          }
+        },
+        "required": [
+          "operatingLimitEvaluations"
+        ]
+      },
+      "then": {
+        "properties": {
+          "disposition": {
+            "const": "denied"
+          }
+        }
       }
     }
   ],
@@ -117,6 +153,15 @@
       "$ref": "../common.schema.json#/$defs/idRef",
       "x-charter-ref-kinds": [
         "Assignment"
+      ]
+    },
+    "assignmentBasis": {
+      "description": "Why assignmentId was chosen among the assignments applicable to this work (CHR-ENT-012).",
+      "enum": [
+        "sole",
+        "matched",
+        "classified",
+        "default"
       ]
     },
     "responsibilityId": {
@@ -392,6 +437,45 @@
         "ActionRecord"
       ],
       "description": "The earlier attempt whose unknown outcome this record resolves from observed effects; that record is never rewritten (CHR-EVID-012)."
+    },
+    "sodExceptionId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "SodException"
+      ],
+      "description": "The exception this action relied on to pass a separation-of-duties constraint (CHR-AUTH-012)."
+    },
+    "operatingLimitEvaluations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Operating limits evaluated for this action (CHR-AGENT-011).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "limitKind": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "result": {
+            "enum": [
+              "within",
+              "exceeded"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "limitKind",
+          "result",
+          "reason"
+        ],
+        "additionalProperties": false
+      }
     }
   },
   "required": [

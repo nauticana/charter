@@ -51,6 +51,10 @@ func TestReleasedClaimsAreCurrent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	version, err := (Catalog{}).SpecVersion()
+	if err != nil {
+		t.Fatal(err)
+	}
 	c, err := corpus.NewDirLoader("../../conformance/claims").Load()
 	if err != nil {
 		t.Fatal(err)
@@ -64,8 +68,8 @@ func TestReleasedClaimsAreCurrent(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if claim.CharterSpecVersion != manifest.Specification.Version || claim.Result != model.ResultConforming {
-			t.Errorf("%s: version %s result %s, want %s conforming", d.ID, claim.CharterSpecVersion, claim.Result, manifest.Specification.Version)
+		if claim.CharterSpecVersion != version || claim.Result != model.ResultConforming {
+			t.Errorf("%s: version %s result %s, want %s conforming", d.ID, claim.CharterSpecVersion, claim.Result, version)
 		}
 		for _, p := range manifest.Profiles {
 			if p.ID == claim.ConformanceProfile && len(claim.TestedRuleIDs) != len(p.Rules) {

@@ -1,0 +1,11 @@
+id: CHR-RULE-AGENT-003
+title: Runtime operating limits do not widen the definition's
+requirements: [CHR-AGENT-011]
+profile: core-model
+verification: semantic
+applies_to: [AgentRuntime]
+check: >-
+  For every AgentRuntime operating limit and every operating limit of its AgentDefinition with the same limitKind and bound direction (upper, lower, or eq), the runtime limit admits no value the definition limit forbids, in the same unit and currency.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/runtime-widens-operating-limit

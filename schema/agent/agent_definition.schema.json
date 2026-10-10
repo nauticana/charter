@@ -3,13 +3,13 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/agent_definition.schema.json",
   "title": "AgentDefinition",
   "description": "The governed design of an agent: purpose, triggers, inputs, outcomes, capabilities, policies, and escalation conditions.",
-  "x-charter-spec-version": "1.2.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-AGENT-001",
     "CHR-AGENT-002",
     "CHR-ENT-003",
-    "CHR-AGENT-004"
+    "CHR-AGENT-004",
+    "CHR-AGENT-010",
+    "CHR-AGENT-011"
   ],
   "type": "object",
   "allOf": [
@@ -143,6 +143,43 @@
       },
       "minItems": 1,
       "description": "Conditions under which the agent must stop or escalate instead of acting on its own judgment."
+    },
+    "derivedFrom": {
+      "description": "The definition, template, or import this version was derived from; fixed once the version is published (CHR-AGENT-010).",
+      "type": "object",
+      "properties": {
+        "source": {
+          "allOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/objectRef"
+            }
+          ]
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "digest": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "source",
+        "version",
+        "digest"
+      ],
+      "additionalProperties": false
+    },
+    "operatingLimits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/limit"
+      },
+      "description": "Resource bounds such as spend per period, rate, steps per task, or duration; a runtime may add limits but never widen these (CHR-AGENT-011)."
     }
   },
   "required": [

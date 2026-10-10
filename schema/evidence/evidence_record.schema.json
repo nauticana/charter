@@ -3,19 +3,59 @@
   "$id": "https://nauticana.github.io/charter/schema/evidence/evidence_record.schema.json",
   "title": "EvidenceRecord",
   "description": "One categorized record; corrections supersede rather than replace.",
-  "x-charter-spec-version": "1.2.0",
-  "x-charter-schema-version": "2.2.0",
   "x-charter-requirements": [
     "CHR-EVID-003",
     "CHR-EVID-004",
     "CHR-EVID-005",
     "CHR-EVID-011",
-    "CHR-INFO-004"
+    "CHR-INFO-004",
+    "CHR-EVID-013"
   ],
   "type": "object",
   "allOf": [
     {
       "$ref": "../common.schema.json#/$defs/documentBase"
+    },
+    {
+      "if": {
+        "required": [
+          "assessment"
+        ]
+      },
+      "then": {
+        "if": {
+          "properties": {
+            "assessment": {
+              "properties": {
+                "judge": {
+                  "properties": {
+                    "kind": {
+                      "const": "HumanIdentity"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "category": {
+              "const": "human-decision"
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "category": {
+              "enum": [
+                "agent-assertion",
+                "derived-conclusion"
+              ]
+            }
+          }
+        }
+      }
     }
   ],
   "properties": {
@@ -83,6 +123,131 @@
     "integrity": {
       "$ref": "../common.schema.json#/$defs/integrity",
       "description": "Digest of the content member, so one immutable record is verifiable outside a bundle."
+    },
+    "assessment": {
+      "description": "An evaluation that justified releasing a definition, or feedback on an outcome (CHR-EVID-013).",
+      "type": "object",
+      "properties": {
+        "assessmentKind": {
+          "enum": [
+            "evaluation",
+            "feedback"
+          ]
+        },
+        "subject": {
+          "description": "The AgentDefinition evaluated or the ActionRecord rated.",
+          "allOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/objectRef"
+            }
+          ]
+        },
+        "subjectDigest": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "judge": {
+          "description": "The human, agent, or external evaluator that judged.",
+          "allOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/objectRef"
+            }
+          ]
+        },
+        "judgeVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "caseSet": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "../common.schema.json#/$defs/identifier"
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            }
+          },
+          "required": [
+            "id",
+            "version"
+          ],
+          "additionalProperties": false
+        },
+        "scores": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "metric": {
+                "$ref": "../common.schema.json#/$defs/identifier"
+              },
+              "value": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "metric",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "rating": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      },
+      "required": [
+        "assessmentKind",
+        "subject",
+        "judge"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "assessmentKind": {
+                "const": "evaluation"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "subjectDigest",
+              "caseSet",
+              "scores"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "assessmentKind": {
+                "const": "feedback"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "rating",
+              "reason"
+            ]
+          }
+        }
+      ]
     }
   },
   "required": [

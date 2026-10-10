@@ -34,3 +34,13 @@ func TestWindow(t *testing.T) {
 		t.Error("open window wrong")
 	}
 }
+
+func TestOverlaps(t *testing.T) {
+	p := func(from, to model.Date) Period { return NewPeriod(model.Validity{From: from, To: to}) }
+	if !p("2026-01-01", "2026-06-30").Overlaps(p("2026-06-30", "")) || !p("2026-01-01", "").Overlaps(p("2025-01-01", "2026-01-01")) {
+		t.Error("touching or open periods must overlap")
+	}
+	if p("2026-01-01", "2026-06-29").Overlaps(p("2026-06-30", "")) || p("bad", "").Overlaps(p("2026-01-01", "")) {
+		t.Error("disjoint or unparsable periods overlap")
+	}
+}

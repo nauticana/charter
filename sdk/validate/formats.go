@@ -20,7 +20,7 @@ const (
 	formatFixture  = "conformance-fixture-descriptor"
 )
 
-// formats compiles the embedded conformance format schemas once.
+// formats compiles the embedded named schemas, which describe artifacts other than Charter documents, once.
 var formats struct {
 	once    sync.Once
 	schemas map[string]*jsonschema.Schema
@@ -54,7 +54,7 @@ func formatSchema(name string) (*jsonschema.Schema, error) {
 				formats.err = err
 				return
 			}
-			if e.Kind == "" && strings.HasPrefix(e.Name, "conformance-") {
+			if e.Kind == "" {
 				formatEntries = append(formatEntries, e)
 			}
 		}
@@ -77,7 +77,7 @@ func formatSchema(name string) (*jsonschema.Schema, error) {
 	return s, nil
 }
 
-// validateFormat checks YAML bytes against a conformance format schema (CHR-CONF-003).
+// validateFormat checks YAML or JSON bytes against a named schema (CHR-CONF-003).
 func validateFormat(name string, b []byte) error {
 	s, err := formatSchema(name)
 	if err != nil {

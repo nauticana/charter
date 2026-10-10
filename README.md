@@ -12,7 +12,7 @@ This repository holds the normative model, schemas, and conformance corpus toget
 
 ## Specification status and repository map
 
-The current specification release is 1.2.0. Start with the [specification index](spec/README.md); per-release compatibility notes live in [`migration_guide.json`](migration_guide.json) and the reference SDK's conformance claims in [`conformance/claims/`](conformance/claims/).
+Start with the [specification index](spec/README.md); per-release compatibility notes live in [`migration_guide.json`](migration_guide.json) and the reference SDK's conformance claims in [`conformance/claims/`](conformance/claims/).
 
 - `spec/` contains normative semantics and behavioral requirements.
 - `schema/` contains normative language-independent schemas.
@@ -60,10 +60,10 @@ An agent's identity, responsibility, authority, and behavioral contract define i
 
 Every Charter agent has:
 
-- A stable identity and lifecycle
+- A stable identity and lifecycle, with governed, evaluated publication of each definition version
 - A declared business purpose and one or more assigned responsibilities
 - Defined triggers, inputs, business context, and expected outcomes
-- Explicit roles, permissions, data access, and transaction limits
+- Explicit roles, permissions, data access, transaction limits, and operating limits
 - A set of enterprise capabilities and tools it may use
 - Policies governing how it selects, proposes, approves, or executes actions
 - Human decision points and escalation conditions
@@ -154,7 +154,7 @@ An agent is authorized against a stable Charter capability. A binding translates
 
 Agents should first take on work that is repetitive, time-consuming, or dependent on gathering information from several systems. They may monitor, prepare, reconcile, recommend, coordinate, or execute according to the authority granted to them.
 
-Humans retain accountability and remain involved wherever judgment, approval, material risk, or organizational policy requires it. Automation is therefore not all-or-nothing: a task can move through levels such as observation, recommendation, preparation, approval-gated execution, and bounded autonomous execution.
+Humans retain accountability and remain involved wherever judgment, approval, material risk, or organizational policy requires it. Automation is therefore not all-or-nothing: work moves through the ordered participation levels observe, recommend, prepare, perform, and execute, with approval gates or a bounded operating window at the top. Raising an agent's level is itself a governed, evidenced decision.
 
 Examples include:
 
@@ -169,7 +169,7 @@ Examples include:
 
 Nauticana's open-source Keel and Scout repositories provide the initial reference implementation of RBAC for humans and agents. Charter defines the vendor-neutral requirements needed to align system permissions with organizational responsibility and process context; compatible implementations may satisfy those requirements through other platforms.
 
-An agent that supports multiple positions does not automatically receive the combined authority of those positions. Its access remains explicit, scoped, and auditable. The model must preserve separation of duties, approval limits, delegated authority, and the distinction between proposing an action and executing it.
+An agent that supports multiple positions does not automatically receive the combined authority of those positions. Its access remains explicit, scoped, and auditable. The model must preserve separation of duties, approval limits, delegated authority, and the distinction between proposing an action and executing it. Grants can require periodic recertification, an exception to separation of duties is explicit, bounded, and evidenced, and an implementation can explain before an attempt why an action would be allowed or denied.
 
 Every action must be evaluated against the agent's assigned authority in its current organizational and process context. The resulting evidence must record the inputs, action, applicable authority, human decisions, outcome, and any escalation. This provides the operational proof that the responsibility map and RBAC policy were followed without restating that map for every action.
 

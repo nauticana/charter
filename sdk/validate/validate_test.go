@@ -179,32 +179,41 @@ func TestEveryIDRefPropertyDeclaresItsKinds(t *testing.T) {
 	}
 }
 
-func TestCatalogMetaAndSpecVersion(t *testing.T) {
-	meta, err := (Catalog{}).Meta()
-	if err != nil || meta.SpecVersion != "1.2.0" || meta.CatalogVersion == "" {
-		t.Fatalf("meta: %+v %v", meta, err)
+func TestSpecVersionAcceptsEarlierReleasesOfItsMajor(t *testing.T) {
+	version, err := (Catalog{}).SpecVersion()
+	if err != nil || version != "1.3.0" {
+		t.Fatalf("catalog version %q %v", version, err)
 	}
 	c, err := corpus.NewDirLoader(harbor).Load()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if f := (SpecVersion{Version: meta.SpecVersion}).Validate(c); len(f) != 0 {
-		t.Errorf("Harbor targets %s: %v", meta.SpecVersion, f)
+	if f := (SpecVersion{Version: version}).Validate(c); len(f) != 0 {
+		t.Errorf("Harbor: %v", f)
 	}
 	if f := (SpecVersion{Version: "2.0.0"}).Validate(c); len(f) != c.Len() || f[0].Requirements[0] != "CHR-CONF-001" {
-		t.Errorf("other version: %d findings", len(f))
+		t.Errorf("other major: %d findings", len(f))
+	}
+	for doc, readable := range map[string]bool{"1.0.0": true, "1.2.0": true, "1.3.0": true, "1.3.1": false, "1.4.0": false, "0.9.0": false, "1.3": false} {
+		c := corpus.New()
+		if err := c.Add(&model.Document{Envelope: model.Envelope{CharterSpecVersion: doc, Namespace: "t", ID: "D", Kind: model.KindEnterprise}}); err != nil {
+			t.Fatal(err)
+		}
+		if got := len((SpecVersion{Version: "1.3.0"}).Validate(c)) == 0; got != readable {
+			t.Errorf("1.3.0 reads %s: %t, want %t", doc, got, readable)
+		}
 	}
 }
 
 func TestFormatSchemasRejectInvalidManifest(t *testing.T) {
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "manifest.yaml"), []byte("format_version: 2\nspecification: {name: x, version: 1.0.0}\nprofiles: []\nrules: []\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "manifest.yaml"), []byte("specification: {name: x, version: 1.0.0}\nprofiles: []\nrules: []\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := (ManifestReader{Dir: dir}).Manifest(); err == nil || !strings.Contains(err.Error(), "format") {
+	if _, err := (ManifestReader{Dir: dir}).Manifest(); err == nil {
 		t.Errorf("invalid manifest accepted: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "fixture.yaml"), []byte("rules: [CHR-RULE-RT-001]\nspecification_version: 1.0.0\nexpected: fail\nreason: r\nscenario: {namespace: n, enterprise: E, steps: [{expect: {status: denied}, invoke: {}, admit: {}}]}\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "fixture.yaml"), []byte("rules: [CHR-RULE-RT-001]\nexpected: fail\nreason: r\nscenario: {namespace: n, enterprise: E, steps: [{expect: {status: denied}, invoke: {}, admit: {}}]}\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := (ManifestReader{Dir: dir}).Fixture(dir); err == nil {

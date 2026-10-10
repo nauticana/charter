@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/agent/authority_explanation.schema.json",
+  "title": "AuthorityExplanation",
+  "description": "Why an action would be allowed or denied, from the evaluation that would govern it; it authorizes nothing (CHR-AUTH-013).",
+  "x-charter-requirements": [
+    "CHR-AUTH-013"
+  ],
+  "type": "object",
+  "properties": {
+    "actor": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "HumanIdentity",
+            "AgentIdentity"
+          ]
+        }
+      }
+    },
+    "capabilityId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "CapabilityContract"
+      ]
+    },
+    "resourceScope": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "organizationalContext": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision": {
+      "enum": [
+        "allowed",
+        "denied",
+        "missing",
+        "error"
+      ]
+    },
+    "basis": {
+      "type": "array",
+      "description": "Every grant, delegation, approval, policy, or constraint the decision considered.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "enum": [
+              "grant",
+              "delegation",
+              "approval",
+              "policy",
+              "sod-constraint"
+            ]
+          },
+          "ref": {
+            "$ref": "../common.schema.json#/$defs/objectRef"
+          },
+          "redacted": {
+            "const": true,
+            "description": "The viewer may not see the source; its reason discloses nothing of it."
+          },
+          "result": {
+            "enum": [
+              "satisfied",
+              "unsatisfied"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "source",
+          "result",
+          "reason"
+        ],
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "required": [
+              "ref"
+            ]
+          },
+          {
+            "required": [
+              "redacted"
+            ]
+          }
+        ]
+      }
+    },
+    "missing": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "requirement": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "resolvers": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "../common.schema.json#/$defs/objectRef"
+            },
+            "description": "Who can grant, approve, or certify what is missing."
+          }
+        },
+        "required": [
+          "requirement"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "actor",
+    "capabilityId",
+    "at",
+    "decision",
+    "basis"
+  ],
+  "additionalProperties": false
+}

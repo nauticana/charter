@@ -51,6 +51,7 @@ func TestEvaluate(t *testing.T) {
 		{"missing context", with(base, func(r *Request) { r.OrganizationalContext = "" }), Denied},
 		{"other resource scope", with(base, func(r *Request) { r.ResourceScope = "all orders" }), Denied},
 		{"no grant", with(base, func(r *Request) { r.CapabilityID = model.Ref{ID: "CAP-OTHER"} }), Missing},
+		{"certification overdue", with(base, func(r *Request) { r.At = time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC) }), Denied},
 	}
 	for _, tc := range cases {
 		if d := ev.Evaluate(context.Background(), tc.req); d.Result != tc.want {

@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.2.0",
+  "charterSpecVersion": "1.3.0",
   "namespace": "harbor.example",
   "kind": "AuthorityGrant",
   "id": "AUTH-OEC-STOCK-RESERVATION-2026",
@@ -36,5 +36,14 @@
       "id": "POS-SALES-OPERATIONS-MANAGER"
     },
     "maxRedelegationDepth": 0
+  },
+  "certification": {
+    "intervalDays": 90,
+    "certifiedAt": "2026-06-01T09:00:00Z",
+    "certifiedBy": {
+      "kind": "HumanIdentity",
+      "id": "HUMAN-ELENA-TORRES"
+    },
+    "evidenceRecordId": "EVR-OEC-GRANT-CERTIFIED"
   }
 }

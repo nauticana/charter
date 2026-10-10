@@ -43,3 +43,10 @@ func (p Period) Ordered() bool {
 	to, err2 := p.date(p.Validity.To)
 	return err1 == nil && err2 == nil && !to.Before(from)
 }
+
+// Overlaps reports whether the two periods share a calendar date.
+func (p Period) Overlaps(q Period) bool {
+	pf, err1 := p.date(p.Validity.From)
+	qf, err2 := q.date(q.Validity.From)
+	return err1 == nil && err2 == nil && (p.Contains(qf) || q.Contains(pf))
+}

@@ -3,12 +3,11 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/agent_runtime.schema.json",
   "title": "AgentRuntime",
   "description": "An identifiable runtime instance acting as a stable agent identity under one agent definition.",
-  "x-charter-spec-version": "1.2.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-ID-003",
     "CHR-AGENT-005",
-    "CHR-AGENT-006"
+    "CHR-AGENT-006",
+    "CHR-AGENT-011"
   ],
   "type": "object",
   "allOf": [
@@ -55,6 +54,14 @@
     },
     "operator": {
       "$ref": "../common.schema.json#/$defs/objectRef"
+    },
+    "operatingLimits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/limit"
+      },
+      "description": "Further operating limits; the definition's keep applying and none of these may be looser than one of the same kind (CHR-AGENT-011)."
     }
   },
   "required": [

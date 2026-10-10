@@ -1,0 +1,3 @@
+rules: [CHR-RULE-AGENT-003]
+expected: fail
+reason: RT-FX allows 120 actions per hour where its definition AGENTDEF-FX allows 60

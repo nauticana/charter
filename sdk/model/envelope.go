@@ -14,4 +14,6 @@ type Envelope struct {
 	Validity           *Validity                  `json:"validity,omitempty"`
 	EnterpriseID       *Ref                       `json:"enterpriseId,omitempty"`
 	Extensions         map[string]json.RawMessage `json:"extensions,omitempty"`
+	// SourceEvidence is admitted by enterprise and process definition schemas only (CHR-INFO-009).
+	SourceEvidence []Ref `json:"sourceEvidence,omitempty"`
 }

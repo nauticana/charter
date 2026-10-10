@@ -17,6 +17,8 @@ Harbor distinguishes identities from positions, assignments, credentials, sessio
 
 The work-context assignment does not place the agent in a position. The responsibility assignment does not change the organization tree. Authority is evaluated separately for each assignment context.
 
+`ASGN-OEC-ORDER-EXCEPTION-SUPPORT` applies to standard and rush orders and is the default, so a second coordinator added later for one order type must not overlap it without a single default.
+
 ## Identity lifecycle examples
 
 - `HUMAN-JORDAN-KIM` is active. A credential rotation changes the credential reference but not this identity or its historical assignments.

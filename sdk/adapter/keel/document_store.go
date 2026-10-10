@@ -87,6 +87,8 @@ type DocumentStore struct {
 	db        port.DatabaseRepository
 	queries   port.QueryService
 	additions *validate.Additions
+	// Evidence serves a partner's evidence records, which written documents may cite; nil leaves such citations unresolved.
+	Evidence func(partnerID int64) corpus.Source
 }
 
 func NewDocumentStore(ctx context.Context, db port.DatabaseRepository) (*DocumentStore, error) {
@@ -129,7 +131,11 @@ func (s *DocumentStore) Save(ctx context.Context, partnerID int64, docs ...*mode
 	if len(normalized) == 0 {
 		return nil
 	}
-	findings, err := s.additions.Validate(ctx, s.Source(partnerID), normalized...)
+	scope := s.Source(partnerID)
+	if s.Evidence != nil {
+		scope = corpus.Union{scope, s.Evidence(partnerID)}
+	}
+	findings, err := s.additions.Validate(ctx, scope, normalized...)
 	if err != nil {
 		return fmt.Errorf("charter documents: %w", err)
 	}

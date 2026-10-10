@@ -1,7 +1,5 @@
 # Enterprise Structure and Responsibility
 
-Status: Version 1.2.0
-
 This chapter defines the organizational context in which people and agents act.
 
 ## Core concepts
@@ -21,6 +19,9 @@ An `Enterprise` is the root governance boundary. An `OrganizationUnit` is a stru
 - **CHR-ENT-009:** A position MUST belong to exactly one organization unit and MUST NOT participate as a parent or child node in the organization-unit tree.
 - **CHR-ENT-010:** A position type MAY classify positions in multiple organization units but MUST NOT by itself determine organization membership, reporting, role, responsibility, assignment, or authority.
 - **CHR-ENT-011:** Position occupancy MUST connect a human identity to a position. An agent MAY support, observe, recommend, prepare, approve, perform, or execute work in a position context but MUST NOT occupy the position.
+- **CHR-ENT-012:** An assignment MAY declare structured applicability: criteria over named dimensions such as audience, region, language, product line, or customer segment, a classifier that decides at run time, and whether it is the default. Two assignments of the same target and participation whose validity overlaps, at least one of which declares applicability, and whose criteria share a value in every dimension both constrain, MUST designate exactly one of them as the default. An action performed under one of several applicable assignments MUST record why that assignment was chosen: it was the sole one, its criteria matched, its classifier chose it, or it was the default.
+
+An agent that supports a position acts in the position's context and under its accountability, never as its occupant. It gains no authority from the human who occupies the position (`CHR-ENT-007`, `CHR-AGENT-007`); how far it may act on a task is bounded by its own participation level (`CHR-PROC-008`), the task's permitted participation, and its grants.
 
 ## Relationships
 

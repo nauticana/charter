@@ -1,0 +1,16 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-GAP-EVIDENCE-DISCOVERY",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "derived-conclusion",
+  "content": "Order-exception facts, approvals, and executions are recorded in separate systems without shared identifiers",
+  "recordedAt": "2026-02-10T15:00:00Z",
+  "sources": [
+    "interviews with order management and credit control, 2026-02"
+  ],
+  "transformations": [
+    "compare recorded identifiers across the three systems"
+  ]
+}

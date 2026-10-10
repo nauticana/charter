@@ -3,12 +3,11 @@
   "$id": "https://nauticana.github.io/charter/schema/process/business_process.schema.json",
   "title": "BusinessProcess",
   "description": "Organizes work toward a declared business outcome; customer naming and hierarchy are preserved.",
-  "x-charter-spec-version": "1.2.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-PROC-001",
     "CHR-PROC-003",
-    "CHR-PROC-004"
+    "CHR-PROC-004",
+    "CHR-INFO-009"
   ],
   "type": "object",
   "allOf": [
@@ -25,6 +24,18 @@
     "lifecycleState": true,
     "validity": true,
     "extensions": true,
+    "sourceEvidence": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "x-charter-ref-kinds": [
+        "EvidenceRecord"
+      ],
+      "description": "Evidence the modeled facts rest on; required when they were derived rather than entered by their accountable owner (CHR-INFO-009)."
+    },
     "kind": {
       "const": "BusinessProcess"
     },

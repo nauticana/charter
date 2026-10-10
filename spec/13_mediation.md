@@ -1,7 +1,5 @@
 # Mediation of Governed Acts
 
-Status: Version 1.3.0
-
 A mediation point is a place where a governed act is submitted for a decision before it takes effect, and where the decision is made by a party other than the actor performing the act. Platforms that host agents increasingly offer such a callout so that an enterprise can govern acts it does not itself execute.
 
 Charter models what a mediated decision is, what it must carry, and how it relates to authority, information governance, and evidence. It does not define a transport, a payload encoding, an authentication scheme, or a detection technique. Those belong to a binding.

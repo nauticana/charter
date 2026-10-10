@@ -3,8 +3,6 @@
   "$id": "https://nauticana.github.io/charter/schema/binding/event_binding.schema.json",
   "title": "EventBinding",
   "description": "Maps an external event and its delivery semantics to a declared Charter trigger.",
-  "x-charter-spec-version": "1.3.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-BIND-001",
     "CHR-BIND-002",

@@ -18,6 +18,9 @@ This document designs one agent in enough detail to show how a downstream implem
 | Assignment | `ASGN-OEC-ORDER-EXCEPTION-SUPPORT` |
 | Definition owner | Sales Operations Manager |
 | Runtime | `RT-OEC-PROD-01`, operated by `OU-PLATFORM-OPERATIONS` |
+| Derived from | Version 2 of the external template `TPL-ORDER-EXCEPTION`, with its digest |
+| Operating limits | 120 actions per hour and USD 100,000 reserved per day; the runtime narrows the rate to 60 |
+| Release evaluation | `EVR-OEC-1-EVALUATION`: 47 of 50 cases of `CASES-ORDER-EXCEPTION` 2026-03 resolved within authority |
 
 The accountable position remains accountable for the outcome. The definition owner approves changes to purpose, policy, or capabilities. The technical operator can deploy and suspend runtime components but cannot create business authority through deployment configuration.
 

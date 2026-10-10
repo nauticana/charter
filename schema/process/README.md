@@ -2,7 +2,7 @@
 
 Schemas for the `CHR-PROC`, `CHR-CAP`, and `CHR-ARCH` domains: `value_stream`, `business_process`, `task`, `process_relationship`, `process_instance`, `task_instance`, `capability_contract`, `architecture_state`, `gap`, and `roadmap_item`.
 
-Definition and instance documents are separate. Execute contracts must declare idempotency; target architecture states must name their decision authority.
+Definition and instance documents are separate. Execute contracts must declare idempotency; target architecture states must name their decision authority. Definition documents may cite their `sourceEvidence` (CHR-INFO-009), and a task instance's participation never exceeds its assignment's level (CHR-PROC-008).
 
 ## Relations
 

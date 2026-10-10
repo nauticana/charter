@@ -1,5 +1,5 @@
 {
-  "catalogVersion": "2.3.0",
+  "specVersion": "1.3.0",
   "entries": [
     {
       "name": "common",
@@ -80,6 +80,16 @@
       "kind": "SodConstraint",
       "id": "https://nauticana.github.io/charter/schema/agent/sod_constraint.schema.json",
       "path": "agent/sod_constraint.schema.json"
+    },
+    {
+      "kind": "SodException",
+      "id": "https://nauticana.github.io/charter/schema/agent/sod_exception.schema.json",
+      "path": "agent/sod_exception.schema.json"
+    },
+    {
+      "name": "authority-explanation",
+      "id": "https://nauticana.github.io/charter/schema/agent/authority_explanation.schema.json",
+      "path": "agent/authority_explanation.schema.json"
     },
     {
       "kind": "ValueStream",

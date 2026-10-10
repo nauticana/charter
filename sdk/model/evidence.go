@@ -77,6 +77,7 @@ type ActionRecord struct {
 	Actor                    ObjectRef                 `json:"actor"`
 	RuntimeContext           RuntimeContext            `json:"runtimeContext"`
 	AssignmentID             *Ref                      `json:"assignmentId,omitempty"`
+	AssignmentBasis          string                    `json:"assignmentBasis,omitempty"`
 	ResponsibilityID         *Ref                      `json:"responsibilityId,omitempty"`
 	CapabilityID             Ref                       `json:"capabilityId"`
 	MaterialInputsDigest     string                    `json:"materialInputsDigest,omitempty"`
@@ -92,7 +93,20 @@ type ActionRecord struct {
 	EvidenceRecordIDs        []Ref                     `json:"evidenceRecordIds,omitempty"`
 	PostconditionEvaluations []PostconditionEvaluation `json:"postconditionEvaluations,omitempty"`
 	// ReconcilesActionID names the earlier attempt whose unknown outcome this record resolves (CHR-EVID-012).
-	ReconcilesActionID *Ref `json:"reconcilesActionId,omitempty"`
+	ReconcilesActionID        *Ref                       `json:"reconcilesActionId,omitempty"`
+	SodExceptionID            *Ref                       `json:"sodExceptionId,omitempty"`
+	OperatingLimitEvaluations []OperatingLimitEvaluation `json:"operatingLimitEvaluations,omitempty"`
+}
+
+const (
+	LimitWithin   = "within"
+	LimitExceeded = "exceeded"
+)
+
+type OperatingLimitEvaluation struct {
+	LimitKind string `json:"limitKind"`
+	Result    string `json:"result"`
+	Reason    string `json:"reason"`
 }
 
 const (
@@ -112,7 +126,36 @@ type EvidenceRecord struct {
 	Transformations []string  `json:"transformations,omitempty"`
 	Supersedes      *Ref      `json:"supersedes,omitempty"`
 	// Integrity digests Content, so one immutable record is verifiable outside a bundle (CHR-EVID-005).
-	Integrity *Integrity `json:"integrity,omitempty"`
+	Integrity  *Integrity  `json:"integrity,omitempty"`
+	Assessment *Assessment `json:"assessment,omitempty"`
+}
+
+const (
+	AssessmentEvaluation = "evaluation"
+	AssessmentFeedback   = "feedback"
+)
+
+// Assessment is an evaluation that justified releasing a definition or feedback on an outcome (CHR-EVID-013).
+type Assessment struct {
+	AssessmentKind string    `json:"assessmentKind"`
+	Subject        ObjectRef `json:"subject"`
+	SubjectDigest  string    `json:"subjectDigest,omitempty"`
+	Judge          ObjectRef `json:"judge"`
+	JudgeVersion   string    `json:"judgeVersion,omitempty"`
+	CaseSet        *CaseSet  `json:"caseSet,omitempty"`
+	Scores         []Score   `json:"scores,omitempty"`
+	Rating         string    `json:"rating,omitempty"`
+	Reason         string    `json:"reason,omitempty"`
+}
+
+type CaseSet struct {
+	ID      string `json:"id"`
+	Version string `json:"version"`
+}
+
+type Score struct {
+	Metric string  `json:"metric"`
+	Value  float64 `json:"value"`
 }
 
 type Integrity struct {

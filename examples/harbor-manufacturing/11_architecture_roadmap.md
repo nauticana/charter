@@ -12,7 +12,7 @@ Status: Conceptual, non-normative example
 
 ## Gap and roadmap
 
-`GAP-ORDER-EXCEPTION-EVIDENCE` compares the baseline and target and classifies missing consistent links among facts, proposals, approvals, executions, and outcomes.
+`GAP-ORDER-EXCEPTION-EVIDENCE` compares the baseline and target and classifies missing consistent links among facts, proposals, approvals, executions, and outcomes. It was derived from interviews rather than entered by its owner, so it cites `EVR-GAP-EVIDENCE-DISCOVERY` as source evidence.
 
 `ROADMAP-GOVERNED-EXCEPTION-PILOT` addresses that gap. Sales Operations owns it; dependencies include approved agent definition, identity controls, capability and binding review, evidence retention, security tests, and operational suspension procedures. Its statuses progress through proposed, approved, implementing, validating, and completed or cancelled.
 

@@ -1,0 +1,46 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "AgentDefinition",
+  "id": "AGENTDEF-FX",
+  "agentIdentityId": "AGENT-FX",
+  "definitionVersion": "1",
+  "purpose": "fixture",
+  "accountable": {
+    "kind": "OrganizationUnit",
+    "id": "OU-ROOT"
+  },
+  "responsibilityIds": [
+    "RESP-FX"
+  ],
+  "triggers": [
+    "t"
+  ],
+  "requiredInputs": [
+    "i"
+  ],
+  "expectedOutcomes": [
+    "o"
+  ],
+  "capabilityIds": [
+    "CAP-FX"
+  ],
+  "policies": [
+    "p"
+  ],
+  "confidenceBoundaries": [
+    "c"
+  ],
+  "escalationConditions": [
+    "e"
+  ],
+  "operatingLimits": [
+    {
+      "limitKind": "actions-per-hour",
+      "operator": "lte",
+      "value": 60,
+      "unit": "count"
+    }
+  ]
+}

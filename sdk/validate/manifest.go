@@ -10,11 +10,6 @@ import (
 )
 
 type Manifest struct {
-	FormatVersion int `yaml:"format_version"`
-	Specification struct {
-		Name    string `yaml:"name"`
-		Version string `yaml:"version"`
-	} `yaml:"specification"`
 	Profiles []struct {
 		ID     string   `yaml:"id"`
 		Status string   `yaml:"status"`
@@ -42,13 +37,12 @@ type RuleDefinition struct {
 }
 
 type FixtureDescriptor struct {
-	Rules                []string  `yaml:"rules"`
-	AlsoFails            []string  `yaml:"also_fails"`
-	SpecificationVersion string    `yaml:"specification_version"`
-	Expected             string    `yaml:"expected"`
-	Reason               string    `yaml:"reason"`
-	Documents            string    `yaml:"documents"`
-	Scenario             *Scenario `yaml:"scenario"`
+	Rules     []string  `yaml:"rules"`
+	AlsoFails []string  `yaml:"also_fails"`
+	Expected  string    `yaml:"expected"`
+	Reason    string    `yaml:"reason"`
+	Documents string    `yaml:"documents"`
+	Scenario  *Scenario `yaml:"scenario"`
 }
 
 // ManifestReader reads the conformance manifest, rule definitions, and fixture descriptors below Dir.

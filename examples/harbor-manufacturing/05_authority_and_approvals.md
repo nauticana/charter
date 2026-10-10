@@ -6,7 +6,7 @@ Authority is independent of identity, position membership, role, assignment, and
 
 ## Grant and delegation
 
-`AUTH-OEC-STOCK-RESERVATION-2026` records the Sales Operations Manager as delegator, `AGENT-ORDER-EXCEPTION-COORDINATOR` as recipient, `CAP-RESERVE-ORDER-STOCK` as operation, assigned Harbor order exceptions as resource scope, USD 25,000 equivalent and 72 hours as limits, the 2026 validity period, and a redelegation depth of 0.
+`AUTH-OEC-STOCK-RESERVATION-2026` records the Sales Operations Manager as delegator, `AGENT-ORDER-EXCEPTION-COORDINATOR` as recipient, `CAP-RESERVE-ORDER-STOCK` as operation, assigned Harbor order exceptions as resource scope, USD 25,000 equivalent and 72 hours as limits, the 2026 validity period, and a redelegation depth of 0. The Sales Operations Manager recertifies it every 90 days (`EVR-OEC-GRANT-CERTIFIED`); an overdue certification suspends it.
 
 Revocation or expiry prevents new reservations but does not invalidate evidence for reservations performed while the grant was effective.
 

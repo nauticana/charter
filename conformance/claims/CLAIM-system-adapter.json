@@ -1,9 +1,9 @@
 {
   "charterSpecVersion": "1.3.0",
   "namespace": "nauticana.charter",
-  "id": "CLAIM-1.3.0-system-adapter",
+  "id": "CLAIM-system-adapter",
   "kind": "ConformanceClaim",
-  "name": "Reference SDK system-adapter claim 1.3.0",
+  "name": "Reference SDK system-adapter claim",
   "conformanceProfile": "system-adapter",
   "implementationVersion": "1.3.0",
   "testedRuleIds": [

@@ -1,0 +1,11 @@
+id: CHR-RULE-ENT-006
+title: Overlapping assignment applicability designates one default
+requirements: [CHR-ENT-012]
+profile: core-model
+verification: semantic
+applies_to: [Assignment]
+check: >-
+  For every two Assignments with the same target and participation and overlapping validity, at least one declaring applicability, whose criteria share a value in every dimension both constrain, exactly one declares applicability.default true.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/overlapping-applicability

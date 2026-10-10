@@ -1,11 +1,11 @@
 id: CHR-RULE-AUTH-003
 title: Approvers do not approve actions they prepared
-requirements: [CHR-AUTH-007]
+requirements: [CHR-AUTH-007, CHR-AUTH-012]
 profile: core-model
 verification: semantic
 applies_to: [Approval]
 check: >-
-  For every Approval and every SodConstraint whose constrainedActions include the approved action, no performed ActionRecord by the approver uses another constrained action on the same subjects.
+  For every Approval and every SodConstraint whose constrainedActions include the approved action, no performed ActionRecord by the approver uses another constrained action on the same subjects, unless the approval names a SodException for that constraint whose beneficiary is the approver, whose grantor is another identity, and which is effective and unrevoked at issuedAt.
 fixtures:
   valid: fixtures/valid/harbor
   invalid: fixtures/invalid/self-approval

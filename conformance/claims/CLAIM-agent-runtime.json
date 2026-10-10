@@ -1,9 +1,9 @@
 {
   "charterSpecVersion": "1.3.0",
   "namespace": "nauticana.charter",
-  "id": "CLAIM-1.3.0-agent-runtime",
+  "id": "CLAIM-agent-runtime",
   "kind": "ConformanceClaim",
-  "name": "Reference SDK agent-runtime claim 1.3.0",
+  "name": "Reference SDK agent-runtime claim",
   "conformanceProfile": "agent-runtime",
   "implementationVersion": "1.3.0",
   "testedRuleIds": [

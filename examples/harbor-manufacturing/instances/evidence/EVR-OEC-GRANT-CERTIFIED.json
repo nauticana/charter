@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-OEC-GRANT-CERTIFIED",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "human-decision",
+  "content": "Sales Operations Manager certified the stock-reservation grant of the Order Exception Coordinator for another 90 days",
+  "recordedAt": "2026-06-01T09:00:00Z",
+  "sources": [
+    "AUTH-OEC-STOCK-RESERVATION-2026"
+  ]
+}

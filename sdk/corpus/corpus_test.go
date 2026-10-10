@@ -1,6 +1,8 @@
 package corpus
 
 import (
+	"context"
+	"errors"
 	"testing"
 
 	"github.com/nauticana/charter/sdk/model"
@@ -45,5 +47,29 @@ func TestDefinitionVersionReadsTheKindsVersionProperty(t *testing.T) {
 		if version, versioned := DefinitionVersion(d); version != tc.version || versioned != tc.versioned {
 			t.Errorf("%s = %q %v, want %q %v", tc.raw, version, versioned, tc.version, tc.versioned)
 		}
+	}
+}
+
+func TestUnionServesTheFirstSourceHoldingAKey(t *testing.T) {
+	one, two := New(), New()
+	for i, c := range []*Corpus{one, two} {
+		for _, id := range []string{"SHARED", []string{"ONLY-ONE", "ONLY-TWO"}[i]} {
+			if err := c.Add(&model.Document{Envelope: model.Envelope{Namespace: "n", ID: id, Kind: model.KindEnterprise, Name: id + string(rune('1'+i))}}); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	ctx, u := context.Background(), Union{one, two}
+	if d, err := u.Fetch(ctx, DocumentKey{Namespace: "n", ID: "SHARED"}); err != nil || d.Name != "SHARED1" {
+		t.Errorf("shared key: %+v %v", d, err)
+	}
+	if d, err := u.Fetch(ctx, DocumentKey{Namespace: "n", ID: "ONLY-TWO"}); err != nil || d.ID != "ONLY-TWO" {
+		t.Errorf("second source: %+v %v", d, err)
+	}
+	if _, err := u.Fetch(ctx, DocumentKey{Namespace: "n", ID: "NONE"}); !errors.Is(err, ErrNotFound) {
+		t.Errorf("missing key: %v", err)
+	}
+	if docs, err := u.List(ctx, model.KindEnterprise); err != nil || len(docs) != 4 {
+		t.Errorf("list: %d %v", len(docs), err)
 	}
 }

@@ -1,7 +1,5 @@
 # External-System Binding Model
 
-Status: Version 1.3.0
-
 Bindings connect stable Charter capability and authority semantics to a specific external product, version, or deployment without adding vendor concepts to the Charter core.
 
 ## Binding layers

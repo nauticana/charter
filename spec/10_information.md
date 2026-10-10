@@ -1,7 +1,5 @@
 # Information Governance
 
-Status: Version 1.3.0
-
 Charter describes information required or produced by governed work without defining a universal enterprise data model.
 
 ## Requirements

@@ -52,13 +52,6 @@ func (r *Runner) RunFixture(dir string) (FixtureResult, error) {
 	if err != nil {
 		return res, err
 	}
-	manifest, err := r.Manifest.Manifest()
-	if err != nil {
-		return res, err
-	}
-	if fx.SpecificationVersion != manifest.Specification.Version {
-		return res, fmt.Errorf("%s: fixture specification version %q does not match manifest %q", dir, fx.SpecificationVersion, manifest.Specification.Version)
-	}
 	res.Expected = fx.Expected
 	docDir := dir
 	if fx.Documents != "" {

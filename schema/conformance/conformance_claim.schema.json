@@ -3,8 +3,6 @@
   "$id": "https://nauticana.github.io/charter/schema/conformance/conformance_claim.schema.json",
   "title": "ConformanceClaim",
   "description": "A bounded conformance claim against one Charter specification version, profile, implementation, and tested rule set.",
-  "x-charter-spec-version": "1.3.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-CONF-001",
     "CHR-CONF-005",

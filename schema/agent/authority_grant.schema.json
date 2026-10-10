@@ -3,13 +3,12 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/authority_grant.schema.json",
   "title": "AuthorityGrant",
   "description": "Explicit authority scoped to actor, capability, resource scope, organizational context, and validity; absence of a grant is denial.",
-  "x-charter-spec-version": "1.2.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-AUTH-001",
     "CHR-AUTH-002",
     "CHR-AUTH-003",
-    "CHR-AUTH-004"
+    "CHR-AUTH-004",
+    "CHR-AUTH-011"
   ],
   "type": "object",
   "allOf": [
@@ -91,6 +90,49 @@
       "required": [
         "delegator",
         "maxRedelegationDepth"
+      ],
+      "additionalProperties": false
+    },
+    "certification": {
+      "description": "Periodic recertification; once certifiedAt plus intervalDays has passed the grant is suspended (CHR-AUTH-011).",
+      "type": "object",
+      "properties": {
+        "intervalDays": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3660
+        },
+        "certifiedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "certifiedBy": {
+          "allOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/objectRef"
+            }
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "HumanIdentity"
+              ]
+            }
+          }
+        },
+        "evidenceRecordId": {
+          "$ref": "../common.schema.json#/$defs/idRef",
+          "x-charter-ref-kinds": [
+            "EvidenceRecord"
+          ],
+          "description": "The human-decision record of the certification."
+        }
+      },
+      "required": [
+        "intervalDays",
+        "certifiedAt",
+        "certifiedBy",
+        "evidenceRecordId"
       ],
       "additionalProperties": false
     }

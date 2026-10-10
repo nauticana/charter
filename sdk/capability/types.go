@@ -32,6 +32,7 @@ type Invocation struct {
 	Actor                 model.ObjectRef
 	Runtime               model.RuntimeContext
 	AssignmentID          *model.Ref
+	AssignmentBasis       string
 	ResponsibilityID      *model.Ref
 	CapabilityID          model.Ref
 	ContractVersion       string
@@ -48,7 +49,11 @@ type Invocation struct {
 	SubjectRefs          []model.ObjectRef
 	IdempotencyKey       string
 	InformationUses      []InformationUse
-	At                   time.Time
+	// OperatingLimits are the runtime's evaluations of the agent's operating limits; any exceeded one denies (CHR-AGENT-011).
+	OperatingLimits []model.OperatingLimitEvaluation
+	// SodExceptionID names the exception relied on to pass a separation-of-duties constraint (CHR-AUTH-012).
+	SodExceptionID *model.Ref
+	At             time.Time
 }
 
 // Result is the structured outcome of a governed invocation; Action is the evidence appended for it, and Exception

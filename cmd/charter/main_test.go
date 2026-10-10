@@ -32,7 +32,7 @@ func TestValidateHarbor(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &r); err != nil {
 		t.Fatal(err)
 	}
-	if r.Result != model.ResultConforming || r.Documents < 80 || r.Profile != "core-model" || len(r.Rules) < 19 || r.SpecVersion != "1.2.0" {
+	if r.Result != model.ResultConforming || r.Documents < 80 || r.Profile != "core-model" || len(r.Rules) < 19 || r.SpecVersion != "1.3.0" {
 		t.Errorf("report: %+v", r)
 	}
 	if code, out, _ := exec(t, "validate", harbor); code != exitOK || !strings.Contains(out, "result: conforming") {
@@ -51,7 +51,7 @@ func TestValidateReportsFindingsWithRequirements(t *testing.T) {
 	}
 	found := false
 	for _, f := range r.Findings {
-		if f.RuleID == "CHR-RULE-AUTH-001" && len(f.Requirements) == 2 && f.DocumentID == "ACT-FX" {
+		if f.RuleID == "CHR-RULE-AUTH-001" && len(f.Requirements) == 3 && f.DocumentID == "ACT-FX" {
 			found = true
 		}
 	}
@@ -132,12 +132,12 @@ func TestConformanceAndClaim(t *testing.T) {
 
 func TestVersion(t *testing.T) {
 	code, out, _ := exec(t, "version", "-conformance", conf)
-	if code != exitOK || !strings.Contains(out, "specification 1.2.0") || !strings.Contains(out, "active profiles core-model") {
+	if code != exitOK || !strings.Contains(out, "specification 1.3.0") || !strings.Contains(out, "active profiles core-model") {
 		t.Errorf("version: %d %s", code, out)
 	}
 	code, out, _ = exec(t, "version", "-format", "json")
 	var v versionReport
-	if code != exitOK || json.Unmarshal([]byte(out), &v) != nil || len(v.ImplementedRules) < 19 || v.CatalogVersion == "" {
+	if code != exitOK || json.Unmarshal([]byte(out), &v) != nil || len(v.ImplementedRules) < 19 || v.SpecVersion == "" {
 		t.Errorf("version json: %d %s", code, out)
 	}
 }

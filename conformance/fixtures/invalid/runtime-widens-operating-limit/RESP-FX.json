@@ -1,0 +1,13 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "Responsibility",
+  "id": "RESP-FX",
+  "name": "fixture",
+  "expectedOutcome": "o",
+  "accountable": {
+    "kind": "OrganizationUnit",
+    "id": "OU-ROOT"
+  }
+}

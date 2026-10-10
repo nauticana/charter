@@ -3,11 +3,10 @@
   "$id": "https://nauticana.github.io/charter/schema/agent/approval.schema.json",
   "title": "Approval",
   "description": "A decision record binding approver, action, material inputs, limits, and validity; it does not execute anything.",
-  "x-charter-spec-version": "1.2.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-AUTH-006",
-    "CHR-AUTH-009"
+    "CHR-AUTH-009",
+    "CHR-AUTH-012"
   ],
   "type": "object",
   "properties": {
@@ -106,6 +105,13 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 500
+    },
+    "sodExceptionId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "SodException"
+      ],
+      "description": "The exception relied on when this approval would otherwise violate a separation-of-duties constraint."
     }
   },
   "required": [

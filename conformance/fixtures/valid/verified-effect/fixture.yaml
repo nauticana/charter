@@ -1,5 +1,4 @@
 rules: [CHR-RULE-RT-009]
-specification_version: 1.3.0
 expected: pass
 reason: The reservation is accepted and then read back, so executed is recorded with the observed postcondition; an outcome the postcondition does not apply to needs no observation
 documents: ../../../../examples/harbor-manufacturing/instances

@@ -3,8 +3,6 @@
   "$id": "https://nauticana.github.io/charter/schema/binding/data_binding.schema.json",
   "title": "DataBinding",
   "description": "Maps Charter information to external representations; lossy transformations declare their effect.",
-  "x-charter-spec-version": "1.3.0",
-  "x-charter-schema-version": "2.0.0",
   "x-charter-requirements": [
     "CHR-BIND-001",
     "CHR-BIND-002",

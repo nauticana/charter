@@ -20,6 +20,7 @@ const (
 	KindAuthorityGrant              Kind = "AuthorityGrant"
 	KindApproval                    Kind = "Approval"
 	KindSodConstraint               Kind = "SodConstraint"
+	KindSodException                Kind = "SodException"
 	KindValueStream                 Kind = "ValueStream"
 	KindBusinessProcess             Kind = "BusinessProcess"
 	KindTask                        Kind = "Task"

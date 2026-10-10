@@ -1,7 +1,5 @@
 # Charter Specification Overview
 
-Status: Version 1.3.0
-
 This directory contains the normative prose for the Nauticana Charter specification. Charter defines a vendor-neutral model for aligning human accountability, governed agents, business processes, authority, and enterprise-system capabilities.
 
 ## Scope
@@ -44,7 +42,7 @@ Cross-cutting conformance, extension, validation, and identifier requirements ar
 
 ## Versioning
 
-Specification releases use semantic versioning. Git tags identify immutable releases; the repository contains the current development version. Machine-readable artifacts carry an explicit specification version so that copied documents remain identifiable outside the repository.
+Specification releases use semantic versioning. The prose, schemas, and conformance manifest release together under one version, recorded once in `schema/catalog.json`. Git tags identify immutable releases; the repository is the source of truth and contains the current development version. A document's `charterSpecVersion` names the release it was authored against and changes only when the document adopts something a later release added.
 
 ## References
 

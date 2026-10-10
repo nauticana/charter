@@ -131,3 +131,42 @@ func (LimitEvaluator) compareInt(v int64, op string, bound int64) bool {
 	}
 	return false
 }
+
+// Widens reports whether inner, declared beneath outer, admits a value outer forbids in the same direction; limits of
+// other kinds or directions combine with outer rather than replace it (CHR-AGENT-011).
+func (e LimitEvaluator) Widens(outer, inner model.Limit) bool {
+	return outer.LimitKind == inner.LimitKind && direction(outer.Operator) == direction(inner.Operator) && !e.narrows(outer, inner)
+}
+
+func direction(op string) string {
+	switch op {
+	case "lt", "lte":
+		return "upper"
+	case "gt", "gte":
+		return "lower"
+	}
+	return op
+}
+
+func (e LimitEvaluator) narrows(outer, inner model.Limit) bool {
+	if outer.Unit != inner.Unit || outer.Currency != inner.Currency ||
+		(outer.CurrencyExponent == nil) != (inner.CurrencyExponent == nil) || outer.CurrencyExponent != nil && *outer.CurrencyExponent != *inner.CurrencyExponent {
+		return false
+	}
+	if inner.Operator == "eq" {
+		m := Measure{Value: inner.Value, Unit: inner.Unit, Currency: inner.Currency}
+		if inner.CurrencyExponent != nil {
+			m.CurrencyExponent = *inner.CurrencyExponent
+		}
+		return e.Check([]model.Limit{outer}, map[string]Measure{inner.LimitKind: m}) == ""
+	}
+	o, outerOK := e.number(outer.Value)
+	i, innerOK := e.number(inner.Value)
+	if !outerOK || !innerOK {
+		return false
+	}
+	if direction(inner.Operator) == "upper" {
+		return i < o || i == o && (outer.Operator == "lte" || inner.Operator == "lt")
+	}
+	return i > o || i == o && (outer.Operator == "gte" || inner.Operator == "gt")
+}

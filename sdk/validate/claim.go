@@ -27,6 +27,10 @@ func (r *Runner) Claim(spec ClaimSpec) (model.ConformanceClaim, error) {
 	if err != nil {
 		return model.ConformanceClaim{}, err
 	}
+	version, err := (Catalog{}).SpecVersion()
+	if err != nil {
+		return model.ConformanceClaim{}, err
+	}
 	var profileRules []string
 	found := false
 	for _, p := range m.Profiles {
@@ -53,7 +57,7 @@ func (r *Runner) Claim(spec ClaimSpec) (model.ConformanceClaim, error) {
 		paths[entry.ID] = entry.Path
 	}
 	claim := model.ConformanceClaim{Implementation: spec.Implementation}
-	claim.CharterSpecVersion, claim.Namespace, claim.ID, claim.Kind, claim.Name = m.Specification.Version, spec.Namespace, spec.ID, model.KindConformanceClaim, spec.Name
+	claim.CharterSpecVersion, claim.Namespace, claim.ID, claim.Kind, claim.Name = version, spec.Namespace, spec.ID, model.KindConformanceClaim, spec.Name
 	claim.ConformanceProfile, claim.ImplementationVersion, claim.ResultDate = spec.Profile, spec.ImplementationVersion, spec.ResultDate
 	verifications := map[string]bool{model.VerificationStructural: true}
 	claim.Result = model.ResultConforming

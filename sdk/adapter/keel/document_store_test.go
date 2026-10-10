@@ -31,6 +31,20 @@ func newDocumentStore(t *testing.T) (*DocumentStore, *memoryDB) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	evidence := corpus.New()
+	for _, d := range harbor(t).Documents() {
+		if slices.Contains(evidenceKinds, d.Kind) {
+			if err := evidence.Add(d); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	store.Evidence = func(p int64) corpus.Source {
+		if p != partner {
+			return corpus.New()
+		}
+		return evidence
+	}
 	if err := store.Save(context.Background(), partner, harborDocuments(t)...); err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +88,7 @@ func TestDocumentStoreServesTheTenantsCurrentDocuments(t *testing.T) {
 		t.Errorf("save without a tenant: %v", err)
 	}
 	k := docKey{partner, ns, "TASK-OE-DETECT"}
-	db.state.revisions[k][0].content = `{"charterSpecVersion":"1.2.0","namespace":"harbor.example","id":"TASK-OE-DETECT","kind":"Task"}`
+	db.state.revisions[k][0].content = `{"charterSpecVersion":"1.3.0","namespace":"harbor.example","id":"TASK-OE-DETECT","kind":"Task"}`
 	if _, err := source.Fetch(ctx, corpus.DocumentKey{Namespace: ns, ID: "TASK-OE-DETECT"}); !errors.Is(err, ErrStoredDocument) {
 		t.Errorf("content that no longer matches its digest was served: %v", err)
 	}
@@ -130,6 +144,11 @@ func TestDocumentStoreRefusesInvalidWrites(t *testing.T) {
 	if err := store.Save(ctx, partner+1, edited(t, store, "POS-CREDIT-MANAGER", "name", "x")); !errors.As(err, &invalid) {
 		t.Fatalf("references resolve only within the writing tenant: %v", err)
 	}
+	cited := edited(t, store, "GAP-ORDER-EXCEPTION-EVIDENCE", "name", "x")
+	store.Evidence = nil
+	if err := store.Save(ctx, partner, cited); !errors.As(err, &invalid) {
+		t.Fatalf("cited evidence resolved without an evidence source: %v", err)
+	}
 
 	role := edited(t, store, "POS-CREDIT-MANAGER", "kind", string(model.KindRole))
 	role.Kind = model.KindRole
@@ -141,7 +160,7 @@ func TestDocumentStoreRefusesInvalidWrites(t *testing.T) {
 	}
 	otherEnterprise := edited(t, store, "OU-CREDIT-CONTROL", "enterpriseId", "ENT-OTHER")
 	delete(otherEnterprise.Value.(map[string]any), "parentUnitId")
-	enterprise, err := (corpus.Parser{}).Parse([]byte(`{"charterSpecVersion":"1.2.0","namespace":"harbor.example","kind":"Enterprise","id":"ENT-OTHER","name":"Other"}`))
+	enterprise, err := (corpus.Parser{}).Parse([]byte(`{"charterSpecVersion":"1.3.0","namespace":"harbor.example","kind":"Enterprise","id":"ENT-OTHER","name":"Other"}`))
 	if err != nil {
 		t.Fatal(err)
 	}

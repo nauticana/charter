@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/agent/sod_exception.schema.json",
+  "title": "SodException",
+  "description": "A bounded, revocable relief of one actor from a separation-of-duties constraint, granted by another actor with a compensating review.",
+  "x-charter-requirements": [
+    "CHR-AUTH-007",
+    "CHR-AUTH-012"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": {
+      "$ref": "../common.schema.json#/$defs/validity",
+      "required": [
+        "from",
+        "to"
+      ]
+    },
+    "extensions": true,
+    "kind": {
+      "const": "SodException"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
+    },
+    "sodConstraintId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "SodConstraint"
+      ]
+    },
+    "beneficiary": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "HumanIdentity",
+            "AgentIdentity"
+          ]
+        }
+      }
+    },
+    "grantor": {
+      "description": "Holds authority to grant exceptions to the constraint and is never the beneficiary.",
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "HumanIdentity"
+          ]
+        }
+      }
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "compensatingReview": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "The independent review that compensates for the relaxed constraint."
+    },
+    "revokedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "kind",
+    "enterpriseId",
+    "sodConstraintId",
+    "beneficiary",
+    "grantor",
+    "reason",
+    "compensatingReview",
+    "validity"
+  ],
+  "unevaluatedProperties": false
+}

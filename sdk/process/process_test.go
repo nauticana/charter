@@ -52,6 +52,9 @@ func TestContextFailsClosed(t *testing.T) {
 		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-PART","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"executes","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
 		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-PROC","processInstanceId":"PI2","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
 		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-VERSION","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"2","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Task","id":"T-EXEC","name":"t","processId":"P","taskDefinitionVersion":"1","businessOutcome":"o","accountableResponsibilityId":"R","permittedPerformerKinds":["human"],"permittedParticipation":["executes"]}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"Assignment","id":"A-PREP","subject":{"kind":"HumanIdentity","id":"H"},"target":{"kind":"Responsibility","id":"R"},"participation":"prepares","validity":{"from":"2026-01-01"}}`,
+		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-LEVEL","processInstanceId":"PI","taskId":"T-EXEC","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A-PREP","participation":"executes","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
 		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-EXPIRED","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
 	}
 	c := corpus.New()
@@ -65,9 +68,18 @@ func TestContextFailsClosed(t *testing.T) {
 		}
 	}
 	r := &BaseContextResolver{Process: NewBaseProvider(c), Assignments: organization.NewBaseProvider(c)}
-	for id, want := range map[string]error{"TI-AGENT": ErrPerformerKind, "TI-PART": ErrParticipation, "TI-PROC": ErrDefinition, "TI-VERSION": ErrDefinition, "TI-EXPIRED": ErrAssignment} {
+	for id, want := range map[string]error{"TI-AGENT": ErrPerformerKind, "TI-PART": ErrParticipation, "TI-PROC": ErrDefinition, "TI-VERSION": ErrDefinition, "TI-EXPIRED": ErrAssignment, "TI-LEVEL": ErrParticipation} {
 		if _, err := r.TaskContext(context.Background(), "t", model.Ref{ID: id}); !errors.Is(err, want) {
 			t.Errorf("%s: got %v, want %v", id, err, want)
 		}
+	}
+}
+
+func TestParticipationLevels(t *testing.T) {
+	if !Exceeds(model.ParticipationExecutes, model.ParticipationPerforms) || Exceeds(model.ParticipationObserves, model.ParticipationRecommends) {
+		t.Error("levels out of order")
+	}
+	if Exceeds(model.ParticipationExecutes, model.ParticipationSupports) || Exceeds(model.ParticipationApproves, model.ParticipationObserves) {
+		t.Error("supports and approves are not levels")
 	}
 }

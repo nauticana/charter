@@ -75,6 +75,9 @@ func (r GrantEffectiveRule) Validate(c *corpus.Corpus) []Finding {
 			if g.Validity == nil || !temporal.NewPeriod(*g.Validity).Contains(a.ActionTime) {
 				out = append(out, r.finding(a.Namespace, a.ID, fmt.Sprintf("grant %s not effective at %s", g.ID, a.ActionTime.Format("2006-01-02"))))
 			}
+			if reason := authority.CertificationLapse(g, a.ActionTime); reason != "" {
+				out = append(out, r.finding(a.Namespace, a.ID, fmt.Sprintf("grant %s %s", g.ID, reason)))
+			}
 		}
 	}
 	return out
@@ -132,7 +135,8 @@ func effectiveRefNamespace(owner, explicit string) string {
 	return owner
 }
 
-// SodApprovalRule finds approvals whose approver performed a constrained action on the same subjects (CHR-AUTH-007).
+// SodApprovalRule finds approvals whose approver performed a constrained action on the same subjects, unless an
+// applicable exception the approval names relieves the approver of that constraint (CHR-AUTH-007, CHR-AUTH-012).
 type SodApprovalRule struct{ AbstractRule }
 
 var _ Rule = SodApprovalRule{}
@@ -154,7 +158,19 @@ func (r SodApprovalRule) Validate(c *corpus.Corpus) []Finding {
 			}
 		}
 		proposed := authority.SodAction{Namespace: p.Namespace, Capability: model.Ref{ID: p.ApprovedAction}, Scope: authority.SubjectScope(p.Namespace, p.SubjectRefs)}
-		ref, conflict, err := evaluator.Conflict(constraints, performed, proposed)
+		applicable := constraints
+		if p.SodExceptionID != nil {
+			e, ok := resolveAs[model.SodException](c, p.Namespace, *p.SodExceptionID, model.KindSodException)
+			if !ok {
+				continue
+			}
+			var err error
+			if applicable, err = authority.Excuse(constraints, e, p.Namespace, p.Approver, p.IssuedAt); err != nil {
+				out = append(out, r.finding(p.Namespace, p.ID, err.Error()))
+				continue
+			}
+		}
+		ref, conflict, err := evaluator.Conflict(applicable, performed, proposed)
 		if err != nil {
 			out = append(out, r.finding(p.Namespace, p.ID, err.Error()))
 		} else if conflict {

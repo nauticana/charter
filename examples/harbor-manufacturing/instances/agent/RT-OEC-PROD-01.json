@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.2.0",
+  "charterSpecVersion": "1.3.0",
   "namespace": "harbor.example",
   "kind": "AgentRuntime",
   "id": "RT-OEC-PROD-01",
@@ -12,5 +12,13 @@
   "operator": {
     "kind": "OrganizationUnit",
     "id": "OU-PLATFORM-OPERATIONS"
-  }
+  },
+  "operatingLimits": [
+    {
+      "limitKind": "actions-per-hour",
+      "operator": "lte",
+      "value": 60,
+      "unit": "count"
+    }
+  ]
 }

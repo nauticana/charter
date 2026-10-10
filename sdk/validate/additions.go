@@ -29,7 +29,7 @@ func NewAdditions() (*Additions, error) {
 	if err != nil {
 		return nil, err
 	}
-	catalog, err := (Catalog{}).Meta()
+	version, err := (Catalog{}).SpecVersion()
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func NewAdditions() (*Additions, error) {
 	if err != nil {
 		return nil, err
 	}
-	a := &Additions{structural: structural, meta: meta, version: SpecVersion{Version: catalog.SpecVersion}}
+	a := &Additions{structural: structural, meta: meta, version: SpecVersion{Version: version}}
 	for _, id := range []string{"CHR-RULE-CONF-001", "CHR-RULE-CONF-002", "CHR-RULE-ENT-005"} {
 		rule, ok := rules[id]
 		if !ok {

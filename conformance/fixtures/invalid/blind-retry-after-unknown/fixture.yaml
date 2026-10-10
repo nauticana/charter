@@ -1,5 +1,4 @@
 rules: [CHR-RULE-RT-010]
-specification_version: 1.3.0
 expected: fail
 reason: The reservation times out and cannot be observed; a conforming runtime keeps it unknown, refuses the blind retry, and once the effect is observed absent settles the key as failed because the contract does not declare that retry safe
 documents: ../../../../examples/harbor-manufacturing/instances
