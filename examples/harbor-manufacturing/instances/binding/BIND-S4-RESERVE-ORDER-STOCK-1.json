@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.2.0",
+  "charterSpecVersion": "1.3.0",
   "namespace": "harbor.example",
   "kind": "CapabilityBinding",
   "id": "BIND-S4-RESERVE-ORDER-STOCK-1",

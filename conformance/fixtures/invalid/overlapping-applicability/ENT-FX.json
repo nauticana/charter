@@ -1,0 +1,7 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "fixture.example",
+  "kind": "Enterprise",
+  "id": "ENT-FX",
+  "name": "Fixture Enterprise"
+}

@@ -1,0 +1,9 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "AgentIdentity",
+  "id": "AGENT-A",
+  "name": "AGENT-A",
+  "lifecycleState": "active"
+}

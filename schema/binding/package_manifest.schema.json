@@ -3,7 +3,7 @@
   "$id": "https://nauticana.github.io/charter/schema/binding/package_manifest.schema.json",
   "title": "BindingPackageManifest",
   "description": "Portable format for one versioned realization of a capability contract.",
-  "x-charter-spec-version": "1.2.0",
+  "x-charter-spec-version": "1.3.0",
   "x-charter-schema-version": "2.3.0",
   "type": "object",
   "properties": {

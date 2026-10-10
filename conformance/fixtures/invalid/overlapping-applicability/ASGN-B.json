@@ -1,0 +1,30 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "Assignment",
+  "id": "ASGN-B",
+  "subject": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-B"
+  },
+  "target": {
+    "kind": "Position",
+    "id": "POS-X"
+  },
+  "participation": "supports",
+  "validity": {
+    "from": "2026-01-01"
+  },
+  "applicability": {
+    "criteria": [
+      {
+        "dimension": "language",
+        "values": [
+          "de",
+          "fr"
+        ]
+      }
+    ]
+  }
+}

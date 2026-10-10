@@ -1,0 +1,4 @@
+rules: [CHR-RULE-ENT-006]
+specification_version: 1.3.0
+expected: fail
+reason: ASGN-A and ASGN-B both support POS-X for German-language work and neither is the default
