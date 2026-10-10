@@ -1,6 +1,6 @@
 # Information Governance
 
-Status: Version 1.2.0
+Status: Version 1.3.0
 
 Charter describes information required or produced by governed work without defining a universal enterprise data model.
 
@@ -14,5 +14,6 @@ Charter describes information required or produced by governed work without defi
 - **CHR-INFO-006:** A binding MUST declare transformations that reduce precision, omit fields, change classifications, or cross governance boundaries.
 - **CHR-INFO-007:** An implementation MUST NOT use information for an undeclared purpose solely because an actor can technically access it.
 - **CHR-INFO-008:** Conflicting information-governance rules MUST fail closed or follow an explicitly declared precedence policy.
+- **CHR-INFO-009:** An enterprise or process document MAY reference the evidence its modeled facts rest on. It MUST do so when those facts were derived, for example extracted from documents or interviews or proposed by an agent, rather than entered by their accountable owner, and the evidence MUST then include the derived conclusion that `CHR-INFO-004` requires. A fact accepted from a proposal stays distinguishable from an observed one through the categories of its evidence (`CHR-EVID-003`).
 
 Customer, personal, licensed, and vendor-proprietary information remain governed by their applicable policies and rights outside this specification.

@@ -1,6 +1,6 @@
 # Conformance and Compatibility
 
-Status: Version 1.2.0
+Status: Version 1.3.0
 
 Conformance allows independent implementations to make bounded, testable claims about the parts of Charter they support.
 

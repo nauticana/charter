@@ -1,6 +1,6 @@
 # Evidence, Audit, Exceptions, and Escalation
 
-Status: Version 1.2.0
+Status: Version 1.3.0
 
 Evidence demonstrates what context, authority, decisions, and actions produced an outcome. An audit trail organizes evidence without requiring one storage technology.
 
@@ -18,5 +18,6 @@ Evidence demonstrates what context, authority, decisions, and actions produced a
 - **CHR-EVID-010:** An attempt at a governed action that is denied, that fails, or whose external outcome is unknown MUST be evidenced with the same attribution as an executed action, MUST state that disposition explicitly rather than only in free text, and MUST record the authority, approval, and information-governance evaluations made before it stopped.
 - **CHR-EVID-011:** The evaluation of a postcondition MUST state one of satisfied, violated, or unknown, the time of observation, and a reason, and a satisfied or violated evaluation MUST reference the observed-fact evidence supporting it. The external system's response and the independently observed state MUST remain distinct evidence records; a provider's acknowledgement is not evidence of the effect.
 - **CHR-EVID-012:** An unknown outcome of a mutating action MAY be reconciled only through a new observation of its declared postconditions. When the observed effects establish a declared outcome, a new action record with executed disposition MUST be appended that identifies the attempt it reconciles, and the operation MUST NOT be submitted again. While the observation is unavailable or contradictory the outcome remains unknown and escalation continues to apply. Reconciliation MUST preserve the original attempt, its external response, and its uncertainty; it never restates the first record as success.
+- **CHR-EVID-013:** An evaluation that justified releasing an agent definition MUST be evidenced with the definition and digest evaluated, the case set and version, the scores, and the judge and its version. Feedback on an outcome MUST be evidenced with the action rated, who rated it, the rating, and the reason. Either MUST be recorded as a human decision when the judge is a human and as an agent assertion or derived conclusion otherwise.
 
 Evidence formats may be centralized, distributed, signed, or externally referenced, provided their declared conformance requirements are met.
