@@ -68,17 +68,20 @@ func Run(t *testing.T, newStore func(t *testing.T) evidence.Store, newProvider f
 		}
 	})
 
-	t.Run("actions of one execution context stay within its namespace, in time order", func(t *testing.T) {
-		q := evidence.Queries{Provider: newProvider(seeded(t))}
-		in, err := q.ActionsIn(ctx, "a.example", "EXEC-1")
+	t.Run("actions of one execution context stay within its namespace, in time order, up to the limit", func(t *testing.T) {
+		p := newProvider(seeded(t))
+		in, err := p.ActionsIn(ctx, "a.example", "EXEC-1", 10)
 		if err != nil || len(in) != 2 || in[0].ID != "ACT-1" || in[1].ID != "ACT-2" || in[0].Namespace != "a.example" {
 			t.Errorf("actions in EXEC-1: %+v %v", in, err)
 		}
-		if none, err := q.ActionsIn(ctx, "a.example", "EXEC-MISSING"); err != nil || len(none) != 0 {
+		if first, err := p.ActionsIn(ctx, "a.example", "EXEC-1", 1); err != nil || len(first) != 1 || first[0].ID != "ACT-1" {
+			t.Errorf("first action in EXEC-1: %+v %v", first, err)
+		}
+		if none, err := p.ActionsIn(ctx, "a.example", "EXEC-MISSING", 10); err != nil || len(none) != 0 {
 			t.Errorf("unknown context: %+v %v", none, err)
 		}
-		if _, err := q.ActionsIn(ctx, "", "EXEC-1"); !errors.Is(err, evidence.ErrNoExecutionContext) {
-			t.Errorf("blank namespace: %v", err)
+		if _, err := p.ActionsIn(ctx, "a.example", "EXEC-1", -1); !errors.Is(err, evidence.ErrNoLimit) {
+			t.Errorf("negative limit: %v", err)
 		}
 	})
 }

@@ -2,6 +2,7 @@ package evidence
 
 import (
 	"context"
+	"sort"
 
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/model"
@@ -43,7 +44,10 @@ func (p *BaseProvider) Actions(ctx context.Context) ([]model.ActionRecord, error
 }
 
 // ActionsIn scans every action of the source, which has no execution-context index.
-func (p *BaseProvider) ActionsIn(ctx context.Context, owner, executionContextID string) ([]model.ActionRecord, error) {
+func (p *BaseProvider) ActionsIn(ctx context.Context, owner, executionContextID string, limit int) ([]model.ActionRecord, error) {
+	if limit <= 0 {
+		return nil, ErrNoLimit
+	}
 	all, err := p.Actions(ctx)
 	if err != nil {
 		return nil, err
@@ -54,7 +58,8 @@ func (p *BaseProvider) ActionsIn(ctx context.Context, owner, executionContextID 
 			out = append(out, a)
 		}
 	}
-	return out, nil
+	sort.SliceStable(out, func(i, j int) bool { return out[i].ActionTime.Before(out[j].ActionTime) })
+	return out[:min(len(out), limit)], nil
 }
 
 func (p *BaseProvider) Records(ctx context.Context) ([]model.EvidenceRecord, error) {
