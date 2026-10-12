@@ -21,6 +21,7 @@ func Run(t *testing.T, newStore func(t *testing.T) evidence.Store, newProvider f
 	actions := []model.ActionRecord{
 		Action("a.example", "ACT-2", "EXEC-1", at.Add(2*time.Minute)),
 		Action("a.example", "ACT-1", "EXEC-1", at),
+		Action("a.example", "ACT-4", "EXEC-1", at.Add(3*time.Minute)),
 		Action("a.example", "ACT-3", "EXEC-2", at.Add(time.Minute)),
 		Action("b.example", "ACT-1", "EXEC-1", at.Add(time.Minute)),
 	}
@@ -68,14 +69,14 @@ func Run(t *testing.T, newStore func(t *testing.T) evidence.Store, newProvider f
 		}
 	})
 
-	t.Run("actions of one execution context stay within its namespace, in time order, up to the limit", func(t *testing.T) {
+	t.Run("actions stay within their namespace and the latest window stays in time order", func(t *testing.T) {
 		p := newProvider(seeded(t))
 		in, err := p.ActionsIn(ctx, "a.example", "EXEC-1", 10)
-		if err != nil || len(in) != 2 || in[0].ID != "ACT-1" || in[1].ID != "ACT-2" || in[0].Namespace != "a.example" {
+		if err != nil || len(in) != 3 || in[0].ID != "ACT-1" || in[1].ID != "ACT-2" || in[2].ID != "ACT-4" || in[0].Namespace != "a.example" {
 			t.Errorf("actions in EXEC-1: %+v %v", in, err)
 		}
-		if first, err := p.ActionsIn(ctx, "a.example", "EXEC-1", 1); err != nil || len(first) != 1 || first[0].ID != "ACT-1" {
-			t.Errorf("first action in EXEC-1: %+v %v", first, err)
+		if latest, err := p.ActionsIn(ctx, "a.example", "EXEC-1", 2); err != nil || len(latest) != 2 || latest[0].ID != "ACT-2" || latest[1].ID != "ACT-4" {
+			t.Errorf("latest actions in EXEC-1: %+v %v", latest, err)
 		}
 		if none, err := p.ActionsIn(ctx, "a.example", "EXEC-MISSING", 10); err != nil || len(none) != 0 {
 			t.Errorf("unknown context: %+v %v", none, err)

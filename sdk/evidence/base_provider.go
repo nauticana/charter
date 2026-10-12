@@ -59,7 +59,7 @@ func (p *BaseProvider) ActionsIn(ctx context.Context, owner, executionContextID 
 		}
 	}
 	sort.SliceStable(out, func(i, j int) bool { return out[i].ActionTime.Before(out[j].ActionTime) })
-	return out[:min(len(out), limit)], nil
+	return out[max(0, len(out)-limit):], nil
 }
 
 func (p *BaseProvider) Records(ctx context.Context) ([]model.EvidenceRecord, error) {

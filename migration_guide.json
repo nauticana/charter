@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.3.2",
+      "title": "Latest execution-context actions",
+      "tags": [
+        "breaking"
+      ],
+      "summary": "`ActionsIn` returns the latest `limit` actions of an execution context instead of the earliest, so a caller reconciling the newest attempt reads a bounded window. Updates the optional keel adapter to keel v1.2.110.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`schema/catalog.json` `specVersion`) | 1.3.0 |\n| Go module `github.com/nauticana/charter` | v1.3.2 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.2.110 |\n\n## Compatibility impact\n\nBehavior change for callers of `evidence.Queries.ActionsIn` and custom `evidence.Provider` implementations only; signatures, documents, schemas, fixtures, and conformance claims are unchanged. The adapter's source is unchanged by keel v1.2.110.\n\n## Go SDK — breaking\n\n| Before | After |\n|---|---|\n| `Provider.ActionsIn` returns the earliest `limit` actions, in time order | Returns the latest `limit` actions, still in time order |\n\n## Adoption\n\n1. `go get github.com/nauticana/charter@v1.3.2`; with `sdk/adapter/keel`, keel v1.2.110, adopting keel's own guidance first.\n2. A caller that needs the start of a long execution context reads `Provider.Actions` instead.\n3. A custom `Provider` orders by time descending, applies the limit, returns the window in ascending order, and runs `evidencetest.Run`.\n"
+    },
+    {
       "version": "1.3.1",
       "title": "Bounded execution-context actions",
       "tags": [

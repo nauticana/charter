@@ -38,7 +38,7 @@ func (q Queries) ActionsBy(ctx context.Context, ownerNamespace string, actor mod
 	return out, nil
 }
 
-// ActionsIn lists, in time order, the first limit actions recorded in one execution context, including denials,
+// ActionsIn lists, in time order, the latest limit actions recorded in one execution context, including denials,
 // unknown outcomes, and the reconciliations that settled them.
 func (q Queries) ActionsIn(ctx context.Context, ownerNamespace, executionContextID string, limit int) ([]model.ActionRecord, error) {
 	if strings.TrimSpace(ownerNamespace) == "" || strings.TrimSpace(executionContextID) == "" {

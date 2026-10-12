@@ -13,7 +13,7 @@ type Provider interface {
 	Escalation(ctx context.Context, ownerNamespace string, ref model.Ref) (model.Escalation, error)
 	Bundle(ctx context.Context, ownerNamespace string, ref model.Ref) (model.EvidenceBundle, error)
 	Actions(ctx context.Context) ([]model.ActionRecord, error)
-	// ActionsIn lists, in time order, at most limit actions recorded in one execution context; a durable store
+	// ActionsIn lists, in time order, the latest limit actions recorded in one execution context; a durable store
 	// answers it from an index.
 	ActionsIn(ctx context.Context, ownerNamespace, executionContextID string, limit int) ([]model.ActionRecord, error)
 	Records(ctx context.Context) ([]model.EvidenceRecord, error)
