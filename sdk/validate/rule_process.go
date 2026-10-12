@@ -8,16 +8,19 @@ import (
 	"github.com/nauticana/charter/sdk/model"
 	"github.com/nauticana/charter/sdk/organization"
 	"github.com/nauticana/charter/sdk/process"
+	"github.com/nauticana/charter/sdk/temporal"
 )
 
 type PerformerRule struct{ AbstractRule }
 type InstanceAssignmentRule struct{ AbstractRule }
 type InstanceDefinitionRule struct{ AbstractRule }
+type BaselineRule struct{ AbstractRule }
 
 var (
 	_ Rule = PerformerRule{}
 	_ Rule = InstanceAssignmentRule{}
 	_ Rule = InstanceDefinitionRule{}
+	_ Rule = BaselineRule{}
 )
 
 func (r PerformerRule) Validate(c *corpus.Corpus) []Finding {
@@ -71,6 +74,30 @@ func (r InstanceDefinitionRule) Validate(c *corpus.Corpus) []Finding {
 		}
 		if corpus.KeyOf(task.Namespace, task.ProcessID) != corpus.KeyOf(pi.Namespace, pi.ProcessID) {
 			out = append(out, r.finding(ti.Namespace, ti.ID, fmt.Sprintf("task %s belongs to %s, but process instance %s runs %s", task.ID, task.ProcessID.ID, pi.ID, pi.ProcessID.ID)))
+		}
+	}
+	return out
+}
+
+func (r BaselineRule) Validate(c *corpus.Corpus) []Finding {
+	var out []Finding
+	measures := allOf[model.OutcomeMeasure](c, model.KindOutcomeMeasure)
+	for _, m := range measures {
+		if m.Baseline != nil && !temporal.NewPeriod(m.Baseline.Window).Ordered() {
+			out = append(out, r.finding(m.Namespace, m.ID, "baseline window ends before it starts"))
+		}
+	}
+	for _, ti := range allOf[model.TaskInstance](c, model.KindTaskInstance) {
+		if !process.NeedsBaseline(ti) {
+			continue
+		}
+		task, taskOK := resolveAs[model.Task](c, ti.Namespace, ti.TaskID, model.KindTask)
+		asg, asgOK := resolveAs[model.Assignment](c, ti.Namespace, ti.AssignmentID, model.KindAssignment)
+		if !taskOK || !asgOK {
+			continue
+		}
+		if ids := process.Unbaselined(measures, task, asg); len(ids) > 0 {
+			out = append(out, r.finding(ti.Namespace, ti.ID, fmt.Sprintf("agent %s under assignment %s, which began before measures %v were baselined", ti.Participation, asg.ID, ids)))
 		}
 	}
 	return out

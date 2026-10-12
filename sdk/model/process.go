@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"slices"
 	"time"
 )
@@ -151,4 +152,28 @@ type RoadmapItem struct {
 	Owner           ObjectRef `json:"owner"`
 	Dependencies    []string  `json:"dependencies,omitempty"`
 	Status          string    `json:"status"`
+}
+
+const (
+	ImprovementIncrease = "increase"
+	ImprovementDecrease = "decrease"
+)
+
+// OutcomeMeasure measures the outcome of its subject; currency values are integer minor units (CHR-PROC-009).
+type OutcomeMeasure struct {
+	Envelope
+	Subject          ObjectRef   `json:"subject"`
+	Improvement      string      `json:"improvement"`
+	Unit             string      `json:"unit,omitempty"`
+	Currency         string      `json:"currency,omitempty"`
+	CurrencyExponent *int        `json:"currencyExponent,omitempty"`
+	Target           json.Number `json:"target,omitempty"`
+	Baseline         *Baseline   `json:"baseline,omitempty"`
+}
+
+// Baseline is the value observed over a closed window and the evidence it was measured from.
+type Baseline struct {
+	Value             json.Number `json:"value"`
+	Window            Validity    `json:"window"`
+	EvidenceRecordIDs []Ref       `json:"evidenceRecordIds"`
 }

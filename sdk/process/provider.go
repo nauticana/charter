@@ -15,6 +15,7 @@ type DefinitionProvider interface {
 	Relationship(ctx context.Context, ownerNamespace string, ref model.Ref) (model.ProcessRelationship, error)
 	Tasks(ctx context.Context) ([]model.Task, error)
 	Relationships(ctx context.Context) ([]model.ProcessRelationship, error)
+	OutcomeMeasures(ctx context.Context) ([]model.OutcomeMeasure, error)
 }
 
 type InstanceProvider interface {

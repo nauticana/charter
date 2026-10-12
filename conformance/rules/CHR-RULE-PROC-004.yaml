@@ -1,0 +1,11 @@
+id: CHR-RULE-PROC-004
+title: Agent work above recommends follows the baselines of its outcome measures
+requirements: [CHR-PROC-009]
+profile: core-model
+verification: semantic
+applies_to: [OutcomeMeasure, TaskInstance]
+check: >-
+  Every OutcomeMeasure baseline window ends on or after it starts. For every TaskInstance an AgentIdentity performs above recommends, every OutcomeMeasure of its task or the task's process that is active (or has no lifecycle state) and effective on the first day of the instance's assignment has a baseline whose window ended before that day.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/agent-before-baseline

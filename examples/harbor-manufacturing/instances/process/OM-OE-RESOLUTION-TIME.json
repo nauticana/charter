@@ -1,0 +1,28 @@
+{
+  "charterSpecVersion": "1.4.0",
+  "namespace": "harbor.example",
+  "kind": "OutcomeMeasure",
+  "id": "OM-OE-RESOLUTION-TIME",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Median order exception resolution time",
+  "validity": {
+    "from": "2026-01-01"
+  },
+  "subject": {
+    "kind": "BusinessProcess",
+    "id": "PROC-RESOLVE-ORDER-EXCEPTION"
+  },
+  "improvement": "decrease",
+  "unit": "hour",
+  "target": 4,
+  "baseline": {
+    "value": 26,
+    "window": {
+      "from": "2026-01-01",
+      "to": "2026-03-31"
+    },
+    "evidenceRecordIds": [
+      "EVR-OE-RESOLUTION-BASELINE"
+    ]
+  }
+}

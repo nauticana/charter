@@ -63,6 +63,7 @@ This catalogue gives the recurring Harbor Manufacturing objects stable example i
 | Target state | `ARCH-TARGET-2026-Q4` | Governed agent-supported state |
 | Gap | `GAP-ORDER-EXCEPTION-EVIDENCE` | Missing consistent decision and execution evidence |
 | Roadmap item | `ROADMAP-GOVERNED-EXCEPTION-PILOT` | Introduce governed support and measure it |
+| Outcome measure | `OM-OE-RESOLUTION-TIME` | Median resolution time, baselined over 2026-Q1 |
 
 This catalogue lists the principal objects referenced across multiple Harbor documents; the complete set is the [instance documents](instances/README.md). An individual document may define additional objects needed by its example, such as task definitions, task instances, runtime instances, execution contexts, credentials, policies, events, exceptions, escalations, or evidence records. Each additional object has its own kind and identifier, and its relationships to catalogue objects must be stated explicitly rather than inferred from identifier structure or document location.
 

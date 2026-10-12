@@ -105,3 +105,11 @@ func TestExplanationMatchesItsSchema(t *testing.T) {
 		}
 	}
 }
+
+func TestBaselineWindowIsOrdered(t *testing.T) {
+	m := model.OutcomeMeasure{Envelope: envelope(model.KindOutcomeMeasure, "M"), Subject: model.ObjectRef{Kind: model.KindTask, ID: "T"},
+		Baseline: &model.Baseline{Window: model.Validity{From: "2026-03-31", To: "2026-01-01"}}}
+	if f := (BaselineRule{AbstractRule{"CHR-RULE-PROC-004", nil}}).Validate(effectCorpus(t, m)); len(f) != 1 || f[0].DocumentID != "M" {
+		t.Errorf("reversed baseline window: %+v", f)
+	}
+}

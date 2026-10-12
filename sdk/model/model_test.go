@@ -59,6 +59,7 @@ func typed(d *model.Document) (any, error) {
 		model.KindArchitectureState:           func() (any, error) { return corpus.Decode[model.ArchitectureState](d) },
 		model.KindGap:                         func() (any, error) { return corpus.Decode[model.Gap](d) },
 		model.KindRoadmapItem:                 func() (any, error) { return corpus.Decode[model.RoadmapItem](d) },
+		model.KindOutcomeMeasure:              func() (any, error) { return corpus.Decode[model.OutcomeMeasure](d) },
 		model.KindEnterpriseSystem:            func() (any, error) { return corpus.Decode[model.EnterpriseSystem](d) },
 		model.KindSystemProfile:               func() (any, error) { return corpus.Decode[model.SystemProfile](d) },
 		model.KindCapabilityBinding:           func() (any, error) { return corpus.Decode[model.CapabilityBinding](d) },

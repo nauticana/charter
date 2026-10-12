@@ -42,6 +42,10 @@ func (p *BaseProvider) Relationships(ctx context.Context) ([]model.ProcessRelati
 	return corpus.ListAs[model.ProcessRelationship](ctx, &p.AbstractDocumentProvider, model.KindProcessRelationship)
 }
 
+func (p *BaseProvider) OutcomeMeasures(ctx context.Context) ([]model.OutcomeMeasure, error) {
+	return corpus.ListAs[model.OutcomeMeasure](ctx, &p.AbstractDocumentProvider, model.KindOutcomeMeasure)
+}
+
 func (p *BaseProvider) ProcessInstance(ctx context.Context, owner string, ref model.Ref) (model.ProcessInstance, error) {
 	return corpus.ResolveAs[model.ProcessInstance](ctx, &p.AbstractDocumentProvider, owner, ref, model.KindProcessInstance)
 }

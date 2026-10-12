@@ -54,13 +54,13 @@ flowchart LR
     agent -->|capabilityIds, constrainedActions| process
     agent -->|certification.evidenceRecordId| evidence
     enterprise -->|sourceEvidence| evidence
-    process -->|sourceEvidence| evidence
+    process -->|sourceEvidence, baseline.evidenceRecordIds| evidence
 
     binding["binding<br/>EnterpriseSystem, SystemProfile, CapabilityBinding,<br/>DataBinding, AuthorityBinding, EventBinding,<br/>BindingConformance"]
     information["information<br/>InformationDefinition,<br/>InformationGovernancePolicy"]
     enterprise["enterprise<br/>Enterprise, OrganizationUnit, PositionType,<br/>Position, Role, Responsibility,<br/>OrganizationRelationship, Assignment"]
     agent["agent<br/>HumanIdentity, AgentIdentity, AgentDefinition,<br/>AgentRuntime, AuthorityGrant, Approval, SodConstraint,<br/>SodException"]
-    process["process<br/>ValueStream, BusinessProcess, Task, ProcessRelationship,<br/>ProcessInstance, TaskInstance, CapabilityContract,<br/>ArchitectureState, Gap, RoadmapItem"]
+    process["process<br/>ValueStream, BusinessProcess, Task, ProcessRelationship,<br/>ProcessInstance, TaskInstance, CapabilityContract,<br/>ArchitectureState, Gap, RoadmapItem,<br/>OutcomeMeasure"]
     evidence["evidence<br/>EvidenceRecord, ActionRecord, ExceptionRecord,<br/>Escalation, EvidenceBundle"]
     conformance["conformance<br/>ConformanceClaim"]
 ```

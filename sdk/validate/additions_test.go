@@ -98,7 +98,7 @@ func TestAdditionsJudgeOnlyTheDocumentsWritten(t *testing.T) {
 	if f := check(t, a, base, position(t, "POS-NEW", "ENT-HARBOR", "1.2.0")); len(f) != 1 || f[0].RuleID != "CHR-RULE-CONF-002" {
 		t.Fatalf("wrong reference kind: %+v", f)
 	}
-	if f := check(t, a, base, position(t, "POS-NEW", "OU-CREDIT-CONTROL", "1.4.0")); len(f) != 1 || f[0].RuleID != "spec-version" {
+	if f := check(t, a, base, position(t, "POS-NEW", "OU-CREDIT-CONTROL", "1.5.0")); len(f) != 1 || f[0].RuleID != "spec-version" {
 		t.Fatalf("later specification version: %+v", f)
 	}
 	replaced := position(t, "POS-CREDIT-MANAGER", "OU-NONE", "1.2.0")

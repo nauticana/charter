@@ -31,6 +31,7 @@ const (
 	KindArchitectureState           Kind = "ArchitectureState"
 	KindGap                         Kind = "Gap"
 	KindRoadmapItem                 Kind = "RoadmapItem"
+	KindOutcomeMeasure              Kind = "OutcomeMeasure"
 	KindEnterpriseSystem            Kind = "EnterpriseSystem"
 	KindSystemProfile               Kind = "SystemProfile"
 	KindCapabilityBinding           Kind = "CapabilityBinding"

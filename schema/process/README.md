@@ -1,8 +1,8 @@
 # Process and Capability Schemas
 
-Schemas for the `CHR-PROC`, `CHR-CAP`, and `CHR-ARCH` domains: `value_stream`, `business_process`, `task`, `process_relationship`, `process_instance`, `task_instance`, `capability_contract`, `architecture_state`, `gap`, and `roadmap_item`.
+Schemas for the `CHR-PROC`, `CHR-CAP`, and `CHR-ARCH` domains: `value_stream`, `business_process`, `task`, `process_relationship`, `process_instance`, `task_instance`, `capability_contract`, `architecture_state`, `gap`, `roadmap_item`, and `outcome_measure`.
 
-Definition and instance documents are separate. Execute contracts must declare idempotency; target architecture states must name their decision authority. Definition documents may cite their `sourceEvidence` (CHR-INFO-009), and a task instance's participation never exceeds its assignment's level (CHR-PROC-008).
+Definition and instance documents are separate. Execute contracts must declare idempotency; target architecture states must name their decision authority. Definition documents may cite their `sourceEvidence` (CHR-INFO-009), and a task instance's participation never exceeds its assignment's level (CHR-PROC-008). An agent performs a measured task above `recommends` only under an assignment that began after each measure in effect was baselined (CHR-PROC-009).
 
 ## Relations
 
@@ -24,9 +24,13 @@ flowchart LR
     RoadmapItem -->|addressesGapIds| Gap
     RoadmapItem -->|owner| OrganizationUnit
     ArchitectureState -->|decisionAuthority| Position
+    OutcomeMeasure -->|subject| BusinessProcess
+    OutcomeMeasure -.->|subject| Task
+    OutcomeMeasure -.->|subject| ValueStream
+    OutcomeMeasure -->|baseline.evidenceRecordIds| EvidenceRecord
 
     classDef ext stroke-dasharray: 4 3
-    class Responsibility,Assignment,AgentIdentity,SodConstraint,OrganizationUnit,Position ext
+    class Responsibility,Assignment,AgentIdentity,SodConstraint,OrganizationUnit,Position,EvidenceRecord ext
 ```
 
 Dashed nodes belong to other domains.

@@ -1,0 +1,14 @@
+{
+  "charterSpecVersion": "1.4.0",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "OutcomeMeasure",
+  "id": "OM-FX",
+  "name": "cycle time",
+  "subject": {
+    "kind": "Task",
+    "id": "TASK-FX"
+  },
+  "improvement": "decrease",
+  "unit": "hour"
+}

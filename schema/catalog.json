@@ -1,5 +1,5 @@
 {
-  "specVersion": "1.3.0",
+  "specVersion": "1.4.0",
   "entries": [
     {
       "name": "common",
@@ -140,6 +140,11 @@
       "kind": "RoadmapItem",
       "id": "https://nauticana.github.io/charter/schema/process/roadmap_item.schema.json",
       "path": "process/roadmap_item.schema.json"
+    },
+    {
+      "kind": "OutcomeMeasure",
+      "id": "https://nauticana.github.io/charter/schema/process/outcome_measure.schema.json",
+      "path": "process/outcome_measure.schema.json"
     },
     {
       "kind": "EnterpriseSystem",

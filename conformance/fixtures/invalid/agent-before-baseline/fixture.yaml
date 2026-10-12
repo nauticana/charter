@@ -1,0 +1,3 @@
+rules: [CHR-RULE-PROC-004]
+expected: fail
+reason: An agent executes a task whose outcome measure was never baselined

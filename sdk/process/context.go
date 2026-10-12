@@ -10,6 +10,7 @@ import (
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/model"
 	"github.com/nauticana/charter/sdk/organization"
+	"github.com/nauticana/charter/sdk/temporal"
 )
 
 var (
@@ -17,6 +18,7 @@ var (
 	ErrPerformerKind = errors.New("performer kind is not permitted for the task")
 	ErrParticipation = errors.New("participation is not permitted for the task")
 	ErrAssignment    = errors.New("assignment does not cover the performer at the instance time")
+	ErrBaseline      = errors.New("assignment began before an outcome measure was baselined")
 )
 
 // TaskContext is the resolved execution context of one task occurrence; definitions are read, never modified (CHR-PROC-005).
@@ -90,6 +92,15 @@ func (r *BaseContextResolver) TaskContext(ctx context.Context, owner string, ref
 	if Exceeds(ti.Participation, asg.Participation) {
 		return TaskContext{}, fmt.Errorf("%w: %s exceeds %s of %s", ErrParticipation, ti.Participation, asg.Participation, asg.ID)
 	}
+	if NeedsBaseline(ti) {
+		measures, err := r.Process.OutcomeMeasures(ctx)
+		if err != nil {
+			return TaskContext{}, err
+		}
+		if ids := Unbaselined(measures, task, asg); len(ids) > 0 {
+			return TaskContext{}, fmt.Errorf("%w: %s, measures %v", ErrBaseline, asg.ID, ids)
+		}
+	}
 	return TaskContext{Instance: ti, Task: task, Process: proc, ProcessInstance: pi, Assignment: asg, At: at}, nil
 }
 
@@ -117,4 +128,39 @@ func Exceeds(participation, bound string) bool {
 	l, ok := Level(participation)
 	b, boundOK := Level(bound)
 	return ok && boundOK && l > b
+}
+
+// NeedsBaseline reports whether an agent performs the instance above recommends, where measures gate it (CHR-PROC-009).
+func NeedsBaseline(ti model.TaskInstance) bool {
+	return ti.Performer.Kind == model.KindAgentIdentity && Exceeds(ti.Participation, model.ParticipationRecommends)
+}
+
+// Unbaselined returns the measures of the task or its process in effect when asg began whose baseline window did not end
+// before that day; an unparsable date fails closed.
+func Unbaselined(measures []model.OutcomeMeasure, task model.Task, asg model.Assignment) []string {
+	var from model.Date
+	if asg.Validity != nil {
+		from = asg.Validity.From
+	}
+	start, startErr := time.Parse(time.DateOnly, string(from))
+	taskKey, procKey := corpus.KeyOf(task.Namespace, model.Ref{ID: task.ID}), corpus.KeyOf(task.Namespace, task.ProcessID)
+	var out []string
+	for _, m := range measures {
+		key := corpus.ObjectKeyOf(m.Namespace, m.Subject)
+		measured := m.Subject.Kind == model.KindTask && key == taskKey || m.Subject.Kind == model.KindBusinessProcess && key == procKey
+		active := m.LifecycleState == "" || m.LifecycleState == model.LifecycleActive
+		effective := startErr != nil || temporal.EffectiveAt(m.Validity, start)
+		if !measured || !active || !effective {
+			continue
+		}
+		baselined := false
+		if m.Baseline != nil && startErr == nil {
+			end, err := time.Parse(time.DateOnly, string(m.Baseline.Window.To))
+			baselined = err == nil && end.Before(start)
+		}
+		if !baselined {
+			out = append(out, m.ID)
+		}
+	}
+	return out
 }

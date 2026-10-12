@@ -37,6 +37,7 @@ func NewRuleSet() (RuleSet, error) {
 		RepeatedSubmissionRule{AbstractRule{"CHR-RULE-MED-004", []string{"CHR-MED-010"}}},
 		ApplicabilityRule{AbstractRule{"CHR-RULE-ENT-006", []string{"CHR-ENT-012"}}},
 		OperatingLimitsRule{AbstractRule{"CHR-RULE-AGENT-003", []string{"CHR-AGENT-011"}}},
+		BaselineRule{AbstractRule{"CHR-RULE-PROC-004", []string{"CHR-PROC-009"}}},
 	}
 	set := RuleSet{}
 	for _, r := range all {

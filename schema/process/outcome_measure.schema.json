@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/process/outcome_measure.schema.json",
+  "title": "OutcomeMeasure",
+  "description": "How the outcome of a value stream, process, or task is measured, and its observed baseline.",
+  "x-charter-requirements": [
+    "CHR-PROC-009"
+  ],
+  "type": "object",
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "kind": {
+      "const": "OutcomeMeasure"
+    },
+    "enterpriseId": {
+      "$ref": "../common.schema.json#/$defs/idRef",
+      "x-charter-ref-kinds": [
+        "Enterprise"
+      ]
+    },
+    "subject": {
+      "allOf": [
+        {
+          "$ref": "../common.schema.json#/$defs/objectRef"
+        }
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "ValueStream",
+            "BusinessProcess",
+            "Task"
+          ]
+        }
+      }
+    },
+    "improvement": {
+      "description": "Whether an increase or a decrease of the value improves the outcome.",
+      "enum": [
+        "increase",
+        "decrease"
+      ]
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "currencyExponent": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 6,
+      "description": "Decimal exponent of integer minor-unit currency values."
+    },
+    "target": {
+      "type": "number"
+    },
+    "baseline": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number"
+        },
+        "window": {
+          "description": "The closed period the baseline was observed over.",
+          "allOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/validity"
+            }
+          ],
+          "required": [
+            "to"
+          ]
+        },
+        "evidenceRecordIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "x-charter-ref-kinds": [
+            "EvidenceRecord"
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "window",
+        "evidenceRecordIds"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "enterpriseId",
+    "subject",
+    "improvement"
+  ],
+  "unevaluatedProperties": false,
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    },
+    {
+      "anyOf": [
+        {
+          "required": [
+            "unit"
+          ]
+        },
+        {
+          "required": [
+            "currency"
+          ]
+        }
+      ]
+    },
+    {
+      "if": {
+        "required": [
+          "currency"
+        ]
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "type": "integer"
+          },
+          "baseline": {
+            "properties": {
+              "value": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "required": [
+          "currencyExponent"
+        ]
+      }
+    }
+  ]
+}
