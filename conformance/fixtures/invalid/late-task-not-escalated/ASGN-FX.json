@@ -1,0 +1,19 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "Assignment",
+  "id": "ASGN-FX",
+  "subject": {
+    "kind": "HumanIdentity",
+    "id": "HUMAN-FX"
+  },
+  "target": {
+    "kind": "Responsibility",
+    "id": "RESP-FX"
+  },
+  "participation": "performs",
+  "validity": {
+    "from": "2026-01-01"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "BusinessProcess",
+  "id": "PROC-FX",
+  "name": "PROC-FX",
+  "businessOutcome": "o",
+  "processDefinitionVersion": "1"
+}

@@ -1,11 +1,11 @@
 {
-  "charterSpecVersion": "1.4.0",
+  "charterSpecVersion": "1.5.0",
   "namespace": "nauticana.charter",
   "id": "CLAIM-agent-runtime",
   "kind": "ConformanceClaim",
   "name": "Reference SDK agent-runtime claim",
   "conformanceProfile": "agent-runtime",
-  "implementationVersion": "1.4.0",
+  "implementationVersion": "1.5.0",
   "testedRuleIds": [
     "CHR-RULE-RT-001",
     "CHR-RULE-RT-002",

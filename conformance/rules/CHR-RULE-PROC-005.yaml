@@ -1,0 +1,11 @@
+id: CHR-RULE-PROC-005
+title: A task instance not started by its due time is escalated
+requirements: [CHR-PROC-010, CHR-PROC-007]
+profile: core-model
+verification: semantic
+applies_to: [TaskInstance, ExceptionRecord]
+check: >-
+  Every TaskInstance dueAt is not before its createdAt. A TaskInstance whose startedAt, or when it never started its endedAt, is after its dueAt is the affected object of an ExceptionRecord whose escalationTarget is the accountable authority of the Responsibility its Task names.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/late-task-not-escalated

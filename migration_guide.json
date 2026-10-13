@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.5.0",
+      "title": "Due task instances",
+      "tags": [
+        "additive"
+      ],
+      "summary": "Adds `TaskInstance.dueAt` and CHR-PROC-010: a task instance not started by its due time is escalated to its task's accountable authority, checked by the new CHR-RULE-PROC-005, and a closed instance is never reassigned. The SDK adds `process.Assign`, `process.BaseContextResolver.Resolve`, `process.Late`, and `process.LateException`. Specification 1.5.0; the optional keel adapter targets keel v1.2.114.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`schema/catalog.json` `specVersion`) | 1.5.0 |\n| Go module `github.com/nauticana/charter` | v1.5.0 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.2.114 |\n\n## Compatibility impact\n\nAdditive: the rule applies only to task instances that declare `dueAt`.\n\n## New requirement and rule\n\n| Id | Meaning |\n|---|---|\n| `CHR-PROC-010` | A task instance may declare when it is due, no earlier than its creation. One not started by then is escalated: an exception names it as affected and its task's accountable authority as escalation target. A closed instance is never reassigned; a new performer and assignment satisfy CHR-PROC-002, CHR-PROC-006, and CHR-PROC-008. |\n| `CHR-RULE-PROC-005` (core-model) | `dueAt` is not before `createdAt`; an instance started, or ended unstarted, after `dueAt` is escalated as above. |\n\n## Schema\n\n`TaskInstance.dueAt` is an optional date-time. A document using it declares `\"charterSpecVersion\": \"1.5.0\"`.\n\n## Go SDK\n\n- `model.TaskInstance.DueAt` and task-state constants.\n- `process.Assign` rejects closed instances and due times before creation.\n- `process.BaseContextResolver.Resolve` validates an instance before it is recorded.\n- `process.Late` detects missed start deadlines; `process.LateException` builds the required exception record.\n- `validate.LateTaskRule`.\n\n## Adoption\n\n1. `go get github.com/nauticana/charter@v1.5.0`; with `sdk/adapter/keel`, keel v1.2.114, adopting keel's own guidance first.\n2. Use `Assign`, validate with `BaseContextResolver.Resolve`, and record the instance. After its deadline, use `LateException` once per late instance and re-run `charter claim`.\n"
+    },
+    {
       "version": "1.4.0",
       "title": "Outcome measures and baselines",
       "tags": [

@@ -38,6 +38,7 @@ func NewRuleSet() (RuleSet, error) {
 		ApplicabilityRule{AbstractRule{"CHR-RULE-ENT-006", []string{"CHR-ENT-012"}}},
 		OperatingLimitsRule{AbstractRule{"CHR-RULE-AGENT-003", []string{"CHR-AGENT-011"}}},
 		BaselineRule{AbstractRule{"CHR-RULE-PROC-004", []string{"CHR-PROC-009"}}},
+		LateTaskRule{AbstractRule{"CHR-RULE-PROC-005", []string{"CHR-PROC-010", "CHR-PROC-007"}}},
 	}
 	set := RuleSet{}
 	for _, r := range all {

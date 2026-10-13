@@ -1,0 +1,9 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "fixture.example",
+  "enterpriseId": "ENT-FX",
+  "kind": "HumanIdentity",
+  "id": "HUMAN-FX",
+  "name": "HUMAN-FX",
+  "lifecycleState": "active"
+}

@@ -56,6 +56,16 @@ type ProcessInstance struct {
 	ContextRefs              []ObjectRef `json:"contextRefs,omitempty"`
 }
 
+const (
+	TaskPending   = "pending"
+	TaskRunning   = "running"
+	TaskSuspended = "suspended"
+	TaskCompleted = "completed"
+	TaskCancelled = "cancelled"
+	TaskFailed    = "failed"
+	TaskEscalated = "escalated"
+)
+
 type TaskInstance struct {
 	Envelope
 	ProcessInstanceID     Ref        `json:"processInstanceId"`
@@ -66,6 +76,7 @@ type TaskInstance struct {
 	Participation         string     `json:"participation"`
 	State                 string     `json:"state"`
 	CreatedAt             time.Time  `json:"createdAt"`
+	DueAt                 *time.Time `json:"dueAt,omitempty"`
 	StartedAt             *time.Time `json:"startedAt,omitempty"`
 	EndedAt               *time.Time `json:"endedAt,omitempty"`
 	Outcome               string     `json:"outcome,omitempty"`

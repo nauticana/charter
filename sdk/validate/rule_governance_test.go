@@ -113,3 +113,34 @@ func TestBaselineWindowIsOrdered(t *testing.T) {
 		t.Errorf("reversed baseline window: %+v", f)
 	}
 }
+
+func TestLateTaskIsEscalatedToTheAccountableAuthority(t *testing.T) {
+	at := func(h int) *time.Time { v := time.Date(2026, 6, 1, h, 0, 0, 0, time.UTC); return &v }
+	accountable := model.ObjectRef{Kind: model.KindPosition, ID: "POS"}
+	resp := model.Responsibility{Envelope: envelope(model.KindResponsibility, "RESP"), Accountable: accountable}
+	task := model.Task{Envelope: envelope(model.KindTask, "T"), AccountableResponsibilityID: model.Ref{ID: "RESP"}}
+	instance := func(due, started, ended *time.Time) model.TaskInstance {
+		return model.TaskInstance{Envelope: envelope(model.KindTaskInstance, "TI"), TaskID: model.Ref{ID: "T"}, CreatedAt: *at(8), DueAt: due, StartedAt: started, EndedAt: ended}
+	}
+	exception := func(target model.ObjectRef) model.ExceptionRecord {
+		return model.ExceptionRecord{Envelope: envelope(model.KindExceptionRecord, "EXC"), Affected: model.ObjectRef{Kind: model.KindTaskInstance, ID: "TI"}, EscalationTarget: target}
+	}
+	rule := LateTaskRule{AbstractRule{"CHR-RULE-PROC-005", nil}}
+	for name, tc := range map[string]struct {
+		docs []any
+		want int
+	}{
+		"no due time":               {[]any{instance(nil, at(12), nil)}, 0},
+		"due before creation":       {[]any{instance(at(7), nil, nil)}, 1},
+		"started on time":           {[]any{resp, task, instance(at(10), at(10), nil)}, 0},
+		"not yet started":           {[]any{resp, task, instance(at(10), nil, nil)}, 0},
+		"started late":              {[]any{resp, task, instance(at(10), at(11), nil)}, 1},
+		"cancelled late, unstarted": {[]any{resp, task, instance(at(10), nil, at(11))}, 1},
+		"started late, escalated":   {[]any{resp, task, exception(accountable), instance(at(10), at(11), nil)}, 0},
+		"escalated to another":      {[]any{resp, task, exception(model.ObjectRef{Kind: model.KindPosition, ID: "OTHER"}), instance(at(10), at(11), nil)}, 1},
+	} {
+		if got := len(rule.Validate(effectCorpus(t, tc.docs...))); got != tc.want {
+			t.Errorf("%s: %d findings, want %d", name, got, tc.want)
+		}
+	}
+}

@@ -1,11 +1,11 @@
 {
-  "charterSpecVersion": "1.4.0",
+  "charterSpecVersion": "1.5.0",
   "namespace": "nauticana.charter",
   "id": "CLAIM-core-model",
   "kind": "ConformanceClaim",
   "name": "Reference SDK core-model claim",
   "conformanceProfile": "core-model",
-  "implementationVersion": "1.4.0",
+  "implementationVersion": "1.5.0",
   "testedRuleIds": [
     "CHR-RULE-AGENT-001",
     "CHR-RULE-AGENT-002",
@@ -35,7 +35,8 @@
     "CHR-RULE-PROC-001",
     "CHR-RULE-PROC-002",
     "CHR-RULE-PROC-003",
-    "CHR-RULE-PROC-004"
+    "CHR-RULE-PROC-004",
+    "CHR-RULE-PROC-005"
   ],
   "verificationTypes": [
     "structural",
@@ -191,6 +192,11 @@
     },
     {
       "ruleId": "CHR-RULE-PROC-004",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-PROC-005",
       "verificationType": "semantic",
       "result": "pass"
     }

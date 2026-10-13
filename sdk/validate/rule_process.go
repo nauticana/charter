@@ -15,12 +15,14 @@ type PerformerRule struct{ AbstractRule }
 type InstanceAssignmentRule struct{ AbstractRule }
 type InstanceDefinitionRule struct{ AbstractRule }
 type BaselineRule struct{ AbstractRule }
+type LateTaskRule struct{ AbstractRule }
 
 var (
 	_ Rule = PerformerRule{}
 	_ Rule = InstanceAssignmentRule{}
 	_ Rule = InstanceDefinitionRule{}
 	_ Rule = BaselineRule{}
+	_ Rule = LateTaskRule{}
 )
 
 func (r PerformerRule) Validate(c *corpus.Corpus) []Finding {
@@ -98,6 +100,40 @@ func (r BaselineRule) Validate(c *corpus.Corpus) []Finding {
 		}
 		if ids := process.Unbaselined(measures, task, asg); len(ids) > 0 {
 			out = append(out, r.finding(ti.Namespace, ti.ID, fmt.Sprintf("agent %s under assignment %s, which began before measures %v were baselined", ti.Participation, asg.ID, ids)))
+		}
+	}
+	return out
+}
+
+func (r LateTaskRule) Validate(c *corpus.Corpus) []Finding {
+	var out []Finding
+	exceptions := allOf[model.ExceptionRecord](c, model.KindExceptionRecord)
+	for _, ti := range allOf[model.TaskInstance](c, model.KindTaskInstance) {
+		if ti.DueAt == nil {
+			continue
+		}
+		if ti.DueAt.Before(ti.CreatedAt) {
+			out = append(out, r.finding(ti.Namespace, ti.ID, "due before it was created"))
+			continue
+		}
+		// Judged at its due time, an instance is late only by what it records.
+		if !process.Late(ti, *ti.DueAt) {
+			continue
+		}
+		task, taskOK := resolveAs[model.Task](c, ti.Namespace, ti.TaskID, model.KindTask)
+		if !taskOK {
+			continue
+		}
+		resp, respOK := resolveAs[model.Responsibility](c, task.Namespace, task.AccountableResponsibilityID, model.KindResponsibility)
+		if !respOK {
+			continue
+		}
+		self, target := corpus.KeyOf(ti.Namespace, model.Ref{ID: ti.ID}), corpus.ObjectKeyOf(resp.Namespace, resp.Accountable)
+		if !slices.ContainsFunc(exceptions, func(e model.ExceptionRecord) bool {
+			return e.Affected.Kind == model.KindTaskInstance && corpus.ObjectKeyOf(e.Namespace, e.Affected) == self &&
+				e.EscalationTarget.Kind == resp.Accountable.Kind && corpus.ObjectKeyOf(e.Namespace, e.EscalationTarget) == target
+		}) {
+			out = append(out, r.finding(ti.Namespace, ti.ID, fmt.Sprintf("not started by its due time and not escalated to %s %s", resp.Accountable.Kind, resp.Accountable.ID)))
 		}
 	}
 	return out

@@ -1,0 +1,3 @@
+rules: [CHR-RULE-PROC-005]
+expected: fail
+reason: A task instance started after its due time without an exception escalated to its responsibility's accountable authority

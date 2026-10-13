@@ -6,7 +6,8 @@
   "x-charter-requirements": [
     "CHR-PROC-005",
     "CHR-PROC-006",
-    "CHR-PROC-007"
+    "CHR-PROC-007",
+    "CHR-PROC-010"
   ],
   "type": "object",
   "allOf": [
@@ -81,6 +82,11 @@
     "createdAt": {
       "type": "string",
       "format": "date-time"
+    },
+    "dueAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the instance must have started; one not started by then is escalated (CHR-PROC-010)."
     },
     "startedAt": {
       "type": "string",

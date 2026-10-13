@@ -1,11 +1,11 @@
 {
-  "charterSpecVersion": "1.4.0",
+  "charterSpecVersion": "1.5.0",
   "namespace": "nauticana.charter",
   "id": "CLAIM-system-adapter",
   "kind": "ConformanceClaim",
   "name": "Reference SDK system-adapter claim",
   "conformanceProfile": "system-adapter",
-  "implementationVersion": "1.4.0",
+  "implementationVersion": "1.5.0",
   "testedRuleIds": [
     "CHR-RULE-SA-001",
     "CHR-RULE-SA-002",

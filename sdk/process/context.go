@@ -48,6 +48,13 @@ func (r *BaseContextResolver) TaskContext(ctx context.Context, owner string, ref
 	if err != nil {
 		return TaskContext{}, err
 	}
+	return r.Resolve(ctx, ti)
+}
+
+func (r *BaseContextResolver) Resolve(ctx context.Context, ti model.TaskInstance) (TaskContext, error) {
+	if err := validateDue(ti); err != nil {
+		return TaskContext{}, err
+	}
 	pi, err := r.Process.ProcessInstance(ctx, ti.Namespace, ti.ProcessInstanceID)
 	if err != nil {
 		return TaskContext{}, err

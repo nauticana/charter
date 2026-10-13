@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/model"
@@ -59,6 +60,7 @@ func TestContextFailsClosed(t *testing.T) {
 		`{"charterSpecVersion":"1.4.0","namespace":"t","kind":"Task","id":"T-AGENT","name":"t","processId":"P","taskDefinitionVersion":"1","businessOutcome":"o","accountableResponsibilityId":"R","permittedPerformerKinds":["agent"]}`,
 		`{"charterSpecVersion":"1.4.0","namespace":"t","kind":"OutcomeMeasure","id":"M","name":"m","subject":{"kind":"BusinessProcess","id":"P"},"improvement":"decrease","unit":"hour","baseline":{"value":26,"window":{"from":"2026-01-01","to":"2026-04-01"},"evidenceRecordIds":["E"]}}`,
 		`{"charterSpecVersion":"1.4.0","namespace":"t","kind":"TaskInstance","id":"TI-BASELINE","processInstanceId":"PI","taskId":"T-AGENT","taskDefinitionVersion":"1","performer":{"kind":"AgentIdentity","id":"G"},"assignmentId":"A-AGENT","participation":"executes","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
+		`{"charterSpecVersion":"1.5.0","namespace":"t","kind":"TaskInstance","id":"TI-DUE","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z","dueAt":"2026-05-31T00:00:00Z"}`,
 		`{"charterSpecVersion":"1.0.0","namespace":"t","kind":"TaskInstance","id":"TI-EXPIRED","processInstanceId":"PI","taskId":"T","taskDefinitionVersion":"1","performer":{"kind":"HumanIdentity","id":"H"},"assignmentId":"A","participation":"approves","state":"pending","createdAt":"2026-06-01T00:00:00Z"}`,
 	}
 	c := corpus.New()
@@ -72,7 +74,7 @@ func TestContextFailsClosed(t *testing.T) {
 		}
 	}
 	r := &BaseContextResolver{Process: NewBaseProvider(c), Assignments: organization.NewBaseProvider(c)}
-	for id, want := range map[string]error{"TI-AGENT": ErrPerformerKind, "TI-PART": ErrParticipation, "TI-PROC": ErrDefinition, "TI-VERSION": ErrDefinition, "TI-EXPIRED": ErrAssignment, "TI-LEVEL": ErrParticipation, "TI-BASELINE": ErrBaseline} {
+	for id, want := range map[string]error{"TI-AGENT": ErrPerformerKind, "TI-PART": ErrParticipation, "TI-PROC": ErrDefinition, "TI-VERSION": ErrDefinition, "TI-EXPIRED": ErrAssignment, "TI-LEVEL": ErrParticipation, "TI-BASELINE": ErrBaseline, "TI-DUE": ErrDue} {
 		if _, err := r.TaskContext(context.Background(), "t", model.Ref{ID: id}); !errors.Is(err, want) {
 			t.Errorf("%s: got %v, want %v", id, err, want)
 		}
@@ -133,5 +135,65 @@ func TestUnbaselined(t *testing.T) {
 	advice.Participation = model.ParticipationRecommends
 	if !NeedsBaseline(agent) || NeedsBaseline(human) || NeedsBaseline(advice) {
 		t.Error("only agent work above recommends needs a baseline")
+	}
+}
+
+func TestAssignAndLate(t *testing.T) {
+	at := func(h int) *time.Time { v := time.Date(2026, 6, 1, h, 0, 0, 0, time.UTC); return &v }
+	open := model.TaskInstance{Envelope: model.Envelope{Namespace: "t", ID: "TI"}, State: model.TaskPending, CreatedAt: *at(8)}
+	performer := model.ObjectRef{Kind: model.KindHumanIdentity, ID: "H"}
+	got, err := Assign(open, performer, model.Ref{ID: "A"}, at(10))
+	if err != nil || got.Performer != performer || got.AssignmentID.ID != "A" || !got.DueAt.Equal(*at(10)) || open.DueAt != nil {
+		t.Fatalf("assign: %+v %v", got, err)
+	}
+	if _, err := Assign(open, performer, model.Ref{ID: "A"}, at(7)); !errors.Is(err, ErrDue) {
+		t.Errorf("due before creation: %v", err)
+	}
+	for _, state := range []string{model.TaskCompleted, model.TaskCancelled, model.TaskFailed} {
+		closed := open
+		closed.State = state
+		if _, err := Assign(closed, performer, model.Ref{ID: "A"}, nil); !errors.Is(err, ErrClosed) {
+			t.Errorf("%s: %v", state, err)
+		}
+	}
+	if Late(open, *at(23)) || Late(got, *at(10)) || !Late(got, *at(11)) {
+		t.Error("late only after the due time")
+	}
+	started := got
+	started.StartedAt = at(9)
+	if Late(started, *at(23)) {
+		t.Error("started on time is never late")
+	}
+	ended := got
+	ended.EndedAt = at(11)
+	if !Late(ended, *at(9)) {
+		t.Error("ended unstarted after the due time is late")
+	}
+}
+
+func TestLateException(t *testing.T) {
+	due := time.Date(2026, 6, 1, 10, 0, 0, 0, time.UTC)
+	enterprise := model.Ref{ID: "ENT"}
+	tc := TaskContext{
+		Instance: model.TaskInstance{Envelope: model.Envelope{CharterSpecVersion: "1.5.0", Namespace: "t", ID: "TI", EnterpriseID: &enterprise}, DueAt: &due},
+		Task:     model.Task{Envelope: model.Envelope{Namespace: "t", ID: "T"}, AccountableResponsibilityID: model.Ref{ID: "R"}},
+	}
+	resp := model.Responsibility{Envelope: model.Envelope{Namespace: "t", ID: "R"}, Accountable: model.ObjectRef{Kind: model.KindPosition, ID: "POS"}}
+	e, err := LateException(tc, resp, "EXC", due.Add(time.Hour))
+	if err != nil || e.ID != "EXC" || e.Kind != model.KindExceptionRecord || e.Affected != (model.ObjectRef{Kind: model.KindTaskInstance, ID: "TI", Namespace: "t"}) ||
+		e.EscalationTarget != (model.ObjectRef{Kind: model.KindPosition, ID: "POS", Namespace: "t"}) || e.EnterpriseID != &enterprise || e.Disposition == "" {
+		t.Fatalf("exception: %+v %v", e, err)
+	}
+	other := resp
+	other.ID = "R2"
+	if _, err := LateException(tc, other, "EXC", due.Add(time.Hour)); !errors.Is(err, ErrDefinition) {
+		t.Errorf("another responsibility: %v", err)
+	}
+	if _, err := LateException(tc, resp, "EXC", due); !errors.Is(err, ErrNotLate) {
+		t.Errorf("not late: %v", err)
+	}
+	tc.Instance.DueAt = nil
+	if _, err := LateException(tc, resp, "EXC", due.Add(time.Hour)); !errors.Is(err, ErrNotLate) {
+		t.Errorf("no due time: %v", err)
 	}
 }
