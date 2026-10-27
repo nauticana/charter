@@ -45,10 +45,14 @@ func TestGenericCRUDScopesModuleTablesToPartner(t *testing.T) {
 	repo := &data.AbstractRepository{TableDefinitions: map[string]*kmodel.TableDefinition{}}
 	res := &kmodel.QueryResult{}
 	for _, table := range s.Tables {
-		repo.TableDefinitions[table.Name] = &kmodel.TableDefinition{TableName: table.Name}
+		def := &kmodel.TableDefinition{TableName: table.Name}
+		for _, column := range table.Columns {
+			def.Columns = append(def.Columns, &kmodel.TableColumn{ColumnName: column.Name})
+		}
+		repo.TableDefinitions[table.Name] = def
 		for _, fk := range table.ForeignKeys {
 			for i, column := range fk.Columns {
-				res.Rows = append(res.Rows, []any{fk.Name, table.Name, int64(i + 1), column, fk.References.Table})
+				res.Rows = append(res.Rows, []any{fk.Name, table.Name, int32(i + 1), column, fk.References.Table, fk.References.Columns[i]})
 			}
 		}
 	}

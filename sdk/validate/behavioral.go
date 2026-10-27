@@ -145,6 +145,7 @@ type InvocationSpec struct {
 	Subjects              []ObjectRefSpec        `yaml:"subjects"`
 	IdempotencyKey        string                 `yaml:"idempotency_key"`
 	InformationUses       []InformationUseSpec   `yaml:"information_uses"`
+	Inputs                any                    `yaml:"inputs"`
 	At                    time.Time              `yaml:"at"`
 }
 
@@ -161,11 +162,13 @@ type TransportSpec struct {
 	Error         string `yaml:"error"`
 }
 
-// ObservationSpec scripts what the effect observer sees: the declared outcome the state corresponds to and a result per
-// postcondition id. Error makes the observation fail; Unevidenced reports results without observed-fact records.
+// ObservationSpec scripts what the observer sees: the declared outcome the state corresponds to, a result per
+// postcondition id, and the facts predicates read. Error makes the observation fail; Unevidenced reports results and
+// facts without observed-fact records.
 type ObservationSpec struct {
 	Outcome        string            `yaml:"outcome"`
 	Postconditions map[string]string `yaml:"postconditions"`
+	Facts          map[string]any    `yaml:"facts"`
 	Error          string            `yaml:"error"`
 	Unevidenced    bool              `yaml:"unevidenced"`
 }
@@ -185,7 +188,10 @@ type Expectation struct {
 	ObserverCalls  *int   `yaml:"observer_calls"`
 	// Postconditions are the recorded evaluation results by postcondition id; Reconciled whether the record names the
 	// unknown attempt it resolves.
+	Preconditions  map[string]string `yaml:"preconditions"`
 	Postconditions map[string]string `yaml:"postconditions"`
+	Effect         string            `yaml:"effect"`
+	UnknownCause   string            `yaml:"unknown_cause"`
 	Reconciled     *bool             `yaml:"reconciled"`
 	VendorCalls    *int              `yaml:"vendor_calls"`
 	Evidence       *bool             `yaml:"evidence"`
@@ -227,6 +233,9 @@ func NewBehavioralRuleSet() BehavioralRuleSet {
 		{AbstractRule{"CHR-RULE-RT-008", []string{"CHR-AGENT-004", "CHR-EVID-006", "CHR-EVID-007"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-RT-009", []string{"CHR-CAP-010", "CHR-EVID-011"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-RT-010", []string{"CHR-CAP-004", "CHR-EVID-004", "CHR-EVID-012", "CHR-SEC-008"}}, SubjectRuntime},
+		{AbstractRule{"CHR-RULE-RT-011", []string{"CHR-CAP-011"}}, SubjectRuntime},
+		{AbstractRule{"CHR-RULE-RT-012", []string{"CHR-CAP-012", "CHR-EVID-010"}}, SubjectRuntime},
+		{AbstractRule{"CHR-RULE-RT-013", []string{"CHR-EVID-016", "CHR-CAP-010"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-SA-001", []string{"CHR-BIND-002", "CHR-BIND-006", "CHR-BIND-009"}}, SubjectAdapter},
 		{AbstractRule{"CHR-RULE-SA-002", []string{"CHR-CAP-005", "CHR-BIND-005", "CHR-SEC-007", "CHR-SEC-008"}}, SubjectAdapter},
 		{AbstractRule{"CHR-RULE-SA-003", []string{"CHR-CAP-001", "CHR-CAP-007"}}, SubjectAdapter},
@@ -408,12 +417,23 @@ func (r BehavioralRule) runStep(ctx context.Context, rt Runtime, external *scrip
 		if e.ObserverCalls != nil && external.observer.calls != *e.ObserverCalls {
 			mismatches = append(mismatches, fmt.Sprintf("observer called %d times, want %d", external.observer.calls, *e.ObserverCalls))
 		}
+		for id, want := range e.Preconditions {
+			got := "not evaluated"
+			if k := slices.IndexFunc(res.Preconditions, func(p model.PreconditionEvaluation) bool { return p.PreconditionID == id }); k >= 0 {
+				got = res.Preconditions[k].Result
+			}
+			expect("precondition "+id, got, want)
+		}
 		for id, want := range e.Postconditions {
 			got := "not evaluated"
 			if k := slices.IndexFunc(res.Postconditions, func(p model.PostconditionEvaluation) bool { return p.PostconditionID == id }); k >= 0 {
 				got = res.Postconditions[k].Result
 			}
 			expect("postcondition "+id, got, want)
+		}
+		if res.Action != nil {
+			expect("effect", res.Action.Effect, e.Effect)
+			expect("unknown cause", res.Action.UnknownCause, e.UnknownCause)
 		}
 		if e.Evidence != nil {
 			recorded := res.Action != nil
@@ -510,7 +530,7 @@ func (s InvocationSpec) invocation(sc *Scenario) capability.Invocation {
 		Runtime:      model.RuntimeContext{RuntimeInstanceID: model.Ref{ID: s.Runtime}, ExecutionContextID: s.ExecutionContextID},
 		CapabilityID: model.Ref{ID: s.Capability}, ContractVersion: s.ContractVersion, RequiredFeatures: s.RequiredFeatures,
 		ResourceScope: s.ResourceScope, OrganizationalContext: s.OrganizationalContext, ApprovedAction: s.ApprovedAction,
-		MaterialInputsDigest: s.MaterialInputsDigest, IdempotencyKey: s.IdempotencyKey, At: s.At,
+		MaterialInputsDigest: s.MaterialInputsDigest, IdempotencyKey: s.IdempotencyKey, Inputs: s.Inputs, At: s.At,
 	}
 	if s.Assignment != "" {
 		inv.AssignmentID = &model.Ref{ID: s.Assignment}
@@ -596,7 +616,10 @@ func (o *scriptedObserver) Observe(_ context.Context, req binding.ObservationReq
 	if o.spec.Error != "" {
 		return binding.Observation{}, errors.New(o.spec.Error)
 	}
-	obs := binding.Observation{Outcome: o.spec.Outcome}
+	obs := binding.Observation{Outcome: o.spec.Outcome, Facts: o.spec.Facts}
+	if !o.spec.Unevidenced && len(o.spec.Facts) > 0 {
+		obs.EvidenceRecordIDs = []model.Ref{{ID: fmt.Sprintf("OBS-FACTS-%d", o.calls)}}
+	}
 	for _, p := range req.Postconditions {
 		result, ok := o.spec.Postconditions[p.ID]
 		if !ok {

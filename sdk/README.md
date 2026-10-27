@@ -6,11 +6,11 @@ The Go reference SDK is platform-neutral. Optional adapters may connect its cont
 
 Packages:
 
-- `model`: schema-aligned structs for every catalogued kind, with no behavior
+- `model`: schema-aligned structs for every catalogued kind, with no behavior beyond JSON codecs
 - `corpus`, `temporal`: document loading and indexing, the `Source` and `AbstractDocumentProvider` foundation every provider embeds; validity evaluation
 - `identity`, `organization`, `agent`, `process`, `architecture`: provider and resolution contracts with corpus-backed `Base*` defaults and reusable views (lifecycle at time, coverage, admission, task context, gap consistency)
-- `authority`, `capability`, `binding`: governed decision and invocation contracts: grant and approval evaluation, the `BaseInvoker` pipeline, binding package materialization, feature support, and fail-closed execution
-- `evidence`, `information`: append-only evidence with supersession and integrity; information-governance decisions
+- `authority`, `capability`, `binding`, `predicate`: governed decision and invocation contracts: grant and approval evaluation, the `BaseInvoker` pipeline, binding package materialization, feature support, fail-closed execution, and CEL evaluation of contract predicates
+- `evidence`, `information`: append-only evidence with supersession, integrity, and fact standing; information shapes and governance decisions
 - `validate`: structural/semantic validation, fixture execution, and conformance claims
 - `adapter/keel`: the optional bridge to keel's principal and tenant context, RBAC permission checks, trust guards, table change log, message publishing, metrics, and request ids, plus a tenant-scoped document store and human account links in its own schema module; only this package imports keel
 

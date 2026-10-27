@@ -28,11 +28,11 @@ func mediationDocument(t *testing.T, c *corpus.Corpus, value any) {
 
 func TestMediationAttributeTrustMatchesProfile(t *testing.T) {
 	profile := model.MediationProfile{
-		Envelope:       model.Envelope{Namespace: "test.example", ID: "P", Kind: model.KindMediationProfile},
+		Namespace: "test.example", ID: "P", Kind: model.KindMediationProfile,
 		AttributeTrust: []model.AttributeTrust{{Attribute: "client", Provenance: model.ProvenanceAsserted, PermittedEffect: model.PermittedTightenOnly}},
 	}
 	decision := model.MediationDecision{
-		Envelope:           model.Envelope{Namespace: "test.example", ID: "D", Kind: model.KindMediationDecision},
+		Namespace: "test.example", ID: "D", Kind: model.KindMediationDecision,
 		MediationProfileID: model.Ref{ID: "P"},
 		DecisionAttributes: []model.DecisionAttribute{{Attribute: "client", Provenance: model.ProvenanceAuthenticated, Effect: model.EffectNone}},
 	}
@@ -54,8 +54,8 @@ func TestMediationAttributeTrustMatchesProfile(t *testing.T) {
 
 func TestMediationDecisionIdentifiesScopedSubject(t *testing.T) {
 	profile := model.MediationProfile{
-		Envelope: model.Envelope{Namespace: "test.example", ID: "P", Kind: model.KindMediationProfile},
-		Stage:    model.StageModelInvocation,
+		Namespace: "test.example", ID: "P", Kind: model.KindMediationProfile,
+		Stage: model.StageModelInvocation,
 		Scope: model.MediationScope{
 			AgentIdentityIDs: []model.Ref{{ID: "A"}},
 			InformationIDs:   []model.Ref{{ID: "I"}},
@@ -63,7 +63,7 @@ func TestMediationDecisionIdentifiesScopedSubject(t *testing.T) {
 		DeclaredOutcomes: []string{model.OutcomeAllow},
 	}
 	decision := model.MediationDecision{
-		Envelope:           model.Envelope{Namespace: "test.example", ID: "D", Kind: model.KindMediationDecision},
+		Namespace: "test.example", ID: "D", Kind: model.KindMediationDecision,
 		MediationProfileID: model.Ref{ID: "P"},
 		Actor:              model.ObjectRef{Kind: model.KindAgentIdentity, ID: "A"},
 		Subject: model.MediationSubject{
@@ -91,7 +91,7 @@ func TestMediationDecisionIdentifiesScopedSubject(t *testing.T) {
 
 func TestRepeatedMediationSubmissionRequiresSupersession(t *testing.T) {
 	first := model.MediationDecision{
-		Envelope:     model.Envelope{Namespace: "test.example", ID: "D1", Kind: model.KindMediationDecision},
+		Namespace: "test.example", ID: "D1", Kind: model.KindMediationDecision,
 		SubmissionID: "S1", Outcome: model.OutcomeAllow, DecidedAt: time.Date(2026, 9, 17, 0, 0, 0, 0, time.UTC),
 	}
 	second := first
@@ -131,7 +131,7 @@ func TestRepeatedMediationSubmissionRequiresSupersession(t *testing.T) {
 
 func TestLayeredMediatorsMayDisagreeOnOneSubmission(t *testing.T) {
 	first := model.MediationDecision{
-		Envelope:           model.Envelope{Namespace: "test.example", ID: "D1", Kind: model.KindMediationDecision},
+		Namespace: "test.example", ID: "D1", Kind: model.KindMediationDecision,
 		MediationProfileID: model.Ref{ID: "ENTERPRISE"},
 		SubmissionID:       "S1",
 		Outcome:            model.OutcomeAllow,
@@ -149,7 +149,7 @@ func TestLayeredMediatorsMayDisagreeOnOneSubmission(t *testing.T) {
 
 func TestMediationSupersessionStaysWithinSubmissionAndProfile(t *testing.T) {
 	first := model.MediationDecision{
-		Envelope:           model.Envelope{Namespace: "test.example", ID: "D1", Kind: model.KindMediationDecision},
+		Namespace: "test.example", ID: "D1", Kind: model.KindMediationDecision,
 		MediationProfileID: model.Ref{ID: "P1"},
 		SubmissionID:       "S1",
 		Outcome:            model.OutcomeAllow,
@@ -232,12 +232,12 @@ func TestMediationDecisionRequiresSubjectContext(t *testing.T) {
 
 func TestShadowProfileDecisionIsNotEnforced(t *testing.T) {
 	profile := model.MediationProfile{
-		Envelope:         model.Envelope{Namespace: "test.example", ID: "P", Kind: model.KindMediationProfile},
+		Namespace: "test.example", ID: "P", Kind: model.KindMediationProfile,
 		DeclaredOutcomes: []string{model.OutcomeAllow, model.OutcomeDeny},
 		EnforcementMode:  model.EnforcementShadow, FailurePolicy: model.FailureObserve,
 	}
 	decision := model.MediationDecision{
-		Envelope:           model.Envelope{Namespace: "test.example", ID: "D", Kind: model.KindMediationDecision},
+		Namespace: "test.example", ID: "D", Kind: model.KindMediationDecision,
 		MediationProfileID: model.Ref{ID: "P"}, Outcome: model.OutcomeDeny,
 		MediatorAvailability: model.MediatorAvailable, Enforced: true,
 	}

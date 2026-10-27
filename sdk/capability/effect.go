@@ -61,7 +61,7 @@ func (r *invocationRun) reconcile(ctx context.Context) Result {
 		return r.deny(ctx, fmt.Sprintf("idempotency key %s is completed without a stored result", key), "CHR-SEC-008")
 	default:
 		r.result.LedgerFence = entry.Fence
-		r.ledger(ctx, true, true, i.Ledger.Release)
+		r.ledger(ctx, true, true, Ledger.Release)
 		r.result.LedgerFence = held
 		return r.deny(ctx, fmt.Sprintf("idempotency key %s has no attempt to reconcile", key), "CHR-EVID-012")
 	}
@@ -75,17 +75,19 @@ func (r *invocationRun) reconcile(ctx context.Context) Result {
 		outcome = ""
 	}
 	judged := contract.RequiredPostconditions(outcome)
-	violated, state := verdict(judged, r.result.Postconditions)
-	// With no outcome named, the effect is absent only when no required postcondition holds.
-	absent := state == model.PostconditionViolated && (outcome != "" || !slices.ContainsFunc(r.result.Postconditions, func(e model.PostconditionEvaluation) bool {
-		return e.Result == model.PostconditionSatisfied && slices.ContainsFunc(judged, func(p model.Postcondition) bool { return p.ID == e.PostconditionID })
-	}))
+	effect, violated := effectOf(judged, r.result.Postconditions)
 	switch {
-	case absent:
+	case effect == model.EffectAbsent || effect == model.EffectPartial && outcome != "":
+		r.setEffect(effect, judged)
 		return r.effectAbsent(ctx, violated)
-	case outcome == "" || len(judged) == 0 || state != model.PostconditionSatisfied:
+	case outcome == "" || len(judged) == 0 || effect != model.EffectComplete:
+		// Without a named outcome, a mix of held and missing effects does not say which outcome was reached.
+		if effect == model.EffectUnobserved {
+			r.setEffect(effect, judged)
+		}
 		return r.finish(ctx, StatusUnknown, "unknown", "observation does not establish a declared outcome; the attempt remains unknown", "CHR-EVID-012")
 	}
+	r.setEffect(effect, judged)
 	r.result.Outcome = outcome
 	return r.complete(ctx, true, StatusExecuted, outcome, fmt.Sprintf("reconciled %s from observed effects without executing again", r.reconciles.ID), "")
 }
@@ -96,20 +98,26 @@ func (r *invocationRun) verifyEffect(ctx context.Context, outcome string) (Resul
 		return Result{}, true
 	}
 	r.observe(ctx, outcome)
-	switch violated, state := verdict(r.contract.RequiredPostconditions(outcome), r.result.Postconditions); state {
-	case model.PostconditionSatisfied:
+	required := r.contract.RequiredPostconditions(outcome)
+	effect, violated := effectOf(required, r.result.Postconditions)
+	r.setEffect(effect, required)
+	switch effect {
+	case model.EffectComplete:
 		return Result{}, true
-	case model.PostconditionViolated:
+	case model.EffectAbsent, model.EffectPartial:
 		return r.effectAbsent(ctx, violated), false
-	default:
-		r.ledger(ctx, true, false, r.invoker.Ledger.MarkUnknown)
-		return r.finish(ctx, StatusUnknown, "unknown", "the mutation was accepted but its effect could not be observed; reconcile before retrying", "CHR-CAP-010"), false
 	}
+	r.ledger(ctx, true, false, Ledger.MarkUnknown)
+	return r.finish(ctx, StatusUnknown, "unknown", "the mutation was accepted but its effect could not be observed; reconcile before retrying", "CHR-CAP-010"), false
 }
 
 // effectAbsent records a violated postcondition as its declared business error, otherwise as failed. The key is
-// released for a retry only when the contract declares one safe; otherwise it replays the failure.
+// released for a retry only when the contract declares one safe; otherwise it replays the failure. A partial effect
+// is failed, never retried, and escalated (CHR-EVID-016).
 func (r *invocationRun) effectAbsent(ctx context.Context, p model.Postcondition) Result {
+	if r.result.Effect == model.EffectPartial {
+		return r.complete(ctx, true, StatusFailed, "failed", fmt.Sprintf("postcondition %s is violated while others hold: the effect is partial", p.ID), "CHR-EVID-016")
+	}
 	reason := fmt.Sprintf("postcondition %s is violated: the effect was not observed", p.ID)
 	if slices.Contains(r.contract.BusinessErrors, p.ViolationBusinessError) {
 		r.result.BusinessError = p.ViolationBusinessError
@@ -117,7 +125,7 @@ func (r *invocationRun) effectAbsent(ctx context.Context, p model.Postcondition)
 	}
 	if r.contract.Idempotency.RetryWhenEffectAbsent {
 		if r.reconciles == nil {
-			r.ledger(ctx, true, true, r.invoker.Ledger.Release)
+			r.ledger(ctx, true, true, Ledger.Release)
 		} else if err := r.invoker.Ledger.Release(ctx, r.inv.IdempotencyKey, r.result.LedgerFence); err != nil {
 			return r.uncommitted(ctx, err)
 		} else {
@@ -141,19 +149,9 @@ func (r *invocationRun) observe(ctx context.Context, outcome string) string {
 	obs, err := r.invoker.Observer.Observe(ctx, binding.ObservationRequest{Capability: inv.CapabilityID, ContractVersion: r.contract.ContractVersion,
 		Inputs: inv.Inputs, IdempotencyKey: inv.IdempotencyKey, SubjectRefs: inv.SubjectRefs, ExternalReference: r.result.ExternalReference,
 		Outcome: outcome, Postconditions: posts})
+	r.causes = map[string]string{}
 	for _, p := range posts {
-		e := model.PostconditionEvaluation{PostconditionID: p.ID, Result: model.PostconditionUnknown, Reason: "not evaluated by the observer"}
-		if k := slices.IndexFunc(obs.Evaluations, func(o model.PostconditionEvaluation) bool { return o.PostconditionID == p.ID }); err == nil && k >= 0 {
-			e = obs.Evaluations[k]
-		}
-		switch {
-		case err != nil:
-			e.Reason = "observation failed: " + err.Error()
-		case e.Result != model.PostconditionSatisfied && e.Result != model.PostconditionViolated:
-			e.Result = model.PostconditionUnknown
-		case len(e.EvidenceRecordIDs) == 0:
-			e.Result, e.Reason = model.PostconditionUnknown, "observer reported "+e.Result+" without observed-fact evidence"
-		}
+		e, cause := r.evaluate(ctx, p, obs, err)
 		if e.Reason == "" {
 			e.Reason = e.Result
 		}
@@ -161,11 +159,8 @@ func (r *invocationRun) observe(ctx context.Context, outcome string) string {
 			e.ObservedAt = inv.At
 		}
 		e.Reason = clip(e.Reason)
-		for _, id := range e.EvidenceRecordIDs {
-			if !slices.Contains(r.evidenceIDs, id) {
-				r.evidenceIDs = append(r.evidenceIDs, id)
-			}
-		}
+		r.cite(e.EvidenceRecordIDs)
+		r.causes[p.ID] = cause
 		r.result.Postconditions = append(r.result.Postconditions, e)
 	}
 	if err != nil {
@@ -174,21 +169,102 @@ func (r *invocationRun) observe(ctx context.Context, outcome string) string {
 	return obs.Outcome
 }
 
-// verdict folds the evaluations of posts: unknown outranks violated, which outranks satisfied; the violated
-// postcondition is returned with that state.
-func verdict(posts []model.Postcondition, evals []model.PostconditionEvaluation) (model.Postcondition, string) {
+// evaluate settles one postcondition and, when unknown, why. A predicate decides it from the observed facts; an
+// observer result that disagrees with the predicate or with itself makes it contradictory.
+func (r *invocationRun) evaluate(ctx context.Context, p model.Postcondition, obs binding.Observation, err error) (model.PostconditionEvaluation, string) {
+	unknown := func(reason, cause string) (model.PostconditionEvaluation, string) {
+		return model.PostconditionEvaluation{PostconditionID: p.ID, Result: model.PostconditionUnknown, Reason: reason}, cause
+	}
+	if err != nil {
+		return unknown("observation failed: "+err.Error(), model.UnknownObservationFailed)
+	}
+	var e *model.PostconditionEvaluation
+	for k, o := range obs.Evaluations {
+		if o.PostconditionID != p.ID {
+			continue
+		}
+		if e != nil && e.Result != o.Result {
+			return unknown("the observer reported conflicting results", model.UnknownContradictory)
+		}
+		e = &obs.Evaluations[k]
+	}
+	if p.Predicate != nil {
+		result, reason := r.decide(ctx, *p.Predicate, obs)
+		if e != nil && decisive(e.Result) && decisive(result) && e.Result != result {
+			return unknown("the observer reported "+e.Result+" but the predicate is "+result, model.UnknownContradictory)
+		}
+		e = &model.PostconditionEvaluation{PostconditionID: p.ID, Result: result, Reason: reason, EvidenceRecordIDs: obs.EvidenceRecordIDs}
+	}
+	switch {
+	case e == nil:
+		return unknown("not evaluated by the observer", model.UnknownUnevidenced)
+	case !decisive(e.Result):
+		out := *e
+		out.Result = model.PostconditionUnknown
+		return out, model.UnknownUnevidenced
+	case len(e.EvidenceRecordIDs) == 0:
+		return unknown("observer reported "+e.Result+" without observed-fact evidence", model.UnknownUnevidenced)
+	}
+	return *e, ""
+}
+
+func decisive(result string) bool {
+	return result == model.PostconditionSatisfied || result == model.PostconditionViolated
+}
+
+// cite adds evidence the action relies on, once each.
+func (r *invocationRun) cite(ids []model.Ref) {
+	for _, id := range ids {
+		if !slices.Contains(r.evidenceIDs, id) {
+			r.evidenceIDs = append(r.evidenceIDs, id)
+		}
+	}
+}
+
+// setEffect records the effect of the judged postconditions and, when unobserved, the most telling cause: a failed
+// observation, then a contradiction, then missing evidence.
+func (r *invocationRun) setEffect(effect string, judged []model.Postcondition) {
+	if len(judged) == 0 {
+		return
+	}
+	r.result.Effect, r.result.UnknownCause = effect, ""
+	if effect != model.EffectUnobserved {
+		return
+	}
+	for _, cause := range []string{model.UnknownObservationFailed, model.UnknownContradictory, model.UnknownUnevidenced} {
+		for _, p := range judged {
+			if r.causes[p.ID] == cause {
+				r.result.UnknownCause = cause
+				return
+			}
+		}
+	}
+	r.result.UnknownCause = model.UnknownUnevidenced
+}
+
+// effectOf classifies the evaluations of the required postconditions posts (CHR-EVID-016) and returns the first
+// violated one.
+func effectOf(posts []model.Postcondition, evals []model.PostconditionEvaluation) (string, model.Postcondition) {
 	var violated *model.Postcondition
+	satisfied := 0
 	for _, p := range posts {
 		k := slices.IndexFunc(evals, func(e model.PostconditionEvaluation) bool { return e.PostconditionID == p.ID })
 		switch {
 		case k < 0 || evals[k].Result == model.PostconditionUnknown:
-			return model.Postcondition{}, model.PostconditionUnknown
-		case evals[k].Result == model.PostconditionViolated && violated == nil:
-			violated = &p
+			return model.EffectUnobserved, model.Postcondition{}
+		case evals[k].Result == model.PostconditionViolated:
+			if violated == nil {
+				violated = &p
+			}
+		default:
+			satisfied++
 		}
 	}
-	if violated != nil {
-		return *violated, model.PostconditionViolated
+	switch {
+	case violated == nil:
+		return model.EffectComplete, model.Postcondition{}
+	case satisfied == 0:
+		return model.EffectAbsent, *violated
 	}
-	return model.Postcondition{}, model.PostconditionSatisfied
+	return model.EffectPartial, *violated
 }

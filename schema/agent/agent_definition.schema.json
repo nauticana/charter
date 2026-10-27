@@ -26,6 +26,7 @@
     "lifecycleState": true,
     "validity": true,
     "extensions": true,
+    "derivedFrom": true,
     "kind": {
       "const": "AgentDefinition"
     },
@@ -143,35 +144,6 @@
       },
       "minItems": 1,
       "description": "Conditions under which the agent must stop or escalate instead of acting on its own judgment."
-    },
-    "derivedFrom": {
-      "description": "The definition, template, or import this version was derived from; fixed once the version is published (CHR-AGENT-010).",
-      "type": "object",
-      "properties": {
-        "source": {
-          "allOf": [
-            {
-              "$ref": "../common.schema.json#/$defs/objectRef"
-            }
-          ]
-        },
-        "version": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 60
-        },
-        "digest": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 500
-        }
-      },
-      "required": [
-        "source",
-        "version",
-        "digest"
-      ],
-      "additionalProperties": false
     },
     "operatingLimits": {
       "type": "array",

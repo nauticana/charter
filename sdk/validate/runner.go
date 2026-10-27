@@ -61,6 +61,11 @@ func (r *Runner) RunFixture(dir string) (FixtureResult, error) {
 	if err != nil {
 		return res, err
 	}
+	if fx.Documents != "" {
+		if c, err = overlay(c, dir); err != nil {
+			return res, err
+		}
+	}
 	if sf := r.Structural.Validate(c); len(sf) > 0 {
 		res.Findings, res.Detail = sf, "documents are not schema-valid"
 		return res, nil
@@ -225,4 +230,20 @@ func (r *Runner) RunManifest() ([]FixtureResult, error) {
 		out = append(out, res)
 	}
 	return out, nil
+}
+
+// overlay replaces documents of base with the documents of the fixture directory that share their key, and adds the rest.
+func overlay(base *corpus.Corpus, dir string) (*corpus.Corpus, error) {
+	local, err := corpus.NewDirLoader(dir).Load()
+	if err != nil || local.Len() == 0 {
+		return base, err
+	}
+	for _, d := range base.Documents() {
+		if _, replaced := local.Get(d.Namespace, d.ID); !replaced {
+			if err := local.Add(d); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return local, nil
 }

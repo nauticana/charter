@@ -98,11 +98,60 @@ type Idempotency struct {
 // Postcondition is an externally observable effect of a capability. Outcomes limits it to those declared outcomes;
 // empty applies it to every outcome (CHR-CAP-009).
 type Postcondition struct {
-	ID                     string   `json:"id"`
-	Statement              string   `json:"statement"`
-	VerificationRequired   bool     `json:"verificationRequired"`
-	Outcomes               []string `json:"outcomes,omitempty"`
-	ViolationBusinessError string   `json:"violationBusinessError,omitempty"`
+	ID                     string     `json:"id"`
+	Statement              string     `json:"statement"`
+	VerificationRequired   bool       `json:"verificationRequired"`
+	Outcomes               []string   `json:"outcomes,omitempty"`
+	ViolationBusinessError string     `json:"violationBusinessError,omitempty"`
+	Predicate              *Predicate `json:"predicate,omitempty"`
+}
+
+// DataSchema types a contract's inputs or outputs by an InformationDefinition shape or an embedded JSON Schema (CHR-CAP-011).
+type DataSchema struct {
+	InformationID *Ref            `json:"informationId,omitempty"`
+	JSONSchema    json.RawMessage `json:"jsonSchema,omitempty"`
+}
+
+const PredicateCEL = "cel"
+
+// Predicate is a machine-checkable condition over the invocation input and observed facts (CHR-CAP-012).
+type Predicate struct {
+	Language   string `json:"language"`
+	Expression string `json:"expression"`
+}
+
+// Precondition is a prose statement, or an identified statement with an optional predicate checked before execution.
+type Precondition struct {
+	ID        string
+	Statement string
+	Predicate *Predicate
+}
+
+type preconditionObject struct {
+	ID        string     `json:"id"`
+	Statement string     `json:"statement"`
+	Predicate *Predicate `json:"predicate,omitempty"`
+}
+
+func (p *Precondition) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err == nil {
+		*p = Precondition{Statement: s}
+		return nil
+	}
+	var o preconditionObject
+	if err := json.Unmarshal(b, &o); err != nil {
+		return err
+	}
+	*p = Precondition(o)
+	return nil
+}
+
+func (p Precondition) MarshalJSON() ([]byte, error) {
+	if p.ID == "" && p.Predicate == nil {
+		return json.Marshal(p.Statement)
+	}
+	return json.Marshal(preconditionObject(p))
 }
 
 // AppliesTo reports whether the postcondition must hold for a declared outcome; an empty outcome matches every postcondition.
@@ -117,7 +166,9 @@ type CapabilityContract struct {
 	ContractVersion      string                `json:"contractVersion"`
 	Inputs               []string              `json:"inputs"`
 	Outputs              []string              `json:"outputs"`
-	Preconditions        []string              `json:"preconditions"`
+	InputSchema          *DataSchema           `json:"inputSchema,omitempty"`
+	OutputSchema         *DataSchema           `json:"outputSchema,omitempty"`
+	Preconditions        []Precondition        `json:"preconditions"`
 	Outcomes             []string              `json:"outcomes"`
 	BusinessErrors       []string              `json:"businessErrors"`
 	RequiredAuthority    string                `json:"requiredAuthority"`

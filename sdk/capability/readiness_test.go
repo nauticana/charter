@@ -2,10 +2,14 @@ package capability_test
 
 import (
 	"context"
+	"slices"
 	"testing"
 
 	"github.com/nauticana/charter/sdk/capability"
+	"github.com/nauticana/charter/sdk/corpus"
+	"github.com/nauticana/charter/sdk/information"
 	"github.com/nauticana/charter/sdk/model"
+	"github.com/nauticana/charter/sdk/predicate"
 )
 
 func requirements(blockers []capability.Blocker) []string {
@@ -68,6 +72,44 @@ func TestReadinessReportsWhatTheInvokerWouldDeny(t *testing.T) {
 		}
 		if got := requirements(h.invoker.Readiness(ctx, "harbor.example", model.Ref{ID: "CAP-MISSING"}, profile)); len(got) != 1 || got[0] != "CHR-CAP-001" {
 			t.Fatalf("unknown contract = %v", got)
+		}
+	})
+
+	t.Run("schemas, shapes, predicates, and partial effects", func(t *testing.T) {
+		h := newHarness(t)
+		shaped := &model.DataSchema{InformationID: &model.Ref{ID: "INFO-ORDER-EXCEPTION"}}
+		h.amend(func(c *model.CapabilityContract) {
+			c.InputSchema = shaped
+			c.Preconditions = append(c.Preconditions, model.Precondition{ID: "PRE", Statement: "s", Predicate: &model.Predicate{Language: model.PredicateCEL, Expression: "true"}})
+			c.Postconditions = append(c.Postconditions, model.Postcondition{ID: "POST-2", Statement: "s", VerificationRequired: true, Outcomes: []string{"reserved"}})
+		})
+		got := requirements(h.invoker.Readiness(ctx, "harbor.example", reservation, profile, "reservation-create"))
+		if want := []string{"CHR-CAP-011", "CHR-CAP-012", "CHR-EVID-016"}; !slices.Equal(got, want) {
+			t.Fatalf("blockers = %v, want %v", got, want)
+		}
+		h.invoker.Definitions, h.invoker.Predicates = information.NewBaseProvider(h.corpus), &predicate.CEL{}
+		h.invoker.Escalation = &capability.BaseEscalator{}
+		if got := requirements(h.invoker.Readiness(ctx, "harbor.example", reservation, profile, "reservation-create")); len(got) != 0 {
+			t.Fatalf("composed = %v", got)
+		}
+		h.amend(func(c *model.CapabilityContract) {
+			c.InputSchema = &model.DataSchema{InformationID: &model.Ref{ID: "INFO-CREDIT-STATUS-SUMMARY"}}
+		})
+		if got := h.invoker.Readiness(ctx, "harbor.example", reservation, profile, "reservation-create"); len(got) != 0 {
+			t.Fatalf("a shape without a data binding on the profile = %+v", got)
+		}
+		d, err := (corpus.Parser{}).Parse([]byte(`{"charterSpecVersion":"1.6.0","namespace":"harbor.example","kind":"DataBinding","id":"DATABIND-CREDIT","bindingVersion":"1",
+			"systemProfileId":"SYSPROFILE-HARBOR-S4-2602","informationDefinitionId":"INFO-CREDIT-STATUS-SUMMARY","featureSupport":[{"feature":"credit-read","support":"supported"}],
+			"fieldMappings":[{"charterPath":"customerId","externalPath":"Customer"},{"charterPath":"rating","externalPath":"Rating"}]}`))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := h.corpus.Add(d); err != nil {
+			t.Fatal(err)
+		}
+		unmapped := h.invoker.Readiness(ctx, "harbor.example", reservation, profile, "reservation-create")
+		if got := requirements(unmapped); !slices.Equal(got, []string{"CHR-INFO-010", "CHR-INFO-010"}) {
+			t.Fatalf("unresolved path and unmapped required property = %+v", unmapped)
 		}
 	})
 

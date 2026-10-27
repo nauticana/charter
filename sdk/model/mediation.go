@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"slices"
+	"time"
+)
 
 const (
 	StageModelInvocation = "model-invocation"
@@ -107,12 +110,7 @@ type MediationProfile struct {
 
 // Declares reports whether the profile may issue outcome (CHR-MED-003).
 func (p MediationProfile) Declares(outcome string) bool {
-	for _, o := range p.DeclaredOutcomes {
-		if o == outcome {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(p.DeclaredOutcomes, outcome)
 }
 
 type MediationRuntimeContext struct {

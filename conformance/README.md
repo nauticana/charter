@@ -1,10 +1,10 @@
 # Charter Conformance
 
-Status: core-model profile active with thirty semantic rules; agent-runtime profile active with ten runtime-behavioral rules and system-adapter profile with four, both run against the reference SDK by default.
+Status: core-model profile active with thirty-three semantic rules; agent-runtime profile active with thirteen runtime-behavioral rules and system-adapter profile with four, both run against the reference SDK by default.
 
 Conformance combines normative requirement traceability, structural schema validation, semantic rules, valid and invalid fixtures, and runtime behavioral checks where static documents are insufficient.
 
-`manifest.yaml` is the inventory of profiles and rules. Each active rule has a definition in `rules/` citing its `CHR-*` requirements, a valid fixture (the Harbor instance documents), and an invalid fixture under `fixtures/invalid/` that is schema-valid and fails that rule.
+`manifest.yaml` is the inventory of profiles and rules. Each active rule has a definition in `rules/` citing its `CHR-*` requirements, a valid fixture (the Harbor instance documents), and an invalid fixture under `fixtures/invalid/` that is schema-valid and fails that rule. A fixture that names its `documents` may hold documents of its own, which replace the named set's documents with the same key, so an invalid fixture can state only what it changes in Harbor.
 
 ## Result classes
 

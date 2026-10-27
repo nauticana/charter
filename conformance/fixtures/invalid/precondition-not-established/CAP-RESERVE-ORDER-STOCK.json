@@ -1,0 +1,103 @@
+{
+  "charterSpecVersion": "1.6.0",
+  "namespace": "harbor.example",
+  "kind": "CapabilityContract",
+  "id": "CAP-RESERVE-ORDER-STOCK",
+  "enterpriseId": "ENT-HARBOR",
+  "name": "Reserve order stock",
+  "purpose": "Create or confirm a bounded stock reservation for an order",
+  "operationClass": "execute",
+  "contractVersion": "1",
+  "inputs": [
+    "order and eligible lines",
+    "quantities",
+    "location scope",
+    "expiry",
+    "authority reference",
+    "approval reference",
+    "idempotency key"
+  ],
+  "outputs": [
+    "reservation reference",
+    "reserved quantities"
+  ],
+  "inputSchema": {
+    "informationId": "INFO-ORDER-EXCEPTION"
+  },
+  "preconditions": [
+    "current order state",
+    "available stock",
+    "active authority within limits",
+    "separation of duties satisfied",
+    "binding supports the operation",
+    {
+      "id": "PRE-ELIGIBLE-STOCK",
+      "statement": "Eligible stock covers the requested quantity",
+      "predicate": {
+        "language": "cel",
+        "expression": "facts.eligibleQuantity >= input.reservedQuantity"
+      }
+    }
+  ],
+  "outcomes": [
+    "reserved",
+    "already-reserved",
+    "rejected",
+    "unknown-pending-reconciliation"
+  ],
+  "businessErrors": [
+    "insufficient eligible stock",
+    "invalid order state",
+    "authority denied",
+    "limit exceeded",
+    "approval invalid",
+    "policy conflict"
+  ],
+  "requiredAuthority": "AuthorityGrant for CAP-RESERVE-ORDER-STOCK covering the order",
+  "constraints": {
+    "approvalRequired": true,
+    "sodConstraintIds": [],
+    "limits": [
+      {
+        "limitKind": "reservation-value",
+        "operator": "lte",
+        "value": 2500000,
+        "currency": "USD",
+        "currencyExponent": 2
+      }
+    ]
+  },
+  "idempotency": {
+    "mutating": true,
+    "retrySemantics": "reconcile by idempotency key before any retry; timeout is an unknown outcome"
+  },
+  "evidenceRequirements": [
+    "invocation and input provenance",
+    "authority and approval decisions",
+    "execution reference",
+    "verified outcome"
+  ],
+  "postconditions": [
+    {
+      "id": "POST-RESERVATION-HELD",
+      "statement": "The system of record holds a reservation for the order's eligible lines with the requested quantities and expiry",
+      "verificationRequired": true,
+      "outcomes": [
+        "reserved",
+        "already-reserved"
+      ]
+    },
+    {
+      "id": "POST-RESERVATION-QUANTITY",
+      "statement": "The reservation holds the requested quantity",
+      "verificationRequired": true,
+      "outcomes": [
+        "reserved"
+      ],
+      "predicate": {
+        "language": "cel",
+        "expression": "facts.reservedQuantity == input.reservedQuantity"
+      }
+    }
+  ]
+}

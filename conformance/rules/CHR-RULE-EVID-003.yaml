@@ -1,0 +1,11 @@
+id: CHR-RULE-EVID-003
+title: Executed actions rely only on current facts
+requirements: [CHR-EVID-014, CHR-EVID-015]
+profile: core-model
+verification: semantic
+applies_to: [ActionRecord, EvidenceRecord, InformationDefinition]
+check: >-
+  No ActionRecord with disposition executed cites, in its evidence or its precondition and postcondition evaluations, an EvidenceRecord fact that at its actionTime was not yet recorded or valid, was superseded, was older than the maxAgeSeconds of its InformationDefinition, was outranked by a higher-ranked source of the same attribute, or disagreed with another fact at the highest present rank.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/stale-fact-relied-on

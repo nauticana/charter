@@ -12,6 +12,7 @@ import (
 	"github.com/nauticana/charter/sdk/identity"
 	"github.com/nauticana/charter/sdk/information"
 	"github.com/nauticana/charter/sdk/organization"
+	"github.com/nauticana/charter/sdk/predicate"
 )
 
 // ReferenceSubject is the SDK's own runtime: the invoker, admission, evaluators, ledger, and evidence sink composed over
@@ -31,6 +32,8 @@ func (ReferenceSubject) Compose(_ context.Context, documents corpus.Source, exte
 		Approvals:   &authority.AbstractApprovalGate{Source: authority.NewDocumentApprovalSource(documents)},
 		Sod:         capability.NewBaseSodChecker(documents, evidence.NewBaseProvider(sink.Store)),
 		Information: &information.BaseEvaluator{Provider: information.NewBaseProvider(documents)},
+		Definitions: information.NewBaseProvider(documents),
+		Predicates:  &predicate.CEL{},
 		Bindings:    binding.NewBaseProvider(documents),
 		Transport:   external.Transport,
 		Observer:    external.Observer,

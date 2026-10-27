@@ -83,7 +83,10 @@ func worse(current, candidate string) string {
 // Conformance records the evaluation of one binding's declared features as a BindingConformance document.
 func Conformance(binding model.Envelope, declared, evaluated []model.FeatureSupport, claim model.ConformanceEnvelope) model.BindingConformance {
 	claim.Result = Compare(declared, evaluated)
-	out := model.BindingConformance{ConformanceEnvelope: claim, BindingID: model.Ref{Namespace: binding.Namespace, ID: binding.ID}, EvaluatedFeatures: evaluated}
-	out.Kind = model.KindBindingConformance
-	return out
+	return model.BindingConformance{
+		Kind:                model.KindBindingConformance,
+		ConformanceEnvelope: claim,
+		BindingID:           model.Ref{Namespace: binding.Namespace, ID: binding.ID},
+		EvaluatedFeatures:   evaluated,
+	}
 }

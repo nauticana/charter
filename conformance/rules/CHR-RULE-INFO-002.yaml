@@ -1,0 +1,11 @@
+id: CHR-RULE-INFO-002
+title: Data bindings cover the shape of their information
+requirements: [CHR-INFO-010]
+profile: core-model
+verification: semantic
+applies_to: [InformationDefinition, DataBinding]
+check: >-
+  Every InformationDefinition shape declares each property and relationship name once and lists only required properties in its identity. Every DataBinding to a shaped InformationDefinition maps each required property, identity included, and each charterPath resolves through the shape: every segment but the last names a relationship whose target has a shape, and the last names a property.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/unmapped-information-shape

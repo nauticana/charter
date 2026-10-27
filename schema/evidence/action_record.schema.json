@@ -4,17 +4,19 @@
   "title": "ActionRecord",
   "description": "Evidence for one governed action, attributable to identity and runtime context.",
   "x-charter-requirements": [
+    "CHR-AGENT-006",
+    "CHR-AGENT-011",
+    "CHR-AUTH-012",
+    "CHR-CAP-010",
+    "CHR-CAP-012",
+    "CHR-ENT-012",
     "CHR-EVID-001",
     "CHR-EVID-002",
     "CHR-EVID-010",
     "CHR-EVID-011",
     "CHR-EVID-012",
-    "CHR-CAP-010",
-    "CHR-AGENT-006",
-    "CHR-INFO-007",
-    "CHR-ENT-012",
-    "CHR-AGENT-011",
-    "CHR-AUTH-012"
+    "CHR-EVID-016",
+    "CHR-INFO-007"
   ],
   "type": "object",
   "allOf": [
@@ -94,6 +96,35 @@
           }
         }
       }
+    },
+    {
+      "if": {
+        "required": [
+          "unknownCause"
+        ]
+      },
+      "then": {
+        "properties": {
+          "effect": {
+            "const": "unobserved"
+          }
+        },
+        "required": [
+          "effect"
+        ]
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "effect"
+        ]
+      },
+      "then": {
+        "required": [
+          "postconditionEvaluations"
+        ]
+      }
     }
   ],
   "properties": {
@@ -105,6 +136,7 @@
     "lifecycleState": true,
     "validity": true,
     "extensions": true,
+    "derivedFrom": true,
     "kind": {
       "const": "ActionRecord"
     },
@@ -365,6 +397,72 @@
         "EvidenceRecord"
       ]
     },
+    "preconditionEvaluations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "State of the contract's predicate preconditions against the observation taken for this attempt (CHR-CAP-012).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "preconditionId": {
+            "$ref": "../common.schema.json#/$defs/identifier"
+          },
+          "result": {
+            "enum": [
+              "satisfied",
+              "violated",
+              "unknown"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "evidenceRecordIds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "../common.schema.json#/$defs/idRef"
+            },
+            "x-charter-ref-kinds": [
+              "EvidenceRecord"
+            ],
+            "description": "Observed-fact records of the facts the predicates were evaluated on."
+          }
+        },
+        "required": [
+          "preconditionId",
+          "result",
+          "reason",
+          "observedAt"
+        ],
+        "additionalProperties": false,
+        "if": {
+          "properties": {
+            "result": {
+              "enum": [
+                "satisfied",
+                "violated"
+              ]
+            }
+          },
+          "required": [
+            "result"
+          ]
+        },
+        "then": {
+          "required": [
+            "evidenceRecordIds"
+          ]
+        }
+      }
+    },
     "postconditionEvaluations": {
       "type": "array",
       "minItems": 1,
@@ -430,6 +528,23 @@
           ]
         }
       }
+    },
+    "effect": {
+      "description": "How much of the effect the required postconditions observed (CHR-EVID-016).",
+      "enum": [
+        "complete",
+        "partial",
+        "absent",
+        "unobserved"
+      ]
+    },
+    "unknownCause": {
+      "description": "Why an unobserved effect is unknown.",
+      "enum": [
+        "observation-failed",
+        "unevidenced",
+        "contradictory"
+      ]
     },
     "reconcilesActionId": {
       "$ref": "../common.schema.json#/$defs/idRef",

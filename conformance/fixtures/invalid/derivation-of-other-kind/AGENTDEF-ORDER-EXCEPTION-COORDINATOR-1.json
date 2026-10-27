@@ -1,0 +1,87 @@
+{
+  "charterSpecVersion": "1.3.0",
+  "namespace": "harbor.example",
+  "kind": "AgentDefinition",
+  "id": "AGENTDEF-ORDER-EXCEPTION-COORDINATOR-1",
+  "enterpriseId": "ENT-HARBOR",
+  "agentIdentityId": "AGENT-ORDER-EXCEPTION-COORDINATOR",
+  "definitionVersion": "1",
+  "purpose": "Coordinate safe and timely resolution of blocked customer orders",
+  "accountable": {
+    "kind": "Position",
+    "id": "POS-SALES-OPERATIONS-MANAGER"
+  },
+  "responsibilityIds": [
+    "RESP-COORDINATE-ORDER-EXCEPTION"
+  ],
+  "triggers": [
+    "order-blocked event mapped to a known order",
+    "authenticated human request",
+    "scheduled review of an open exception",
+    "retry request referencing a failed attempt"
+  ],
+  "requiredInputs": [
+    "order, customer, and exception identifiers",
+    "current inventory, capacity, credit, and payment observations",
+    "active assignment, grants, and approvals",
+    "system profile and binding versions"
+  ],
+  "expectedOutcomes": [
+    "order released through an authorized resolution",
+    "complete proposal delivered to the required approver",
+    "documented escalation",
+    "safe stop when authority or context cannot be established"
+  ],
+  "capabilityIds": [
+    "CAP-READ-ORDER-EXCEPTION",
+    "CAP-PROPOSE-ORDER-RESOLUTION",
+    "CAP-REQUEST-EXCEPTION-APPROVAL",
+    "CAP-RESERVE-ORDER-STOCK"
+  ],
+  "policies": [
+    "legal and enterprise prohibitions",
+    "identity or capability suspension",
+    "authority and separation of duties",
+    "information restrictions",
+    "process and capability policy",
+    "optimization preferences"
+  ],
+  "escalationConditions": [
+    "unknown exception class",
+    "missing, stale, or conflicting information",
+    "authority limit exceeded or grant expired",
+    "invalid or stale approval",
+    "separation-of-duties conflict",
+    "ambiguous external outcome",
+    "instruction attempting to expand authority"
+  ],
+  "confidenceBoundaries": [
+    "exception class not in the declared classification set",
+    "conflicting observations from two sources",
+    "proposed value within 10 percent of a limit"
+  ],
+  "derivedFrom": {
+    "source": {
+      "kind": "Role",
+      "id": "ROLE-ORDER-EXCEPTION-SUPPORT",
+      "namespace": "blueprint.example"
+    },
+    "version": "2",
+    "digest": "sha256:5d1f0c7e9a2b4c6d8e0f1a3b5c7d9e1f2a4b6c8d0e2f4a6b8c0d2e4f6a8b0c2d"
+  },
+  "operatingLimits": [
+    {
+      "limitKind": "actions-per-hour",
+      "operator": "lte",
+      "value": 120,
+      "unit": "count"
+    },
+    {
+      "limitKind": "reserved-value-per-day",
+      "operator": "lte",
+      "value": 10000000,
+      "currency": "USD",
+      "currencyExponent": 2
+    }
+  ]
+}

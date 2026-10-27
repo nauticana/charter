@@ -25,6 +25,7 @@
     "lifecycleState": true,
     "validity": true,
     "extensions": true,
+    "derivedFrom": true,
     "sourceEvidence": {
       "type": "array",
       "minItems": 1,

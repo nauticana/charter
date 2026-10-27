@@ -3,6 +3,7 @@ package keel
 import (
 	"context"
 	"errors"
+	"maps"
 	"slices"
 	"testing"
 
@@ -59,9 +60,7 @@ func edited(t *testing.T, store *DocumentStore, id, property string, value any) 
 		t.Fatal(err)
 	}
 	v := map[string]any{}
-	for k, x := range d.Value.(map[string]any) {
-		v[k] = x
-	}
+	maps.Copy(v, d.Value.(map[string]any))
 	v[property] = value
 	return &model.Document{Envelope: d.Envelope, Value: v}
 }
@@ -198,8 +197,8 @@ func TestDocumentStoreWriteReadsOnlyReferencedDocuments(t *testing.T) {
 	if err := store.Save(ctx, partner, position); err != nil {
 		t.Fatal(err)
 	}
-	if got := db.calls[qDocumentCurrent]; got != 3 {
-		t.Fatalf("a one-document write fetched %d documents, want its 3 references of %d stored", got, len(db.state.kinds))
+	if got := db.calls[qDocumentCurrent]; got != 4 {
+		t.Fatalf("a one-document write fetched %d documents, want itself and its 3 references of %d stored", got, len(db.state.kinds))
 	}
 	if db.calls[qDocumentsOfKind] != 0 {
 		t.Fatal("a write listed stored documents")

@@ -126,7 +126,8 @@ func walkRefs(meta *SchemaMeta, v any, onID func(key string, ref model.Ref), onO
 	switch n := v.(type) {
 	case map[string]any:
 		for k, x := range n {
-			if k == "extensions" {
+			// A derivation source lives in another document set and is never resolved here (CHR-CONF-015).
+			if k == "extensions" || k == "derivedFrom" {
 				continue
 			}
 			items := []any{x}

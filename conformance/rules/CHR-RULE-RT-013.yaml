@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-013
+title: A partial effect is failed, escalated, and never retried
+requirements: [CHR-EVID-016, CHR-CAP-010]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  When some required postconditions of the reported outcome hold and others are violated, the runtime records disposition failed with effect partial under CHR-EVID-016, raises an exception and escalation, and replays the failure for its idempotency key without calling the transport again, whether or not the contract declares a retry after an absent effect safe.
+fixtures:
+  valid: fixtures/valid/typed-conditions-met
+  invalid: fixtures/invalid/partial-effect-retried

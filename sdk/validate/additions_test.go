@@ -61,7 +61,8 @@ func TestAdditionsFetchOnlyWhatTheWriteReferences(t *testing.T) {
 	if f := check(t, a, source, position(t, "POS-NEW", "OU-CREDIT-CONTROL", "1.2.0")); len(f) != 0 {
 		t.Fatalf("valid addition: %+v", f)
 	}
-	want := []string{"ENT-HARBOR", "OU-CREDIT-CONTROL", "PT-FUNCTIONAL-MANAGER"}
+	// The written key is read for the stored derivation it may replace.
+	want := []string{"ENT-HARBOR", "OU-CREDIT-CONTROL", "PT-FUNCTIONAL-MANAGER", "POS-NEW"}
 	if len(source.fetched) != len(want) {
 		t.Fatalf("fetched %v, want only %v of %d documents", source.fetched, want, base.Len())
 	}
@@ -98,7 +99,7 @@ func TestAdditionsJudgeOnlyTheDocumentsWritten(t *testing.T) {
 	if f := check(t, a, base, position(t, "POS-NEW", "ENT-HARBOR", "1.2.0")); len(f) != 1 || f[0].RuleID != "CHR-RULE-CONF-002" {
 		t.Fatalf("wrong reference kind: %+v", f)
 	}
-	if f := check(t, a, base, position(t, "POS-NEW", "OU-CREDIT-CONTROL", "1.6.0")); len(f) != 1 || f[0].RuleID != "spec-version" {
+	if f := check(t, a, base, position(t, "POS-NEW", "OU-CREDIT-CONTROL", "1.7.0")); len(f) != 1 || f[0].RuleID != "spec-version" {
 		t.Fatalf("later specification version: %+v", f)
 	}
 	replaced := position(t, "POS-CREDIT-MANAGER", "OU-NONE", "1.2.0")
@@ -116,8 +117,45 @@ func TestAdditionsJudgeOnlyTheDocumentsWritten(t *testing.T) {
 	if len(twice) != 1 || !strings.Contains(twice[0].Message, "twice") {
 		t.Fatalf("duplicate key in one write: %+v", twice)
 	}
-	invalid := check(t, a, base, &model.Document{Envelope: model.Envelope{CharterSpecVersion: "1.2.0", Namespace: "harbor.example", ID: "X", Kind: "Unknown"}, Value: map[string]any{}})
+	invalid := check(t, a, base, &model.Document{CharterSpecVersion: "1.2.0", Namespace: "harbor.example", ID: "X", Kind: "Unknown", Value: map[string]any{}})
 	if len(invalid) == 0 || invalid[0].Class != ClassStructural {
 		t.Fatalf("unknown kind: %+v", invalid)
+	}
+}
+
+func TestAdditionsKeepThePublishedDerivation(t *testing.T) {
+	base, err := corpus.NewDirLoader(harbor).Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	a, err := NewAdditions()
+	if err != nil {
+		t.Fatal(err)
+	}
+	stored, _ := base.Get("harbor.example", "AGENTDEF-ORDER-EXCEPTION-COORDINATOR-1")
+	rewrite := func(state, digest string) *model.Document {
+		raw := strings.Replace(string(stored.Raw), stored.DerivedFrom.Digest, digest, 1)
+		if state != "" {
+			raw = strings.Replace(raw, `"kind": "AgentDefinition",`, `"kind": "AgentDefinition", "lifecycleState": "`+state+`",`, 1)
+		}
+		d, err := (corpus.Parser{}).Parse([]byte(raw))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return d
+	}
+	other := "sha256:" + strings.Repeat("ab", 32)
+	if f := check(t, a, base, rewrite("", stored.DerivedFrom.Digest)); len(f) != 0 {
+		t.Fatalf("unchanged derivation: %+v", f)
+	}
+	if f := check(t, a, base, rewrite("", other)); len(f) != 1 || f[0].RuleID != "CHR-RULE-CONF-003" {
+		t.Fatalf("changed derivation of a published document: %+v", f)
+	}
+	draft := corpus.New()
+	if err := draft.Add(rewrite("proposed", stored.DerivedFrom.Digest)); err != nil {
+		t.Fatal(err)
+	}
+	if f := check(t, a, corpus.Union{draft, base}, rewrite("proposed", other)); len(f) != 0 {
+		t.Fatalf("a draft may still change its derivation: %+v", f)
 	}
 }

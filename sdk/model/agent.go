@@ -18,26 +18,18 @@ type AgentDefinition struct {
 	Envelope
 	AgentIdentityID Ref `json:"agentIdentityId"`
 	// DefinitionVersion is the version an AgentRuntime must name to operate this definition.
-	DefinitionVersion    string      `json:"definitionVersion"`
-	Purpose              string      `json:"purpose"`
-	Accountable          ObjectRef   `json:"accountable"`
-	ResponsibilityIDs    []Ref       `json:"responsibilityIds"`
-	Triggers             []string    `json:"triggers"`
-	RequiredInputs       []string    `json:"requiredInputs"`
-	ExpectedOutcomes     []string    `json:"expectedOutcomes"`
-	CapabilityIDs        []Ref       `json:"capabilityIds"`
-	Policies             []string    `json:"policies"`
-	EscalationConditions []string    `json:"escalationConditions"`
-	ConfidenceBoundaries []string    `json:"confidenceBoundaries"`
-	DerivedFrom          *Provenance `json:"derivedFrom,omitempty"`
-	OperatingLimits      []Limit     `json:"operatingLimits,omitempty"`
-}
-
-// Provenance names the definition, template, or import a definition version was derived from (CHR-AGENT-010).
-type Provenance struct {
-	Source  ObjectRef `json:"source"`
-	Version string    `json:"version"`
-	Digest  string    `json:"digest"`
+	DefinitionVersion    string    `json:"definitionVersion"`
+	Purpose              string    `json:"purpose"`
+	Accountable          ObjectRef `json:"accountable"`
+	ResponsibilityIDs    []Ref     `json:"responsibilityIds"`
+	Triggers             []string  `json:"triggers"`
+	RequiredInputs       []string  `json:"requiredInputs"`
+	ExpectedOutcomes     []string  `json:"expectedOutcomes"`
+	CapabilityIDs        []Ref     `json:"capabilityIds"`
+	Policies             []string  `json:"policies"`
+	EscalationConditions []string  `json:"escalationConditions"`
+	ConfidenceBoundaries []string  `json:"confidenceBoundaries"`
+	OperatingLimits      []Limit   `json:"operatingLimits,omitempty"`
 }
 
 type AgentRuntime struct {

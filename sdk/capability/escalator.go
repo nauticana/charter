@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/nauticana/charter/sdk/agent"
 	"github.com/nauticana/charter/sdk/model"
@@ -39,12 +40,7 @@ func (e *BaseEscalator) Applies(status Status) bool {
 	if len(statuses) == 0 {
 		statuses = []Status{StatusUnknown, StatusFailed}
 	}
-	for _, s := range statuses {
-		if s == status {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(statuses, status)
 }
 
 func (e *BaseEscalator) Escalate(ctx context.Context, inv Invocation, res Result) (model.ExceptionRecord, model.Escalation, error) {

@@ -203,6 +203,9 @@
             ],
             "additionalProperties": false
           }
+        },
+        "inputs": {
+          "description": "The invocation inputs, validated against the contract's input schema."
         }
       },
       "additionalProperties": false
@@ -322,6 +325,32 @@
         "reconciled": {
           "type": "boolean",
           "description": "the appended record names the unknown attempt it resolves"
+        },
+        "preconditions": {
+          "type": "object",
+          "additionalProperties": {
+            "enum": [
+              "satisfied",
+              "violated",
+              "unknown",
+              "not evaluated"
+            ]
+          }
+        },
+        "effect": {
+          "enum": [
+            "complete",
+            "partial",
+            "absent",
+            "unobserved"
+          ]
+        },
+        "unknown_cause": {
+          "enum": [
+            "observation-failed",
+            "unevidenced",
+            "contradictory"
+          ]
         }
       },
       "additionalProperties": false
@@ -473,7 +502,7 @@
       "additionalProperties": false
     },
     "observation": {
-      "description": "What the scripted effect observer sees: the declared outcome the external state corresponds to and a result per postcondition id; unscripted postconditions are unknown.",
+      "description": "What the scripted observer sees: the declared outcome the external state corresponds to, a result per postcondition id, and the named facts predicates read; unscripted postconditions are unknown.",
       "type": "object",
       "properties": {
         "outcome": {
@@ -497,7 +526,11 @@
         },
         "unevidenced": {
           "type": "boolean",
-          "description": "results are reported without observed-fact records"
+          "description": "results and facts are reported without observed-fact records"
+        },
+        "facts": {
+          "type": "object",
+          "description": "named observed facts, reported before execution for preconditions and after it for postconditions"
         }
       },
       "additionalProperties": false
@@ -523,6 +556,7 @@
       "maxLength": 500
     },
     "documents": {
+      "description": "Directory of the fixture's documents, relative to the fixture; documents in the fixture directory itself then replace those with the same key.",
       "type": "string",
       "minLength": 1
     },

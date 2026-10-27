@@ -4,8 +4,10 @@
   "title": "InformationDefinition",
   "description": "The business meaning, ownership, classification, and policy context of governed information.",
   "x-charter-requirements": [
+    "CHR-EVID-015",
     "CHR-INFO-001",
-    "CHR-INFO-002"
+    "CHR-INFO-002",
+    "CHR-INFO-010"
   ],
   "type": "object",
   "allOf": [
@@ -22,6 +24,7 @@
     "lifecycleState": true,
     "validity": true,
     "extensions": true,
+    "derivedFrom": true,
     "kind": {
       "const": "InformationDefinition"
     },
@@ -54,6 +57,151 @@
       "x-charter-ref-kinds": [
         "InformationGovernancePolicy"
       ]
+    },
+    "shape": {
+      "description": "Typed properties, identity, and relationships of the information (CHR-INFO-010).",
+      "type": "object",
+      "properties": {
+        "properties": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+                "maxLength": 120
+              },
+              "type": {
+                "description": "JSON Schema type of the property.",
+                "enum": [
+                  "string",
+                  "number",
+                  "integer",
+                  "boolean",
+                  "object",
+                  "array"
+                ]
+              },
+              "required": {
+                "type": "boolean"
+              },
+              "classification": {
+                "description": "Classification of this property where it differs from the definition's.",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "identity": {
+          "description": "Required properties that together identify an instance.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+            "maxLength": 120
+          }
+        },
+        "relationships": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+                "maxLength": 120
+              },
+              "targetInformationId": {
+                "$ref": "../common.schema.json#/$defs/idRef",
+                "x-charter-ref-kinds": [
+                  "InformationDefinition"
+                ]
+              },
+              "cardinality": {
+                "enum": [
+                  "one",
+                  "many"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "targetInformationId",
+              "cardinality"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "properties",
+        "identity"
+      ],
+      "additionalProperties": false
+    },
+    "factAuthority": {
+      "description": "Sources of facts about this information, most authoritative first, and how long a fact stays current (CHR-EVID-014, CHR-EVID-015).",
+      "type": "object",
+      "properties": {
+        "ranks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "systemProfileId": {
+                "$ref": "../common.schema.json#/$defs/idRef",
+                "x-charter-ref-kinds": [
+                  "SystemProfile"
+                ]
+              },
+              "category": {
+                "enum": [
+                  "observed-fact",
+                  "agent-assertion",
+                  "human-decision",
+                  "external-response",
+                  "derived-conclusion"
+                ]
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "systemProfileId"
+                ]
+              },
+              {
+                "required": [
+                  "category"
+                ]
+              }
+            ],
+            "additionalProperties": false
+          }
+        },
+        "maxAgeSeconds": {
+          "description": "A fact whose validAt is more than this many seconds before the decision is stale.",
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "ranks"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

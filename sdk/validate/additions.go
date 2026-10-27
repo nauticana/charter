@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/model"
@@ -70,6 +71,11 @@ func (a *Additions) Validate(ctx context.Context, source corpus.Source, docs ...
 			return nil, err
 		}
 	}
+	fixed, err := a.fixedDerivations(ctx, source, written)
+	if err != nil {
+		return nil, err
+	}
+	out = append(out, fixed...)
 	scope, err := a.withTargets(ctx, source, written)
 	if err != nil {
 		return nil, err
@@ -79,6 +85,28 @@ func (a *Additions) Validate(ctx context.Context, source corpus.Source, docs ...
 			if added[corpus.DocumentKey{Namespace: f.Namespace, ID: f.DocumentID}] {
 				out = append(out, f)
 			}
+		}
+	}
+	return out, nil
+}
+
+// fixedDerivations refuses a write that changes the recorded derivation of a published stored document (CHR-CONF-015).
+func (a *Additions) fixedDerivations(ctx context.Context, source corpus.Source, written *corpus.Corpus) ([]Finding, error) {
+	if source == nil {
+		return nil, nil
+	}
+	var out []Finding
+	for _, d := range written.Documents() {
+		stored, err := source.Fetch(ctx, corpus.DocumentKey{Namespace: d.Namespace, ID: d.ID})
+		if errors.Is(err, corpus.ErrNotFound) {
+			continue
+		}
+		if err != nil {
+			return nil, fmt.Errorf("stored %s:%s: %w", d.Namespace, d.ID, err)
+		}
+		if published(stored) && !reflect.DeepEqual(stored.DerivedFrom, d.DerivedFrom) {
+			out = append(out, Finding{RuleID: "CHR-RULE-CONF-003", Requirements: []string{"CHR-CONF-015", "CHR-AGENT-010"}, Class: ClassSemantic,
+				Namespace: d.Namespace, DocumentID: d.ID, Message: "the derivation of a published document cannot change"})
 		}
 	}
 	return out, nil

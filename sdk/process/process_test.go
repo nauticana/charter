@@ -91,9 +91,9 @@ func TestParticipationLevels(t *testing.T) {
 }
 
 func TestUnbaselined(t *testing.T) {
-	task := model.Task{Envelope: model.Envelope{Namespace: "t", ID: "T"}, ProcessID: model.Ref{ID: "P"}}
+	task := model.Task{Namespace: "t", ID: "T", ProcessID: model.Ref{ID: "P"}}
 	measure := func(kind model.Kind, id string, to model.Date, edit func(*model.OutcomeMeasure)) model.OutcomeMeasure {
-		m := model.OutcomeMeasure{Envelope: model.Envelope{Namespace: "t", ID: "M"}, Subject: model.ObjectRef{Kind: kind, ID: id}}
+		m := model.OutcomeMeasure{Namespace: "t", ID: "M", Subject: model.ObjectRef{Kind: kind, ID: id}}
 		if to != "" {
 			m.Baseline = &model.Baseline{Window: model.Validity{From: "2026-01-01", To: to}}
 		}
@@ -121,7 +121,7 @@ func TestUnbaselined(t *testing.T) {
 		"in effect on the start":           {measure(model.KindTask, "T", "", func(m *model.OutcomeMeasure) { m.Validity = &model.Validity{From: "2026-04-01"} }), "2026-04-01", true},
 		"start unparsable, declared later": {measure(model.KindTask, "T", "2026-03-31", func(m *model.OutcomeMeasure) { m.Validity = &model.Validity{From: "2026-05-01"} }), "April", true},
 	} {
-		asg := model.Assignment{Envelope: model.Envelope{Validity: &model.Validity{From: tc.start}}}
+		asg := model.Assignment{Validity: &model.Validity{From: tc.start}}
 		if got := len(Unbaselined([]model.OutcomeMeasure{tc.m}, task, asg)) == 1; got != tc.want {
 			t.Errorf("%s: unbaselined %t, want %t", name, got, tc.want)
 		}
@@ -140,7 +140,7 @@ func TestUnbaselined(t *testing.T) {
 
 func TestAssignAndLate(t *testing.T) {
 	at := func(h int) *time.Time { v := time.Date(2026, 6, 1, h, 0, 0, 0, time.UTC); return &v }
-	open := model.TaskInstance{Envelope: model.Envelope{Namespace: "t", ID: "TI"}, State: model.TaskPending, CreatedAt: *at(8)}
+	open := model.TaskInstance{Namespace: "t", ID: "TI", State: model.TaskPending, CreatedAt: *at(8)}
 	performer := model.ObjectRef{Kind: model.KindHumanIdentity, ID: "H"}
 	got, err := Assign(open, performer, model.Ref{ID: "A"}, at(10))
 	if err != nil || got.Performer != performer || got.AssignmentID.ID != "A" || !got.DueAt.Equal(*at(10)) || open.DueAt != nil {
@@ -178,7 +178,7 @@ func TestLateException(t *testing.T) {
 		Instance: model.TaskInstance{Envelope: model.Envelope{CharterSpecVersion: "1.5.0", Namespace: "t", ID: "TI", EnterpriseID: &enterprise}, DueAt: &due},
 		Task:     model.Task{Envelope: model.Envelope{Namespace: "t", ID: "T"}, AccountableResponsibilityID: model.Ref{ID: "R"}},
 	}
-	resp := model.Responsibility{Envelope: model.Envelope{Namespace: "t", ID: "R"}, Accountable: model.ObjectRef{Kind: model.KindPosition, ID: "POS"}}
+	resp := model.Responsibility{Namespace: "t", ID: "R", Accountable: model.ObjectRef{Kind: model.KindPosition, ID: "POS"}}
 	e, err := LateException(tc, resp, "EXC", due.Add(time.Hour))
 	if err != nil || e.ID != "EXC" || e.Kind != model.KindExceptionRecord || e.Affected != (model.ObjectRef{Kind: model.KindTaskInstance, ID: "TI", Namespace: "t"}) ||
 		e.EscalationTarget != (model.ObjectRef{Kind: model.KindPosition, ID: "POS", Namespace: "t"}) || e.EnterpriseID != &enterprise || e.Disposition == "" {

@@ -146,8 +146,8 @@ func (q *memoryQueries) Query(_ context.Context, name string, args ...any) (*kmo
 	case qRevisions:
 		out := rows()
 		revs := s.revisions[key(0)]
-		for i := len(revs) - 1; i >= 0; i-- {
-			out.Rows = append(out.Rows, []any{revs[i].revision, revs[i].version, revs[i].digest, revs[i].content})
+		for _, rev := range slices.Backward(revs) {
+			out.Rows = append(out.Rows, []any{rev.revision, rev.version, rev.digest, rev.content})
 		}
 		return out, nil
 	case qRevisionInsert:

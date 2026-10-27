@@ -2,7 +2,7 @@
 
 Status: Illustrative only; not a conformance claim
 
-The core-model profile is active with thirty semantic rules, the agent-runtime profile with ten runtime-behavioral rules, and the system-adapter profile with four; the Harbor instance documents are the valid fixture for the former and the document set most behavioral scenarios drive. This page shows what a result for the Harbor example would contain without making a conformance claim.
+The core-model profile is active with thirty-three semantic rules, the agent-runtime profile with thirteen runtime-behavioral rules, and the system-adapter profile with four; the Harbor instance documents are the valid fixture for the former and the document set most behavioral scenarios drive. This page shows what a result for the Harbor example would contain without making a conformance claim.
 
 ## Illustrative claim envelope
 

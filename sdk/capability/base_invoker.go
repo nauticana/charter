@@ -12,11 +12,13 @@ import (
 	"github.com/nauticana/charter/sdk/identity"
 	"github.com/nauticana/charter/sdk/information"
 	"github.com/nauticana/charter/sdk/model"
+	"github.com/nauticana/charter/sdk/predicate"
 )
 
-// BaseInvoker runs the governed invocation pipeline around an abstract binding.Executor: contract and version,
-// actor lifecycle, authority, approval, separation of duties, information governance, binding feature support,
-// idempotency, execution, outcome and effect verification, evidence, and escalation of stopped actions. Every gate fails closed
+// BaseInvoker runs the governed invocation pipeline around an abstract binding.Executor: contract and version, input
+// schema, actor lifecycle, authority, approval, separation of duties, information governance, binding feature support,
+// idempotency, preconditions, execution, outputs, outcome and effect verification, evidence, and escalation of stopped
+// actions. Every gate fails closed
 // and every governed decision is recorded (CHR-AUTH-010, CHR-AGENT-008).
 type BaseInvoker struct {
 	Catalog     Catalog
@@ -27,6 +29,9 @@ type BaseInvoker struct {
 	Delegations authority.DelegationPolicy
 	Sod         SodChecker
 	Information information.Evaluator
+	// Definitions resolves the information shapes a contract's input or output schema names.
+	Definitions information.Provider
+	Predicates  predicate.Evaluator
 	Bindings    binding.Provider
 	Transport   binding.Executor
 	// Observer reads external effects; a mutating contract with required postconditions is denied without one.
@@ -76,6 +81,8 @@ type invocationRun struct {
 	result      Result
 	evidenceIDs []model.Ref
 	reconciles  *model.Ref
+	// causes records why each postcondition observed unknown is unknown.
+	causes map[string]string
 }
 
 // gate runs every decision that precedes the external system; false stops the run with the recorded denial.
@@ -87,6 +94,9 @@ func (r *invocationRun) gate(ctx context.Context) (Result, bool) {
 	}
 	if err := versions.Compatible(inv.ContractVersion, contract.ContractVersion); err != nil {
 		return r.deny(ctx, err.Error(), "CHR-CAP-008"), false
+	}
+	if err := i.checkData(ctx, inv.Namespace, contract.InputSchema, inv.Inputs); err != nil {
+		return r.deny(ctx, "inputs do not match the input schema: "+err.Error(), "CHR-CAP-011"), false
 	}
 	if _, err := i.Identities.ActiveAt(ctx, inv.Namespace, inv.Actor, inv.At); err != nil {
 		return r.deny(ctx, "actor: "+err.Error(), "CHR-ID-005"), false
@@ -163,6 +173,12 @@ func (r *invocationRun) gate(ctx context.Context) (Result, bool) {
 	if mutating && len(contract.RequiredPostconditions("")) > 0 && i.Observer == nil {
 		return r.deny(ctx, "capability declares required postconditions but no effect observer is composed", "CHR-CAP-010"), false
 	}
+	switch declared, pre := predicates(contract); {
+	case declared && i.Predicates == nil:
+		return r.deny(ctx, "capability declares predicates but no predicate evaluator is composed", "CHR-CAP-012"), false
+	case pre && i.Observer == nil:
+		return r.deny(ctx, "capability declares predicate preconditions but no observer is composed", "CHR-CAP-012"), false
+	}
 	return Result{}, true
 }
 
@@ -200,29 +216,36 @@ func (r *invocationRun) execute(ctx context.Context) Result {
 			return r.finish(ctx, StatusUnknown, "unknown", fmt.Sprintf("idempotency key %s has invalid state %q; reconcile before retrying", inv.IdempotencyKey, entry.State), "CHR-SEC-008")
 		}
 	}
+	if stopped, ok := r.checkPreconditions(ctx); !ok {
+		return stopped
+	}
 	resp, err := i.Transport.Execute(ctx, binding.Request{Capability: inv.CapabilityID, ContractVersion: contract.ContractVersion, Inputs: inv.Inputs,
 		IdempotencyKey: inv.IdempotencyKey, RequiredFeatures: inv.RequiredFeatures, SubjectRefs: inv.SubjectRefs})
 	if err != nil {
 		r.result.Err = err
 		if errors.Is(err, binding.ErrNotExecuted) {
-			r.ledger(ctx, mutating, true, i.Ledger.Release)
+			r.ledger(ctx, mutating, true, Ledger.Release)
 			return r.finish(ctx, StatusFailed, "failed", err.Error(), "CHR-SEC-007")
 		}
-		r.ledger(ctx, mutating, false, i.Ledger.MarkUnknown)
+		r.ledger(ctx, mutating, false, Ledger.MarkUnknown)
 		return r.finish(ctx, StatusUnknown, "unknown", err.Error(), "CHR-SEC-008")
 	}
 	r.result.Outputs, r.result.ExternalReference = resp.Outputs, resp.ExternalReference
 	r.evidenceIDs = resp.EvidenceRecordIDs
 	if resp.BusinessError != "" {
 		if !slices.Contains(contract.BusinessErrors, resp.BusinessError) {
-			r.ledger(ctx, mutating, false, i.Ledger.MarkUnknown)
+			r.ledger(ctx, mutating, false, Ledger.MarkUnknown)
 			return r.finish(ctx, StatusUnknown, "unknown", "undeclared business error: "+resp.BusinessError, "CHR-CAP-005")
 		}
 		r.result.BusinessError = resp.BusinessError
 		return r.complete(ctx, mutating, StatusBusinessError, resp.BusinessError, "business error: "+resp.BusinessError, "")
 	}
+	if err := i.checkData(ctx, inv.Namespace, contract.OutputSchema, resp.Outputs); err != nil {
+		r.ledger(ctx, mutating, false, Ledger.MarkUnknown)
+		return r.finish(ctx, StatusUnknown, "unknown", "outputs do not match the output schema: "+err.Error(), "CHR-CAP-011")
+	}
 	if !slices.Contains(contract.Outcomes, resp.Outcome) {
-		r.ledger(ctx, mutating, false, i.Ledger.MarkUnknown)
+		r.ledger(ctx, mutating, false, Ledger.MarkUnknown)
 		return r.finish(ctx, StatusUnknown, "unknown", "undeclared outcome: "+resp.Outcome, "CHR-CAP-001")
 	}
 	if mutating {
@@ -280,9 +303,10 @@ func (r *invocationRun) uncommitted(ctx context.Context, err error) Result {
 	return r.finish(ctx, StatusUnknown, "unknown", "the reconciliation could not commit its ledger result before publication", "CHR-SEC-008")
 }
 
-func (r *invocationRun) ledger(ctx context.Context, mutating, clearFence bool, op func(context.Context, string, string) error) {
+// ledger applies op to the held claim of a mutating run; op is a Ledger method expression, so a read run needs no ledger.
+func (r *invocationRun) ledger(ctx context.Context, mutating, clearFence bool, op func(Ledger, context.Context, string, string) error) {
 	if mutating {
-		if err := op(ctx, r.inv.IdempotencyKey, r.result.LedgerFence); err != nil {
+		if err := op(r.invoker.Ledger, ctx, r.inv.IdempotencyKey, r.result.LedgerFence); err != nil {
 			r.result.Err = errors.Join(r.result.Err, err)
 		} else if clearFence {
 			r.result.LedgerFence = ""
@@ -303,7 +327,8 @@ func (r *invocationRun) prepare(status Status, outcome, reason, requirement stri
 		CapabilityID: inv.CapabilityID, MaterialInputsDigest: inv.MaterialInputsDigest, SubjectRefs: inv.SubjectRefs, OperationClass: r.contract.OperationClass,
 		ActionTime: inv.At, Outcome: clip(outcome), Disposition: string(status), AuthorityEvaluations: []model.AuthorityEvaluation{authorityEvaluation(r.result.Authority)},
 		ApprovalEvaluations: []model.ApprovalEvaluation{approvalEvaluation(r.result.Approval)}, EvidenceRecordIDs: r.evidenceIDs,
-		PostconditionEvaluations: r.result.Postconditions, ReconcilesActionID: r.reconciles, SodExceptionID: inv.SodExceptionID,
+		PreconditionEvaluations: r.result.Preconditions, PostconditionEvaluations: r.result.Postconditions, Effect: r.result.Effect,
+		UnknownCause: r.result.UnknownCause, ReconcilesActionID: r.reconciles, SodExceptionID: inv.SodExceptionID,
 		OperatingLimitEvaluations: inv.OperatingLimits}
 	if r.result.Approval.ApprovalRef != nil {
 		record.ApprovalIDs = []model.Ref{*r.result.Approval.ApprovalRef}
@@ -328,10 +353,18 @@ func (r *invocationRun) record(ctx context.Context) Result {
 	return r.result
 }
 
-// escalate appends the exception and escalation for a stopped action when an Escalator is composed (CHR-AGENT-004).
+// escalate appends the exception and escalation for a stopped action when an Escalator is composed (CHR-AGENT-004);
+// a failed partial effect is always escalated (CHR-EVID-016).
 func (r *invocationRun) escalate(ctx context.Context) {
 	e := r.invoker.Escalation
-	if e == nil || !e.Applies(r.result.Status) {
+	partial := r.result.Status == StatusFailed && r.result.Effect == model.EffectPartial
+	if e == nil {
+		if partial {
+			r.result.Err = errors.Join(r.result.Err, errors.New("escalation: a partial effect requires an escalator"))
+		}
+		return
+	}
+	if !partial && !e.Applies(r.result.Status) {
 		return
 	}
 	exception, escalation, err := e.Escalate(ctx, r.inv, r.result)

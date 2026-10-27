@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.3.0",
+  "charterSpecVersion": "1.6.0",
   "namespace": "harbor.example",
   "kind": "DataBinding",
   "id": "DATABIND-S4-ORDER-EXCEPTION-1",
@@ -18,17 +18,21 @@
   ],
   "fieldMappings": [
     {
-      "charterPath": "order.id",
+      "charterPath": "orderId",
       "externalPath": "SalesOrder",
       "transformation": "ORD-2026-0173 to 50000173"
     },
     {
-      "charterPath": "order.line.id",
+      "charterPath": "lineId",
       "externalPath": "SalesOrderItem"
     },
     {
-      "charterPath": "reservation.quantity",
+      "charterPath": "reservedQuantity",
       "externalPath": "_ReservationDocumentItem[].ResvnItmRequiredQtyInEntryUnit"
+    },
+    {
+      "charterPath": "creditStatus.creditStatus",
+      "externalPath": "_SoldToParty/CreditBlockStatus"
     }
   ],
   "lossyTransformations": [

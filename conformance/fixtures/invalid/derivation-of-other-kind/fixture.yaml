@@ -1,0 +1,4 @@
+rules: [CHR-RULE-CONF-003]
+expected: fail
+reason: The agent definition records a Role of another document set as the document it was derived from
+documents: ../../../../examples/harbor-manufacturing/instances

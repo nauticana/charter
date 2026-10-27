@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.3.0",
+  "charterSpecVersion": "1.6.0",
   "namespace": "harbor.example",
   "kind": "EvidenceRecord",
   "id": "EVR-0042-STOCK-OBSERVED",
@@ -9,5 +9,17 @@
   "recordedAt": "2026-06-18T17:03:12Z",
   "sources": [
     "SYSPROFILE-HARBOR-S4-2602 reservation-document-read at 17:03:12Z"
-  ]
+  ],
+  "fact": {
+    "subject": {
+      "kind": "SalesOrderItem",
+      "id": "ORD-2026-0173-10",
+      "external": true
+    },
+    "informationId": "INFO-ORDER-EXCEPTION",
+    "attribute": "eligibleQuantity",
+    "value": 40,
+    "validAt": "2026-06-18T17:03:12Z",
+    "systemProfileId": "SYSPROFILE-HARBOR-S4-2602"
+  }
 }

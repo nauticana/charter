@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-011
+title: Inputs are validated against the contract schema before any authority check
+requirements: [CHR-CAP-011]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  An invocation whose inputs do not validate against the contract input schema, an information shape or an embedded JSON Schema, is denied under CHR-CAP-011 with evidence before authority is evaluated, an observer is asked, or the transport is called; valid inputs proceed.
+fixtures:
+  valid: fixtures/valid/typed-conditions-met
+  invalid: fixtures/invalid/input-outside-schema

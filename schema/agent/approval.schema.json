@@ -18,6 +18,7 @@
     "lifecycleState": true,
     "validity": true,
     "extensions": true,
+    "derivedFrom": true,
     "kind": {
       "const": "Approval"
     },

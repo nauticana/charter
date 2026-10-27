@@ -47,7 +47,7 @@ func TestPackageManifestMaterializesCustomerBindings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	profile := model.SystemProfile{Envelope: model.Envelope{CharterSpecVersion: "1.2.0", Namespace: "customer.example", ID: "PROFILE-SAP", Kind: model.KindSystemProfile}}
+	profile := model.SystemProfile{CharterSpecVersion: "1.2.0", Namespace: "customer.example", ID: "PROFILE-SAP", Kind: model.KindSystemProfile}
 	docs, err := Materialize(manifest, profile, map[string]any{"operation": "POST /reservations"})
 	if err != nil || len(docs) != 1 {
 		t.Fatalf("materialize = %d documents, %v", len(docs), err)
@@ -70,7 +70,7 @@ func TestPackageManifestFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	profile := model.SystemProfile{Envelope: model.Envelope{CharterSpecVersion: "1.2.0", Namespace: "customer.example", ID: "PROFILE-SAP", Kind: model.KindSystemProfile}}
+	profile := model.SystemProfile{CharterSpecVersion: "1.2.0", Namespace: "customer.example", ID: "PROFILE-SAP", Kind: model.KindSystemProfile}
 	if _, err := Materialize(manifest, profile, nil); !errors.Is(err, ErrPackageManifest) {
 		t.Fatalf("missing parameter: %v", err)
 	}

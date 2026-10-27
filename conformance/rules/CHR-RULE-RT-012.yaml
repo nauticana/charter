@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-012
+title: Predicate preconditions are decided on an observation taken for the attempt
+requirements: [CHR-CAP-012, CHR-EVID-010]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: ["*"]
+check: >-
+  Before the transport is called for a new attempt, every precondition with a predicate is evaluated against facts observed for this attempt; a violated precondition, or one whose facts cannot be observed or are unevidenced, denies the attempt under CHR-CAP-012 and the action record names the precondition and its result.
+fixtures:
+  valid: fixtures/valid/typed-conditions-met
+  invalid: fixtures/invalid/precondition-not-established

@@ -1,0 +1,4 @@
+rules: [CHR-RULE-EVID-003]
+expected: fail
+reason: The order read relies at 18:30 on the eligible quantity SAP stated at 17:14, older than the hour INFO-ORDER-EXCEPTION allows a fact to stay current
+documents: ../../../../examples/harbor-manufacturing/instances

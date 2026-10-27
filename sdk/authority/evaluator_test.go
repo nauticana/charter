@@ -68,10 +68,8 @@ func TestEvaluate(t *testing.T) {
 func with(r Request, f func(*Request)) Request { f(&r); return r }
 
 func TestSodConflict(t *testing.T) {
-	sod := model.SodConstraint{ConstrainedActions: []model.Ref{{ID: "CAP-PROPOSE"}, {ID: "CAP-APPROVE"}}}
-	sod.ID = "SOD-1"
-	sod.Namespace = "test.example"
-	sod.Scope = "CASE-1"
+	sod := model.SodConstraint{Namespace: "test.example", ID: "SOD-1", Scope: "CASE-1",
+		ConstrainedActions: []model.Ref{{ID: "CAP-PROPOSE"}, {ID: "CAP-APPROVE"}}}
 	propose := SodAction{Namespace: sod.Namespace, Capability: model.Ref{ID: "CAP-PROPOSE"}, Scope: sod.Scope}
 	approve := SodAction{Namespace: sod.Namespace, Capability: model.Ref{ID: "CAP-APPROVE"}, Scope: sod.Scope}
 	evaluator := SodEvaluator{Scopes: ExactSodScopeMatcher{}}

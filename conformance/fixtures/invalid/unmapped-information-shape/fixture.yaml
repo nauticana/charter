@@ -1,0 +1,4 @@
+rules: [CHR-RULE-INFO-002]
+expected: fail
+reason: The order-exception data binding leaves the identity property lineId unmapped and maps creditStatus.rating, which the credit-status shape does not declare
+documents: ../../../../examples/harbor-manufacturing/instances

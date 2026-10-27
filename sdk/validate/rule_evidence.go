@@ -55,3 +55,51 @@ func (r RecordedOutcomeRule) Validate(c *corpus.Corpus) []Finding {
 	}
 	return out
 }
+
+// CurrentFactsRule checks that an executed action relies on no fact that was stale, superseded, outranked, or in
+// conflict at its action time (CHR-EVID-014, CHR-EVID-015).
+type CurrentFactsRule struct{ AbstractRule }
+
+var _ Rule = CurrentFactsRule{}
+
+func (r CurrentFactsRule) Validate(c *corpus.Corpus) []Finding {
+	var out []Finding
+	provider := evidence.NewBaseProvider(c)
+	q := evidence.Queries{Provider: provider}
+	for _, a := range r.actions(c) {
+		if a.Disposition != model.DispositionExecuted {
+			continue
+		}
+		cited := slices.Clone(a.EvidenceRecordIDs)
+		for _, e := range a.PreconditionEvaluations {
+			cited = append(cited, e.EvidenceRecordIDs...)
+		}
+		for _, e := range a.PostconditionEvaluations {
+			cited = append(cited, e.EvidenceRecordIDs...)
+		}
+		seen := map[corpus.DocumentKey]bool{}
+		for _, ref := range cited {
+			key := corpus.KeyOf(a.Namespace, ref)
+			rec, err := provider.Record(context.Background(), a.Namespace, ref)
+			if seen[key] || err != nil || rec.Fact == nil {
+				continue
+			}
+			seen[key] = true
+			def, ok := resolveAs[model.InformationDefinition](c, rec.Namespace, rec.Fact.InformationID, model.KindInformationDefinition)
+			if !ok {
+				continue
+			}
+			states, err := q.CurrentFacts(context.Background(), rec.Namespace, rec.Fact.Subject, def, a.ActionTime)
+			if err != nil {
+				out = append(out, r.finding(a.Namespace, a.ID, err.Error()))
+				continue
+			}
+			if k := slices.IndexFunc(states, func(s evidence.FactState) bool { return s.Record.ID == rec.ID && s.Record.Namespace == rec.Namespace }); k < 0 {
+				out = append(out, r.finding(a.Namespace, a.ID, fmt.Sprintf("relies on fact %s, which was not yet recorded or valid", rec.ID)))
+			} else if states[k].State != evidence.FactCurrent {
+				out = append(out, r.finding(a.Namespace, a.ID, fmt.Sprintf("relies on fact %s, which was %s: %s", rec.ID, states[k].State, states[k].Rule)))
+			}
+		}
+	}
+	return out
+}

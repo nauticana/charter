@@ -83,3 +83,15 @@ func (c *Corpus) OfKind(k model.Kind) []*model.Document {
 }
 
 func (c *Corpus) Len() int { return len(c.docs) }
+
+// Derivations lists the documents whose recorded derivation names source, resolved in ownerNamespace (CHR-CONF-015).
+func (c *Corpus) Derivations(ownerNamespace string, source model.ObjectRef) []*model.Document {
+	want := ObjectKeyOf(ownerNamespace, source)
+	var out []*model.Document
+	for _, d := range c.Documents() {
+		if p := d.DerivedFrom; p != nil && p.Source.Kind == source.Kind && ObjectKeyOf(d.Namespace, p.Source) == want {
+			out = append(out, d)
+		}
+	}
+	return out
+}

@@ -8,6 +8,7 @@
     "CHR-CONF-002",
     "CHR-CONF-004",
     "CHR-CONF-012",
+    "CHR-CONF-015",
     "CHR-ENT-005"
   ],
   "$defs": {
@@ -155,6 +156,41 @@
           "additionalProperties": false
         }
       ]
+    },
+    "digest": {
+      "description": "A content digest: the algorithm and its lowercase hexadecimal value.",
+      "type": "string",
+      "pattern": "^(sha256:[0-9a-f]{64}|sha384:[0-9a-f]{96}|sha512:[0-9a-f]{128})$"
+    },
+    "provenance": {
+      "description": "The document in another document set this document was derived from; fixed once the document is published and never resolved within this document set (CHR-CONF-015).",
+      "type": "object",
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/objectRef"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "adoption": {
+          "description": "Whether the source was adopted unchanged or tailored.",
+          "enum": [
+            "adopted",
+            "tailored"
+          ]
+        }
+      },
+      "required": [
+        "source",
+        "version",
+        "digest"
+      ],
+      "additionalProperties": false
     },
     "featureSupport": {
       "description": "Declared support for one or more contract features.",
@@ -346,6 +382,9 @@
         },
         "extensions": {
           "$ref": "#/$defs/extensions"
+        },
+        "derivedFrom": {
+          "$ref": "#/$defs/provenance"
         }
       },
       "required": [

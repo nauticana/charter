@@ -32,6 +32,8 @@ A string-valued `idRef` resolves in the referring document's namespace. Cross-na
 
 Because each schema has an absolute `$id`, an offline validator must register the local schema file under that `$id` before resolving relative `$ref` values. `catalog.json` provides the mapping. Validation must use JSON Schema draft 2020-12, support `unevaluatedProperties`, enable `format` assertion for `date` and `date-time` values, and accept or register the `x-charter-*` annotation keywords.
 
+Every document may record in `derivedFrom` the document of another document set it was derived from, with that source's version and content digest; the source is never resolved within the document set (CHR-CONF-015).
+
 Every property typed as `idRef` carries `x-charter-ref-kinds`, the document kinds it may name; a semantic rule (CHR-RULE-CONF-002) checks resolved references against it, so the annotation is the single source of the target kind for CHR-CONF-012.
 
 Structural validation alone cannot establish graph acyclicity, reference existence or kind, date ordering, authority effectiveness, or runtime behavior. Those constraints require active semantic or behavioral conformance rules.

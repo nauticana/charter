@@ -28,6 +28,7 @@
     },
     "validity": true,
     "extensions": true,
+    "derivedFrom": true,
     "kind": {
       "const": "AgentIdentity"
     },

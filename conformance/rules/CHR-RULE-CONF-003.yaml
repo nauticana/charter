@@ -1,0 +1,11 @@
+id: CHR-RULE-CONF-003
+title: A derivation names a source of the deriving kind
+requirements: [CHR-CONF-015, CHR-AGENT-010]
+profile: core-model
+verification: semantic
+applies_to: ["*"]
+check: >-
+  A document whose derivedFrom source is a Charter kind derives from a document of its own kind other than itself; a source of any other kind is declared external. The source is never resolved within the document set.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/derivation-of-other-kind

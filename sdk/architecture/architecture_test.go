@@ -51,8 +51,7 @@ func TestHarborArchitecture(t *testing.T) {
 	if states, err := chk.StatesAt(ctx, ns, ent, model.StateTarget, time.Date(2026, 11, 1, 0, 0, 0, 0, time.UTC)); err != nil || len(states) != 1 {
 		t.Errorf("target in Q4: %v %v", states, err)
 	}
-	target := model.ArchitectureState{StateType: model.StateTarget}
-	target.ID = "T"
+	target := model.ArchitectureState{ID: "T", StateType: model.StateTarget}
 	if issues := chk.CheckState(target); len(issues) != 2 {
 		t.Errorf("unbounded target without authority: %v", issues)
 	}

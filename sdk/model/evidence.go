@@ -72,6 +72,30 @@ type PostconditionEvaluation struct {
 	EvidenceRecordIDs []Ref     `json:"evidenceRecordIds,omitempty"`
 }
 
+// PreconditionEvaluation is the state of one predicate precondition against the observation taken for the attempt (CHR-CAP-012).
+type PreconditionEvaluation struct {
+	PreconditionID    string    `json:"preconditionId"`
+	Result            string    `json:"result"`
+	Reason            string    `json:"reason"`
+	ObservedAt        time.Time `json:"observedAt"`
+	EvidenceRecordIDs []Ref     `json:"evidenceRecordIds,omitempty"`
+}
+
+// Effect classifies the required postconditions observed for an outcome (CHR-EVID-016).
+const (
+	EffectComplete   = "complete"
+	EffectPartial    = "partial"
+	EffectAbsent     = "absent"
+	EffectUnobserved = "unobserved"
+)
+
+// Why an unobserved effect is unknown.
+const (
+	UnknownObservationFailed = "observation-failed"
+	UnknownUnevidenced       = "unevidenced"
+	UnknownContradictory     = "contradictory"
+)
+
 type ActionRecord struct {
 	Envelope
 	Actor                    ObjectRef                 `json:"actor"`
@@ -91,7 +115,10 @@ type ActionRecord struct {
 	InformationEvaluations   []InformationEvaluation   `json:"informationEvaluations,omitempty"`
 	ApprovalIDs              []Ref                     `json:"approvalIds,omitempty"`
 	EvidenceRecordIDs        []Ref                     `json:"evidenceRecordIds,omitempty"`
+	PreconditionEvaluations  []PreconditionEvaluation  `json:"preconditionEvaluations,omitempty"`
 	PostconditionEvaluations []PostconditionEvaluation `json:"postconditionEvaluations,omitempty"`
+	Effect                   string                    `json:"effect,omitempty"`
+	UnknownCause             string                    `json:"unknownCause,omitempty"`
 	// ReconcilesActionID names the earlier attempt whose unknown outcome this record resolves (CHR-EVID-012).
 	ReconcilesActionID        *Ref                       `json:"reconcilesActionId,omitempty"`
 	SodExceptionID            *Ref                       `json:"sodExceptionId,omitempty"`
@@ -128,6 +155,17 @@ type EvidenceRecord struct {
 	// Integrity digests Content, so one immutable record is verifiable outside a bundle (CHR-EVID-005).
 	Integrity  *Integrity  `json:"integrity,omitempty"`
 	Assessment *Assessment `json:"assessment,omitempty"`
+	Fact       *Fact       `json:"fact,omitempty"`
+}
+
+// Fact is the value of one attribute of a subject at a time, as its source stated it (CHR-EVID-014).
+type Fact struct {
+	Subject         ObjectRef `json:"subject"`
+	InformationID   Ref       `json:"informationId"`
+	Attribute       string    `json:"attribute"`
+	Value           any       `json:"value"`
+	ValidAt         time.Time `json:"validAt"`
+	SystemProfileID *Ref      `json:"systemProfileId,omitempty"`
 }
 
 const (

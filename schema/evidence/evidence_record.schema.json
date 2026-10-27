@@ -8,8 +8,10 @@
     "CHR-EVID-004",
     "CHR-EVID-005",
     "CHR-EVID-011",
-    "CHR-INFO-004",
-    "CHR-EVID-013"
+    "CHR-EVID-013",
+    "CHR-EVID-014",
+    "CHR-EVID-015",
+    "CHR-INFO-004"
   ],
   "type": "object",
   "allOf": [
@@ -67,6 +69,7 @@
     "lifecycleState": true,
     "validity": true,
     "extensions": true,
+    "derivedFrom": true,
     "kind": {
       "const": "EvidenceRecord"
     },
@@ -248,6 +251,53 @@
           }
         }
       ]
+    },
+    "fact": {
+      "description": "The value of one attribute of a subject at a time, as this record's source states it (CHR-EVID-014).",
+      "type": "object",
+      "properties": {
+        "subject": {
+          "description": "The business object the fact is about.",
+          "allOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/objectRef"
+            }
+          ]
+        },
+        "informationId": {
+          "$ref": "../common.schema.json#/$defs/idRef",
+          "x-charter-ref-kinds": [
+            "InformationDefinition"
+          ]
+        },
+        "attribute": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "value": {
+          "description": "The stated value of the attribute."
+        },
+        "validAt": {
+          "description": "When the value held in the source.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "systemProfileId": {
+          "$ref": "../common.schema.json#/$defs/idRef",
+          "x-charter-ref-kinds": [
+            "SystemProfile"
+          ]
+        }
+      },
+      "required": [
+        "subject",
+        "informationId",
+        "attribute",
+        "value",
+        "validAt"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

@@ -70,7 +70,10 @@ type Result struct {
 	Authority         authority.Decision
 	Approval          authority.ApprovalDecision
 	Information       []information.Decision
+	Preconditions     []model.PreconditionEvaluation
 	Postconditions    []model.PostconditionEvaluation
+	Effect            string
+	UnknownCause      string
 	SodConflict       *model.Ref
 	Binding           *model.Ref
 	Action            *model.ActionRecord

@@ -3,6 +3,7 @@ package corpus
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/nauticana/charter/sdk/model"
@@ -11,7 +12,7 @@ import (
 func TestCorpusKeysDocumentsByNamespaceAndID(t *testing.T) {
 	c := New()
 	for _, namespace := range []string{"one.example", "two.example"} {
-		if err := c.Add(&model.Document{Envelope: model.Envelope{Namespace: namespace, ID: "SAME", Kind: model.KindEnterprise}}); err != nil {
+		if err := c.Add(&model.Document{Namespace: namespace, ID: "SAME", Kind: model.KindEnterprise}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -54,7 +55,7 @@ func TestUnionServesTheFirstSourceHoldingAKey(t *testing.T) {
 	one, two := New(), New()
 	for i, c := range []*Corpus{one, two} {
 		for _, id := range []string{"SHARED", []string{"ONLY-ONE", "ONLY-TWO"}[i]} {
-			if err := c.Add(&model.Document{Envelope: model.Envelope{Namespace: "n", ID: id, Kind: model.KindEnterprise, Name: id + string(rune('1'+i))}}); err != nil {
+			if err := c.Add(&model.Document{Namespace: "n", ID: id, Kind: model.KindEnterprise, Name: id + string(rune('1'+i))}); err != nil {
 				t.Fatal(err)
 			}
 		}
@@ -71,5 +72,28 @@ func TestUnionServesTheFirstSourceHoldingAKey(t *testing.T) {
 	}
 	if docs, err := u.List(ctx, model.KindEnterprise); err != nil || len(docs) != 4 {
 		t.Errorf("list: %d %v", len(docs), err)
+	}
+}
+
+func TestDerivationsNameTheirSource(t *testing.T) {
+	c := New()
+	source := model.ObjectRef{Kind: model.KindResponsibility, ID: "RESP-BLUEPRINT", Namespace: "blueprint.example"}
+	for id, from := range map[string]*model.Provenance{
+		"ADOPTED":  {Source: source, Version: "1", Digest: "sha256:" + strings.Repeat("0", 64), Adoption: model.AdoptionAdopted},
+		"TAILORED": {Source: source, Version: "2", Digest: "sha256:" + strings.Repeat("1", 64), Adoption: model.AdoptionTailored},
+		"OTHER":    {Source: model.ObjectRef{Kind: model.KindRole, ID: "RESP-BLUEPRINT", Namespace: "blueprint.example"}, Version: "1"},
+		"OWN":      nil,
+	} {
+		d := &model.Document{Namespace: "customer.example", ID: id, Kind: model.KindResponsibility, DerivedFrom: from}
+		if err := c.Add(d); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got := c.Derivations("customer.example", source)
+	if len(got) != 2 || got[0].ID != "ADOPTED" || got[1].ID != "TAILORED" {
+		t.Fatalf("derivations = %v", got)
+	}
+	if got := c.Derivations("customer.example", model.ObjectRef{Kind: model.KindResponsibility, ID: "RESP-BLUEPRINT"}); len(got) != 0 {
+		t.Fatalf("a source in another namespace matched a local one: %v", got)
 	}
 }

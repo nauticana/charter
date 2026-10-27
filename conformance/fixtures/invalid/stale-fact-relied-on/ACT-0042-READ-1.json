@@ -1,0 +1,30 @@
+{
+  "charterSpecVersion": "1.6.0",
+  "namespace": "harbor.example",
+  "kind": "ActionRecord",
+  "id": "ACT-0042-READ-1",
+  "enterpriseId": "ENT-HARBOR",
+  "actor": {
+    "kind": "AgentIdentity",
+    "id": "AGENT-ORDER-EXCEPTION-COORDINATOR"
+  },
+  "runtimeContext": {
+    "runtimeInstanceId": "RT-OEC-PROD-01",
+    "executionContextId": "EXEC-OE-0042-02"
+  },
+  "assignmentId": "ASGN-OEC-ORDER-EXCEPTION-SUPPORT",
+  "capabilityId": "CAP-READ-ORDER-EXCEPTION",
+  "subjectRefs": [
+    {
+      "kind": "ProcessInstance",
+      "id": "PROCINST-OE-2026-0042"
+    }
+  ],
+  "operationClass": "read",
+  "actionTime": "2026-06-18T18:30:00Z",
+  "outcome": "facts-returned",
+  "disposition": "executed",
+  "evidenceRecordIds": [
+    "EVR-0042-STOCK-CORRECTED"
+  ]
+}

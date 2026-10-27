@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.3.0",
+  "charterSpecVersion": "1.6.0",
   "namespace": "harbor.example",
   "kind": "InformationDefinition",
   "id": "INFO-CREDIT-STATUS-SUMMARY",
@@ -13,5 +13,27 @@
   "classification": "confidential",
   "governancePolicyIds": [
     "POL-ORDER-EXCEPTION-INFORMATION"
-  ]
+  ],
+  "shape": {
+    "properties": [
+      {
+        "name": "customerId",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "creditStatus",
+        "type": "string",
+        "required": true
+      },
+      {
+        "name": "exposureMinor",
+        "type": "integer",
+        "classification": "restricted"
+      }
+    ],
+    "identity": [
+      "customerId"
+    ]
+  }
 }
