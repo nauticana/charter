@@ -37,18 +37,27 @@ func (q Queries) CurrentFacts(ctx context.Context, ownerNamespace string, subjec
 		return nil, err
 	}
 	about, info := corpus.ObjectKeyOf(ownerNamespace, subject), corpus.DocumentKey{Namespace: def.Namespace, ID: def.ID}
-	superseded := map[corpus.DocumentKey]bool{}
+	concerns := func(r model.EvidenceRecord) bool {
+		f := r.Fact
+		return f.Subject.Kind == subject.Kind && corpus.ObjectKeyOf(r.Namespace, f.Subject) == about && corpus.KeyOf(r.Namespace, f.InformationID) == info
+	}
+	facts := map[corpus.DocumentKey]model.Fact{}
 	var out []FactState
 	for _, r := range all {
-		if r.RecordedAt.After(at) {
+		if r.Fact != nil && !r.RecordedAt.After(at) && !r.Fact.ValidAt.After(at) && concerns(r) {
+			out = append(out, FactState{Record: r})
+			facts[corpus.DocumentKey{Namespace: r.Namespace, ID: r.ID}] = *r.Fact
+		}
+	}
+	// A correction without a fact retracts what it supersedes; one with a fact replaces only the same attribute.
+	superseded := map[corpus.DocumentKey]bool{}
+	for _, r := range all {
+		if r.Supersedes == nil || r.RecordedAt.After(at) {
 			continue
 		}
-		if r.Supersedes != nil {
-			superseded[corpus.KeyOf(r.Namespace, *r.Supersedes)] = true
-		}
-		if f := r.Fact; f != nil && !f.ValidAt.After(at) && f.Subject.Kind == subject.Kind && corpus.ObjectKeyOf(r.Namespace, f.Subject) == about &&
-			corpus.KeyOf(r.Namespace, f.InformationID) == info {
-			out = append(out, FactState{Record: r})
+		key := corpus.KeyOf(r.Namespace, *r.Supersedes)
+		if prior, ok := facts[key]; ok && (r.Fact == nil || concerns(r) && r.Fact.Attribute == prior.Attribute) {
+			superseded[key] = true
 		}
 	}
 	var authority model.FactAuthority

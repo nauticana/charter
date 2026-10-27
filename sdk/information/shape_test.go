@@ -42,8 +42,18 @@ func TestShapes(t *testing.T) {
 		}
 	}
 	mappings := []model.FieldMapping{{CharterPath: "orderId"}, {CharterPath: "creditStatus.rating"}}
-	if problems := CheckMappings(ctx, defs, order, mappings); len(problems) != 2 || !strings.Contains(problems[1], "lineId") {
-		t.Errorf("unresolved path and unmapped identity: %v", problems)
+	if problems := CheckMappings(ctx, defs, order, mappings); len(problems) != 4 || !strings.Contains(problems[1], "lineId") ||
+		!strings.Contains(problems[2], "creditStatus.customerId") || !strings.Contains(problems[3], "creditStatus.creditStatus") {
+		t.Errorf("unresolved path, unmapped identity, and unmapped target properties: %v", problems)
+	}
+	if problems := CheckMappings(ctx, defs, order, []model.FieldMapping{{CharterPath: "orderId"}, {CharterPath: "lineId"}}); len(problems) != 0 {
+		t.Errorf("a relationship no path reaches requires nothing: %v", problems)
+	}
+	dangling := order
+	dangling.Shape = &model.InformationShape{Properties: order.Shape.Properties, Identity: order.Shape.Identity,
+		Relationships: []model.ShapeRelationship{{Name: "lost", TargetInformationID: model.Ref{ID: "INFO-NONE"}, Cardinality: model.CardinalityOne}}}
+	if problems := CheckMappings(ctx, defs, dangling, []model.FieldMapping{{CharterPath: "orderId"}, {CharterPath: "lineId"}}); len(problems) != 1 || !strings.Contains(problems[0], "relationship lost") {
+		t.Errorf("unresolved relationship target: %v", problems)
 	}
 	if problems := CheckMappings(ctx, defs, model.InformationDefinition{}, mappings); problems != nil {
 		t.Errorf("a definition without a shape constrains no mapping: %v", problems)

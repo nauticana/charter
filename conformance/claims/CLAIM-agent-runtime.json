@@ -5,7 +5,7 @@
   "kind": "ConformanceClaim",
   "name": "Reference SDK agent-runtime claim",
   "conformanceProfile": "agent-runtime",
-  "implementationVersion": "1.6.0",
+  "implementationVersion": "1.6.1",
   "testedRuleIds": [
     "CHR-RULE-RT-001",
     "CHR-RULE-RT-002",

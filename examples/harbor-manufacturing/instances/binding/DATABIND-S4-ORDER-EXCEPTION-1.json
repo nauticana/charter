@@ -31,6 +31,10 @@
       "externalPath": "_ReservationDocumentItem[].ResvnItmRequiredQtyInEntryUnit"
     },
     {
+      "charterPath": "creditStatus.customerId",
+      "externalPath": "SoldToParty"
+    },
+    {
       "charterPath": "creditStatus.creditStatus",
       "externalPath": "_SoldToParty/CreditBlockStatus"
     }

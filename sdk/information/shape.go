@@ -62,8 +62,9 @@ func Resolve(ctx context.Context, defs Provider, def model.InformationDefinition
 	return def.Shape.Properties[k], nil
 }
 
-// CheckMappings reports every charterPath that does not resolve and every required property, identity included, that
-// the mappings of a binding to def leave unmapped (CHR-INFO-010).
+// CheckMappings reports every charterPath that does not resolve, every relationship target that does not resolve, and
+// every required property, identity included, that the mappings of a binding to def, or of a target they reach, leave
+// unmapped (CHR-INFO-010).
 func CheckMappings(ctx context.Context, defs Provider, def model.InformationDefinition, mappings []model.FieldMapping) []string {
 	if def.Shape == nil {
 		return nil
@@ -76,12 +77,50 @@ func CheckMappings(ctx context.Context, defs Provider, def model.InformationDefi
 			out = append(out, err.Error())
 		}
 	}
+	checkRequired(ctx, defs, def, "", mapped, map[string]bool{}, &out)
+	return out
+}
+
+// checkRequired reports the required properties of def, and of each relationship target a mapping reaches, left unmapped.
+func checkRequired(ctx context.Context, defs Provider, def model.InformationDefinition, prefix string, mapped, seen map[string]bool, out *[]string) {
+	key := def.Namespace + "\x00" + def.ID
+	if def.Shape == nil || seen[key] {
+		return
+	}
+	seen[key] = true
+	defer delete(seen, key)
 	for _, p := range def.Shape.Properties {
-		if p.Required && !mapped[p.Name] {
-			out = append(out, fmt.Sprintf("required property %s of %s is not mapped", p.Name, def.ID))
+		path := p.Name
+		if prefix != "" {
+			path = prefix + "." + path
+		}
+		if p.Required && !mapped[path] {
+			*out = append(*out, fmt.Sprintf("required property %s of %s is not mapped", path, def.ID))
 		}
 	}
-	return out
+	for _, r := range def.Shape.Relationships {
+		target, err := defs.Definition(ctx, def.Namespace, r.TargetInformationID)
+		if err != nil {
+			*out = append(*out, fmt.Sprintf("%s: relationship %s: %v", def.ID, r.Name, err))
+			continue
+		}
+		path := r.Name
+		if prefix != "" {
+			path = prefix + "." + path
+		}
+		if traversed(mapped, path) {
+			checkRequired(ctx, defs, target, path, mapped, seen, out)
+		}
+	}
+}
+
+func traversed(mapped map[string]bool, relationship string) bool {
+	for p := range mapped {
+		if strings.HasPrefix(p, relationship+".") {
+			return true
+		}
+	}
+	return false
 }
 
 // JSONSchema is the JSON Schema an instance of the shape satisfies; relationships are objects, or arrays of objects

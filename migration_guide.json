@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.6.1",
+      "title": "Nested shape mappings and attribute-scoped fact supersession",
+      "tags": [
+        "breaking"
+      ],
+      "summary": "Data bindings must map the required properties of every relationship target their paths reach, unresolved relationship targets are reported, and fact supersession is scoped to the same subject, information, and attribute while a correction without a fact still retracts. Specification 1.6.0; the optional keel adapter targets keel v1.3.0.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`schema/catalog.json` `specVersion`) | 1.6.0 |\n| Go module `github.com/nauticana/charter` | v1.6.1 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.3.0 |\n\n## Compatibility impact\n\nSignatures, schemas, and documents are unchanged. A data binding that maps a path through a relationship without mapping the target's required properties now fails `CHR-RULE-INFO-002`, and some facts change standing in `evidence.Queries.CurrentFacts`.\n\n## Fixed\n\n- `CHR-INFO-010`: a binding maps the required properties, identity included, of every relationship target its paths reach, not only of the bound definition. `information.CheckMappings` checks them and reports a relationship whose target does not resolve. A relationship no path reaches requires nothing.\n- `CHR-EVID-014`: in `CurrentFacts` a superseding record that states a fact replaces only a fact about the same subject, information, and attribute; one that states no fact still retracts what it supersedes.\n\n## Adoption\n\n1. `go get github.com/nauticana/charter@v1.6.1`.\n2. Map the identity and other required properties of each related definition a binding reaches, and re-run `charter claim`.\n"
+    },
+    {
       "version": "1.6.0",
       "title": "Typed information, machine-checkable conditions, fact authority, partial effects, and derivation provenance",
       "tags": [

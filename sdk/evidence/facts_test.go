@@ -30,6 +30,9 @@ func TestCurrentFacts(t *testing.T) {
 		fact("WMS-B", model.CategoryObservedFact, "WMS", "blocked", "false", at.Add(-time.Minute), ""),
 		fact("AGENT", model.CategoryAgentAssertion, "", "price", 10, at.Add(-time.Minute), ""),
 		fact("LATER", model.CategoryObservedFact, "SAP", "eligible", 41, at.Add(time.Minute), ""),
+		fact("PRICE", model.CategoryObservedFact, "SAP", "price", 12, at.Add(-time.Minute), `,"supersedes":"HUMAN"`),
+		`{"charterSpecVersion":"1.6.0","namespace":"t","kind":"EvidenceRecord","id":"RETRACT","category":"human-decision","content":"the WMS block reading was wrong",` +
+			`"recordedAt":"` + at.Format(time.RFC3339) + `","supersedes":"WMS-B"}`,
 	} {
 		d, err := (corpus.Parser{}).Parse([]byte(raw))
 		if err != nil {
@@ -54,7 +57,9 @@ func TestCurrentFacts(t *testing.T) {
 		}
 		return out
 	}
-	want := map[string]string{"SAP-OLD": FactSuperseded, "SAP-NEW": FactCurrent, "HUMAN": FactOutranked, "WMS-A": FactConflicted, "WMS-B": FactConflicted, "AGENT": FactCurrent}
+	// PRICE names HUMAN as superseded but states another attribute, so HUMAN stands; RETRACT, stating no fact, retracts WMS-B.
+	want := map[string]string{"SAP-OLD": FactSuperseded, "SAP-NEW": FactCurrent, "HUMAN": FactOutranked, "WMS-A": FactCurrent, "WMS-B": FactSuperseded,
+		"AGENT": FactOutranked, "PRICE": FactCurrent}
 	if got := states(at, def); fmt.Sprint(got) != fmt.Sprint(want) {
 		t.Errorf("at the decision: %v, want %v", got, want)
 	}

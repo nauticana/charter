@@ -7,7 +7,7 @@ Status: Conceptual, non-normative example
 | `INFO-ORDER-EXCEPTION` | Condition preventing an accepted order from proceeding | `OU-SALES-OPERATIONS` | Internal | `POL-ORDER-EXCEPTION-INFORMATION` |
 | `INFO-CREDIT-STATUS-SUMMARY` | Current decision-relevant credit state, not the full customer file | `OU-CREDIT-CONTROL` | Confidential | `POL-ORDER-EXCEPTION-INFORMATION` |
 
-`INFO-ORDER-EXCEPTION` declares a shape: an exception is identified by `orderId` and `lineId`, carries reserved and eligible quantities, and relates to one credit-status summary, whose own shape is identified by `customerId`. The SAP DataBinding maps both identity properties and reaches the credit status through that relationship (`creditStatus.creditStatus`). Facts about an exception rank the SAP profile above a human decision and stay current for an hour.
+`INFO-ORDER-EXCEPTION` declares a shape: an exception is identified by `orderId` and `lineId`, carries reserved and eligible quantities, and relates to one credit-status summary, whose own shape is identified by `customerId`. The SAP DataBinding maps both identity properties and reaches the credit status through that relationship, mapping its identity and status (`creditStatus.customerId`, `creditStatus.creditStatus`). Facts about an exception rank the SAP profile above a human decision and stay current for an hour.
 
 `POL-ORDER-EXCEPTION-INFORMATION` permits use only to resolve the identified exception, for governed approval and execution, and for audit; it fails closed on conflicts.
 

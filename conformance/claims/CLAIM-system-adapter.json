@@ -5,7 +5,7 @@
   "kind": "ConformanceClaim",
   "name": "Reference SDK system-adapter claim",
   "conformanceProfile": "system-adapter",
-  "implementationVersion": "1.6.0",
+  "implementationVersion": "1.6.1",
   "testedRuleIds": [
     "CHR-RULE-SA-001",
     "CHR-RULE-SA-002",
