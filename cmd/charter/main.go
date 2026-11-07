@@ -33,6 +33,7 @@ func run(args []string, stdout, stderr io.Writer) int {
 	}
 	commands := map[string]func([]string, io.Writer, io.Writer) int{
 		"validate": validateCmd, "conformance": conformanceCmd, "claim": claimCmd, "version": versionCmd,
+		"export": exportCmd, "import": importCmd, "context": contextCmd,
 	}
 	if args[0] == "help" || args[0] == "-h" || args[0] == "--help" {
 		usage(stdout)
@@ -54,6 +55,9 @@ func usage(w io.Writer) {
   conformance         run every fixture of the conformance manifest
   claim               run the manifest and print a ConformanceClaim document
   version             print the module and specification versions and the implemented rules
+  export <dir>...     print instance documents as one JSON-LD graph under the Charter context
+  import <file>       write the documents of a JSON-LD graph into -out, refusing unaccepted loss
+  context             print the Charter JSON-LD context the embedded schemas define
 
 Run "charter <command> -h" for the command's flags. Exit status: 0 conforming, 1 findings or failures, 2 usage or error.
 `)

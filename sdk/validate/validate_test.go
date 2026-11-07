@@ -181,7 +181,7 @@ func TestEveryIDRefPropertyDeclaresItsKinds(t *testing.T) {
 
 func TestSpecVersionAcceptsEarlierReleasesOfItsMajor(t *testing.T) {
 	version, err := (Catalog{}).SpecVersion()
-	if err != nil || version != "1.6.0" {
+	if err != nil || version != "1.7.0" {
 		t.Fatalf("catalog version %q %v", version, err)
 	}
 	c, err := corpus.NewDirLoader(harbor).Load()
@@ -194,13 +194,13 @@ func TestSpecVersionAcceptsEarlierReleasesOfItsMajor(t *testing.T) {
 	if f := (SpecVersion{Version: "2.0.0"}).Validate(c); len(f) != c.Len() || f[0].Requirements[0] != "CHR-CONF-001" {
 		t.Errorf("other major: %d findings", len(f))
 	}
-	for doc, readable := range map[string]bool{"1.0.0": true, "1.4.0": true, "1.5.0": true, "1.6.0": true, "1.6.1": false, "1.7.0": false, "0.9.0": false, "1.5": false} {
+	for doc, readable := range map[string]bool{"1.0.0": true, "1.4.0": true, "1.6.0": true, "1.7.0": true, "1.7.1": false, "1.8.0": false, "0.9.0": false, "1.5": false} {
 		c := corpus.New()
 		if err := c.Add(&model.Document{CharterSpecVersion: doc, Namespace: "t", ID: "D", Kind: model.KindEnterprise}); err != nil {
 			t.Fatal(err)
 		}
-		if got := len((SpecVersion{Version: "1.6.0"}).Validate(c)) == 0; got != readable {
-			t.Errorf("1.6.0 reads %s: %t, want %t", doc, got, readable)
+		if got := len((SpecVersion{Version: "1.7.0"}).Validate(c)) == 0; got != readable {
+			t.Errorf("1.7.0 reads %s: %t, want %t", doc, got, readable)
 		}
 	}
 }

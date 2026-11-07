@@ -1,0 +1,11 @@
+id: CHR-RULE-ENT-007
+title: One external identifier per system profile is effective at a time
+requirements: [CHR-ENT-013]
+profile: core-model
+verification: semantic
+applies_to: [OrganizationUnit, PositionType, Position, Role, HumanIdentity]
+check: >-
+  Every externalIdentifiers entry with a validity ends on or after it starts, and no two entries of one document naming the same SystemProfile are effective on the same day; an entry without validity is always effective.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/external-identifier-overlap

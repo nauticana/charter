@@ -38,6 +38,10 @@ Every property typed as `idRef` carries `x-charter-ref-kinds`, the document kind
 
 Structural validation alone cannot establish graph acyclicity, reference existence or kind, date ordering, authority effectiveness, or runtime behavior. Those constraints require active semantic or behavioral conformance rules.
 
+## Interchange
+
+`context.jsonld` is the JSON-LD context a document set is exchanged under (CHR-CONF-016). It is generated from the schemas by `charter context`: every property name is a term under the vocabulary `https://nauticana.github.io/charter/vocab#`, `idRef` properties are typed `@id`, and date and date-time properties are typed `xsd:date` and `xsd:dateTime`. A document's IRI is `urn:charter:<namespace>:<id>` with the namespace percent-encoded, an external object's `urn:charter:external:<kind>:<namespace>:<id>`, and the properties and relationships of an information shape are exported as `rdf:Property` nodes of the definition's IRI, so a semantic layer can state facts in Charter's vocabulary. `charter export` and `charter import` carry a document set across; an import refuses what Charter cannot represent unless the loss is accepted.
+
 ## Domain relations
 
 Arrows read "references"; each domain diagram in its README shows the properties.
@@ -57,6 +61,10 @@ flowchart LR
     agent -->|certification.evidenceRecordId| evidence
     enterprise -->|sourceEvidence| evidence
     process -->|sourceEvidence, baseline.evidenceRecordIds| evidence
+    process -->|evidenceRequirements.informationId| information
+    evidence -->|measurement.measureId| process
+    enterprise -->|externalIdentifiers.systemProfileId| binding
+    agent -->|externalIdentifiers.systemProfileId| binding
 
     binding["binding<br/>EnterpriseSystem, SystemProfile, CapabilityBinding,<br/>DataBinding, AuthorityBinding, EventBinding,<br/>BindingConformance"]
     information["information<br/>InformationDefinition,<br/>InformationGovernancePolicy"]

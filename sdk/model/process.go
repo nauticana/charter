@@ -30,6 +30,8 @@ type Task struct {
 	AccountableResponsibilityID Ref      `json:"accountableResponsibilityId"`
 	PermittedPerformerKinds     []string `json:"permittedPerformerKinds"`
 	PermittedParticipation      []string `json:"permittedParticipation,omitempty"`
+	// EvidenceRequirements are what the decisions of the task's performer rest on (CHR-CAP-013).
+	EvidenceRequirements []EvidenceRequirement `json:"evidenceRequirements,omitempty"`
 }
 
 const (
@@ -134,17 +136,10 @@ type preconditionObject struct {
 }
 
 func (p *Precondition) UnmarshalJSON(b []byte) error {
-	var s string
-	if err := json.Unmarshal(b, &s); err == nil {
-		*p = Precondition{Statement: s}
-		return nil
-	}
 	var o preconditionObject
-	if err := json.Unmarshal(b, &o); err != nil {
-		return err
-	}
+	err := stringOr(b, &o.Statement, &o)
 	*p = Precondition(o)
-	return nil
+	return err
 }
 
 func (p Precondition) MarshalJSON() ([]byte, error) {
@@ -152,6 +147,46 @@ func (p Precondition) MarshalJSON() ([]byte, error) {
 		return json.Marshal(p.Statement)
 	}
 	return json.Marshal(preconditionObject(p))
+}
+
+// EvidenceRequirement is a prose requirement, or a structured one naming the information and attribute whose fact the
+// work rests on, whether a current fact is required, and a maximum age no wider than the information's own (CHR-CAP-013).
+type EvidenceRequirement struct {
+	Statement     string
+	InformationID *Ref
+	Attribute     string
+	Required      bool
+	MaxAgeSeconds int64
+}
+
+type evidenceRequirementObject struct {
+	InformationID *Ref   `json:"informationId"`
+	Attribute     string `json:"attribute"`
+	Required      bool   `json:"required"`
+	MaxAgeSeconds int64  `json:"maxAgeSeconds,omitempty"`
+}
+
+func (r *EvidenceRequirement) UnmarshalJSON(b []byte) error {
+	var o evidenceRequirementObject
+	var text string
+	err := stringOr(b, &text, &o)
+	*r = EvidenceRequirement{Statement: text, InformationID: o.InformationID, Attribute: o.Attribute, Required: o.Required, MaxAgeSeconds: o.MaxAgeSeconds}
+	return err
+}
+
+func (r EvidenceRequirement) MarshalJSON() ([]byte, error) {
+	if r.InformationID == nil {
+		return json.Marshal(r.Statement)
+	}
+	return json.Marshal(evidenceRequirementObject{r.InformationID, r.Attribute, r.Required, r.MaxAgeSeconds})
+}
+
+// stringOr decodes a bare JSON string into text, or anything else into obj.
+func stringOr(b []byte, text *string, obj any) error {
+	if json.Unmarshal(b, text) == nil {
+		return nil
+	}
+	return json.Unmarshal(b, obj)
 }
 
 // AppliesTo reports whether the postcondition must hold for a declared outcome; an empty outcome matches every postcondition.
@@ -174,8 +209,28 @@ type CapabilityContract struct {
 	RequiredAuthority    string                `json:"requiredAuthority"`
 	Constraints          CapabilityConstraints `json:"constraints"`
 	Idempotency          Idempotency           `json:"idempotency"`
-	EvidenceRequirements []string              `json:"evidenceRequirements"`
+	EvidenceRequirements []EvidenceRequirement `json:"evidenceRequirements"`
 	Postconditions       []Postcondition       `json:"postconditions,omitempty"`
+}
+
+// RequiredEvidence returns the structured requirements whose current fact an executed action must rely on.
+func RequiredEvidence(reqs []EvidenceRequirement) []EvidenceRequirement {
+	var out []EvidenceRequirement
+	for _, r := range reqs {
+		if r.InformationID != nil && r.Required {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// ObservedEvidence returns the required evidence a mutating contract must observe before its operation is submitted;
+// a read returns the facts it relies on itself (CHR-CAP-013).
+func (c CapabilityContract) ObservedEvidence() []EvidenceRequirement {
+	if !c.Idempotency.Mutating {
+		return nil
+	}
+	return RequiredEvidence(c.EvidenceRequirements)
 }
 
 // RequiredPostconditions are the postconditions that must be verified before outcome may be recorded as executed.

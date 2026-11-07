@@ -1,0 +1,11 @@
+id: CHR-RULE-CAP-003
+title: Required structured evidence is declared within its information and relied on when current
+requirements: [CHR-CAP-013]
+profile: core-model
+verification: semantic
+applies_to: [Task, CapabilityContract, ActionRecord, EvidenceRecord, InformationDefinition]
+check: >-
+  Every structured evidence requirement of a Task or CapabilityContract names an attribute the shape its InformationDefinition declares includes, and a maxAgeSeconds no greater than the definition's factAuthority.maxAgeSeconds, when that is set. Every ActionRecord with disposition executed cites, in its evidence or its precondition and postcondition evaluations, for each required structured requirement of its CapabilityContract, an EvidenceRecord fact about that information and attribute that was current at its actionTime under the requirement's narrower age.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/required-evidence-not-cited

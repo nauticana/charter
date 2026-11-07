@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"slices"
 	"strings"
 	"testing"
 
@@ -32,7 +33,7 @@ func (o *factObserver) Observe(_ context.Context, req binding.ObservationRequest
 	if !o.unevidenced {
 		obs.EvidenceRecordIDs = []model.Ref{{ID: "EVR-0042-STOCK-CORRECTED"}}
 	}
-	if len(req.Preconditions) > 0 {
+	if len(req.Preconditions) > 0 || len(req.Evidence) > 0 {
 		return obs, o.preErr
 	}
 	for _, p := range req.Postconditions {
@@ -294,5 +295,57 @@ func TestReadWithoutLedgerSurvivesTransportFailure(t *testing.T) {
 	read.CapabilityID, read.RequiredFeatures, read.IdempotencyKey, read.MaterialInputsDigest = model.Ref{ID: "CAP-READ-ORDER-EXCEPTION"}, nil, "", ""
 	if res := h.invoker.Invoke(context.Background(), read); res.Status != capability.StatusUnknown {
 		t.Fatalf("read transport failure: %s (%s)", res.Status, res.Reason)
+	}
+}
+
+func TestRequiredEvidenceIsObservedBeforeAMutation(t *testing.T) {
+	ctx := context.Background()
+	stock := model.EvidenceRequirement{InformationID: &model.Ref{ID: "INFO-ORDER-EXCEPTION"}, Attribute: "eligible", Required: true, MaxAgeSeconds: 900}
+	for name, tc := range map[string]struct {
+		arrange func(*harness, *factObserver)
+		want    capability.Status
+	}{
+		"observed": {func(*harness, *factObserver) {}, capability.StatusExecuted},
+		"optional only": {func(h *harness, o *factObserver) {
+			delete(o.facts, "eligible")
+			h.amend(func(c *model.CapabilityContract) { c.EvidenceRequirements[0].Required = false })
+		}, capability.StatusExecuted},
+		"fact missing": {func(_ *harness, o *factObserver) { delete(o.facts, "eligible") }, capability.StatusDenied},
+		"unevidenced":  {func(_ *harness, o *factObserver) { o.unevidenced = true }, capability.StatusDenied},
+		"unobservable": {func(_ *harness, o *factObserver) { o.preErr = errors.New("stock read timed out") }, capability.StatusDenied},
+		"no observer": {func(h *harness, _ *factObserver) {
+			h.invoker.Observer = nil
+			h.amend(func(c *model.CapabilityContract) { c.Postconditions = nil })
+		}, capability.StatusDenied},
+	} {
+		h := newHarness(t)
+		o := h.observeFacts()
+		h.amend(func(c *model.CapabilityContract) {
+			c.EvidenceRequirements = append([]model.EvidenceRequirement{stock}, c.EvidenceRequirements...)
+		})
+		tc.arrange(h, o)
+		res := h.invoker.Invoke(ctx, reserve())
+		if res.Status != tc.want {
+			t.Errorf("%s: got %s (%s)", name, res.Status, res.Reason)
+			continue
+		}
+		h.recorded(res)
+		if tc.want == capability.StatusDenied && (res.Requirement != "CHR-CAP-013" || h.transport.calls != 0 || res.LedgerFence != "") {
+			t.Errorf("%s: denied under %s after %d transport calls, fence %q", name, res.Requirement, h.transport.calls, res.LedgerFence)
+		}
+		if name == "no observer" {
+			if b := h.invoker.Readiness(ctx, "harbor.example", model.Ref{ID: "CAP-RESERVE-ORDER-STOCK"}, &model.Ref{ID: "SYSPROFILE-HARBOR-S4-2602"}, "reservation-create"); !slices.Contains(requirements(b), "CHR-CAP-013") {
+				t.Errorf("readiness does not report the missing observer: %+v", b)
+			}
+		}
+	}
+	// A read relies on the facts it returns; nothing is observed before it.
+	h := newHarness(t)
+	h.invoker.ReadWithoutGrant, h.invoker.Observer = true, nil
+	read := reserve()
+	read.CapabilityID, read.RequiredFeatures, read.IdempotencyKey, read.MaterialInputsDigest = model.Ref{ID: "CAP-READ-ORDER-EXCEPTION"}, nil, "", ""
+	h.transport.resp = binding.Response{Outcome: "facts-returned"}
+	if res := h.invoker.Invoke(ctx, read); res.Status != capability.StatusExecuted {
+		t.Errorf("read with required evidence: %s (%s)", res.Status, res.Reason)
 	}
 }

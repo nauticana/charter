@@ -11,6 +11,7 @@
     "CHR-EVID-013",
     "CHR-EVID-014",
     "CHR-EVID-015",
+    "CHR-PROC-011",
     "CHR-INFO-004"
   ],
   "type": "object",
@@ -296,6 +297,56 @@
         "attribute",
         "value",
         "validAt"
+      ],
+      "additionalProperties": false
+    },
+    "measurement": {
+      "description": "The value of an outcome measure observed over a closed window (CHR-PROC-011).",
+      "type": "object",
+      "properties": {
+        "measureId": {
+          "$ref": "../common.schema.json#/$defs/idRef",
+          "x-charter-ref-kinds": [
+            "OutcomeMeasure"
+          ]
+        },
+        "value": {
+          "description": "In the measure's unit, or integer minor units of its currency.",
+          "type": "number"
+        },
+        "window": {
+          "allOf": [
+            {
+              "$ref": "../common.schema.json#/$defs/validity"
+            }
+          ],
+          "required": [
+            "to"
+          ]
+        },
+        "processDefinitionVersion": {
+          "description": "The version of the measured process, or of the measured task's process, the measurement was taken under.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "actionRecordIds": {
+          "description": "Executed actions whose verified effects the measurement rests on.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "../common.schema.json#/$defs/idRef"
+          },
+          "x-charter-ref-kinds": [
+            "ActionRecord"
+          ]
+        }
+      },
+      "required": [
+        "measureId",
+        "value",
+        "window"
       ],
       "additionalProperties": false
     }

@@ -9,7 +9,8 @@
     "CHR-ID-003",
     "CHR-ID-004",
     "CHR-ID-008",
-    "CHR-ID-009"
+    "CHR-ID-009",
+    "CHR-ENT-013"
   ],
   "type": "object",
   "allOf": [
@@ -29,6 +30,9 @@
     "validity": true,
     "extensions": true,
     "derivedFrom": true,
+    "externalIdentifiers": {
+      "$ref": "../common.schema.json#/$defs/externalIdentifiers"
+    },
     "kind": {
       "const": "HumanIdentity"
     },

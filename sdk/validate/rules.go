@@ -42,6 +42,9 @@ func NewRuleSet() (RuleSet, error) {
 		ShapeRule{AbstractRule{"CHR-RULE-INFO-002", []string{"CHR-INFO-010"}}},
 		CurrentFactsRule{AbstractRule{"CHR-RULE-EVID-003", []string{"CHR-EVID-014", "CHR-EVID-015"}}},
 		DerivationRule{AbstractRule{"CHR-RULE-CONF-003", []string{"CHR-CONF-015", "CHR-AGENT-010"}}, meta},
+		EvidenceRequirementsRule{AbstractRule{"CHR-RULE-CAP-003", []string{"CHR-CAP-013"}}},
+		ExternalIdentifiersRule{AbstractRule{"CHR-RULE-ENT-007", []string{"CHR-ENT-013"}}},
+		MeasurementRule{AbstractRule{"CHR-RULE-PROC-006", []string{"CHR-PROC-011"}}},
 	}
 	set := RuleSet{}
 	for _, r := range all {

@@ -12,14 +12,14 @@ The profile states the outcome vocabulary and enforcement mode; a decision namin
 
 ```mermaid
 flowchart LR
+    MediationDecision -->|actor| AgentIdentity
     MediationProfile -->|scope.agentIdentityIds| AgentIdentity
-    MediationProfile -->|scope.capabilityIds| CapabilityContract
-    MediationProfile -->|scope.informationIds| InformationDefinition
     MediationProfile -->|boundaryControlIds| AuthorityGrant
     MediationProfile -->|boundaryControlIds| SodConstraint
     MediationProfile -->|boundaryControlIds| InformationGovernancePolicy
+    MediationProfile -->|scope.capabilityIds| CapabilityContract
+    MediationProfile -->|scope.informationIds| InformationDefinition
     MediationDecision -->|mediationProfileId| MediationProfile
-    MediationDecision -->|actor| AgentIdentity
     MediationDecision -->|subject.capabilityIds| CapabilityContract
     MediationDecision -->|subject.informationIds| InformationDefinition
     MediationDecision -->|runtimeContext.runtimeInstanceId| AgentRuntime

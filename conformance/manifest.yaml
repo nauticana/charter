@@ -35,6 +35,9 @@ profiles:
       - CHR-RULE-INFO-002
       - CHR-RULE-EVID-003
       - CHR-RULE-CONF-003
+      - CHR-RULE-CAP-003
+      - CHR-RULE-ENT-007
+      - CHR-RULE-PROC-006
   - id: agent-runtime
     status: active
     rules:
@@ -51,6 +54,7 @@ profiles:
       - CHR-RULE-RT-011
       - CHR-RULE-RT-012
       - CHR-RULE-RT-013
+      - CHR-RULE-RT-014
   - id: system-adapter
     status: active
     rules:
@@ -209,3 +213,15 @@ rules:
   - id: CHR-RULE-CONF-003
     status: active
     path: rules/CHR-RULE-CONF-003.yaml
+  - id: CHR-RULE-CAP-003
+    status: active
+    path: rules/CHR-RULE-CAP-003.yaml
+  - id: CHR-RULE-ENT-007
+    status: active
+    path: rules/CHR-RULE-ENT-007.yaml
+  - id: CHR-RULE-PROC-006
+    status: active
+    path: rules/CHR-RULE-PROC-006.yaml
+  - id: CHR-RULE-RT-014
+    status: active
+    path: rules/CHR-RULE-RT-014.yaml

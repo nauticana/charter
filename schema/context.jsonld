@@ -1,0 +1,278 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@vocab": "https://nauticana.github.io/charter/vocab#",
+    "accountableResponsibilityId": {
+      "@id": "chr:accountableResponsibilityId",
+      "@type": "@id"
+    },
+    "actionRecordId": {
+      "@id": "chr:actionRecordId",
+      "@type": "@id"
+    },
+    "actionRecordIds": {
+      "@id": "chr:actionRecordIds",
+      "@type": "@id"
+    },
+    "actionTime": {
+      "@id": "chr:actionTime",
+      "@type": "xsd:dateTime"
+    },
+    "addressesGapIds": {
+      "@id": "chr:addressesGapIds",
+      "@type": "@id"
+    },
+    "agentDefinitionId": {
+      "@id": "chr:agentDefinitionId",
+      "@type": "@id"
+    },
+    "agentIdentityId": {
+      "@id": "chr:agentIdentityId",
+      "@type": "@id"
+    },
+    "agentIdentityIds": {
+      "@id": "chr:agentIdentityIds",
+      "@type": "@id"
+    },
+    "approvalId": {
+      "@id": "chr:approvalId",
+      "@type": "@id"
+    },
+    "approvalIds": {
+      "@id": "chr:approvalIds",
+      "@type": "@id"
+    },
+    "assignmentId": {
+      "@id": "chr:assignmentId",
+      "@type": "@id"
+    },
+    "at": {
+      "@id": "chr:at",
+      "@type": "xsd:dateTime"
+    },
+    "authorityGrantId": {
+      "@id": "chr:authorityGrantId",
+      "@type": "@id"
+    },
+    "baselineStateId": {
+      "@id": "chr:baselineStateId",
+      "@type": "@id"
+    },
+    "bindingId": {
+      "@id": "chr:bindingId",
+      "@type": "@id"
+    },
+    "boundaryControlIds": {
+      "@id": "chr:boundaryControlIds",
+      "@type": "@id"
+    },
+    "capabilityId": {
+      "@id": "chr:capabilityId",
+      "@type": "@id"
+    },
+    "capabilityIds": {
+      "@id": "chr:capabilityIds",
+      "@type": "@id"
+    },
+    "certifiedAt": {
+      "@id": "chr:certifiedAt",
+      "@type": "xsd:dateTime"
+    },
+    "chr": "https://nauticana.github.io/charter/vocab#",
+    "constrainedActions": {
+      "@id": "chr:constrainedActions",
+      "@type": "@id"
+    },
+    "createdAt": {
+      "@id": "chr:createdAt",
+      "@type": "xsd:dateTime"
+    },
+    "decidedAt": {
+      "@id": "chr:decidedAt",
+      "@type": "xsd:dateTime"
+    },
+    "dueAt": {
+      "@id": "chr:dueAt",
+      "@type": "xsd:dateTime"
+    },
+    "effectiveAt": {
+      "@id": "chr:effectiveAt",
+      "@type": "xsd:dateTime"
+    },
+    "endedAt": {
+      "@id": "chr:endedAt",
+      "@type": "xsd:dateTime"
+    },
+    "enterpriseId": {
+      "@id": "chr:enterpriseId",
+      "@type": "@id"
+    },
+    "enterpriseSystemId": {
+      "@id": "chr:enterpriseSystemId",
+      "@type": "@id"
+    },
+    "evidenceRecordId": {
+      "@id": "chr:evidenceRecordId",
+      "@type": "@id"
+    },
+    "evidenceRecordIds": {
+      "@id": "chr:evidenceRecordIds",
+      "@type": "@id"
+    },
+    "expiresAt": {
+      "@id": "chr:expiresAt",
+      "@type": "xsd:dateTime"
+    },
+    "from": {
+      "@id": "chr:from",
+      "@type": "xsd:date"
+    },
+    "governancePolicyIds": {
+      "@id": "chr:governancePolicyIds",
+      "@type": "@id"
+    },
+    "informationDefinitionId": {
+      "@id": "chr:informationDefinitionId",
+      "@type": "@id"
+    },
+    "informationId": {
+      "@id": "chr:informationId",
+      "@type": "@id"
+    },
+    "informationIds": {
+      "@id": "chr:informationIds",
+      "@type": "@id"
+    },
+    "issuedAt": {
+      "@id": "chr:issuedAt",
+      "@type": "xsd:dateTime"
+    },
+    "measureId": {
+      "@id": "chr:measureId",
+      "@type": "@id"
+    },
+    "mediationProfileId": {
+      "@id": "chr:mediationProfileId",
+      "@type": "@id"
+    },
+    "observedAt": {
+      "@id": "chr:observedAt",
+      "@type": "xsd:dateTime"
+    },
+    "organizationUnitId": {
+      "@id": "chr:organizationUnitId",
+      "@type": "@id"
+    },
+    "parentProcessId": {
+      "@id": "chr:parentProcessId",
+      "@type": "@id"
+    },
+    "parentUnitId": {
+      "@id": "chr:parentUnitId",
+      "@type": "@id"
+    },
+    "positionTypeId": {
+      "@id": "chr:positionTypeId",
+      "@type": "@id"
+    },
+    "processId": {
+      "@id": "chr:processId",
+      "@type": "@id"
+    },
+    "processInstanceId": {
+      "@id": "chr:processInstanceId",
+      "@type": "@id"
+    },
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "reconcilesActionId": {
+      "@id": "chr:reconcilesActionId",
+      "@type": "@id"
+    },
+    "recordIds": {
+      "@id": "chr:recordIds",
+      "@type": "@id"
+    },
+    "recordedAt": {
+      "@id": "chr:recordedAt",
+      "@type": "xsd:dateTime"
+    },
+    "responsibilityId": {
+      "@id": "chr:responsibilityId",
+      "@type": "@id"
+    },
+    "responsibilityIds": {
+      "@id": "chr:responsibilityIds",
+      "@type": "@id"
+    },
+    "resultDate": {
+      "@id": "chr:resultDate",
+      "@type": "xsd:date"
+    },
+    "revokedAt": {
+      "@id": "chr:revokedAt",
+      "@type": "xsd:dateTime"
+    },
+    "runtimeInstanceId": {
+      "@id": "chr:runtimeInstanceId",
+      "@type": "@id"
+    },
+    "sodConstraintId": {
+      "@id": "chr:sodConstraintId",
+      "@type": "@id"
+    },
+    "sodConstraintIds": {
+      "@id": "chr:sodConstraintIds",
+      "@type": "@id"
+    },
+    "sodExceptionId": {
+      "@id": "chr:sodExceptionId",
+      "@type": "@id"
+    },
+    "sourceEvidence": {
+      "@id": "chr:sourceEvidence",
+      "@type": "@id"
+    },
+    "startedAt": {
+      "@id": "chr:startedAt",
+      "@type": "xsd:dateTime"
+    },
+    "supersedes": {
+      "@id": "chr:supersedes",
+      "@type": "@id"
+    },
+    "systemProfileId": {
+      "@id": "chr:systemProfileId",
+      "@type": "@id"
+    },
+    "targetInformationId": {
+      "@id": "chr:targetInformationId",
+      "@type": "@id"
+    },
+    "targetStateId": {
+      "@id": "chr:targetStateId",
+      "@type": "@id"
+    },
+    "taskId": {
+      "@id": "chr:taskId",
+      "@type": "@id"
+    },
+    "to": {
+      "@id": "chr:to",
+      "@type": "xsd:date"
+    },
+    "validAt": {
+      "@id": "chr:validAt",
+      "@type": "xsd:dateTime"
+    },
+    "valueStreamId": {
+      "@id": "chr:valueStreamId",
+      "@type": "@id"
+    },
+    "verifiedAt": {
+      "@id": "chr:verifiedAt",
+      "@type": "xsd:dateTime"
+    },
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  }
+}

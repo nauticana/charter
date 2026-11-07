@@ -1,0 +1,4 @@
+rules: [CHR-RULE-PROC-006]
+expected: fail
+reason: The Q2 resolution-time measurement rests on the reservation attempt whose outcome stayed unknown
+documents: ../../../../examples/harbor-manufacturing/instances

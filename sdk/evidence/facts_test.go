@@ -78,3 +78,42 @@ func TestCurrentFacts(t *testing.T) {
 		t.Errorf("unranked: %v", got)
 	}
 }
+
+func TestNarrowedKeepsTheTighterBound(t *testing.T) {
+	def := model.InformationDefinition{FactAuthority: &model.FactAuthority{MaxAgeSeconds: 3600}}
+	for item, want := range map[int64]int64{0: 3600, 900: 900, 7200: 3600} {
+		if got := Narrowed(def, item).FactAuthority.MaxAgeSeconds; got != want {
+			t.Errorf("item %d under 3600: %d, want %d", item, got, want)
+		}
+	}
+	if got := Narrowed(model.InformationDefinition{}, 900).FactAuthority.MaxAgeSeconds; got != 900 {
+		t.Errorf("unbounded definition: %d", got)
+	}
+	if def.FactAuthority.MaxAgeSeconds != 3600 {
+		t.Error("the definition passed in was changed")
+	}
+}
+
+func TestMeasurementsAreListedInWindowOrder(t *testing.T) {
+	c := corpus.New()
+	for _, raw := range []string{
+		`{"charterSpecVersion":"1.7.0","namespace":"t","kind":"EvidenceRecord","id":"Q2","category":"derived-conclusion","content":"c","recordedAt":"2026-07-01T00:00:00Z","sources":["s"],"transformations":["t"],` +
+			`"measurement":{"measureId":"OM","value":9,"window":{"from":"2026-04-01","to":"2026-06-30"}}}`,
+		`{"charterSpecVersion":"1.7.0","namespace":"t","kind":"EvidenceRecord","id":"Q1","category":"derived-conclusion","content":"c","recordedAt":"2026-04-01T00:00:00Z","sources":["s"],"transformations":["t"],` +
+			`"measurement":{"measureId":"OM","value":26,"window":{"from":"2026-01-01","to":"2026-03-31"}}}`,
+		`{"charterSpecVersion":"1.7.0","namespace":"t","kind":"EvidenceRecord","id":"OTHER","category":"observed-fact","content":"c","recordedAt":"2026-04-01T00:00:00Z",` +
+			`"measurement":{"measureId":"OM-OTHER","value":1,"window":{"from":"2026-01-01","to":"2026-03-31"}}}`,
+	} {
+		d, err := (corpus.Parser{}).Parse([]byte(raw))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := c.Add(d); err != nil {
+			t.Fatal(err)
+		}
+	}
+	got, err := (Queries{Provider: NewBaseProvider(c)}).Measurements(context.Background(), "t", model.Ref{ID: "OM"})
+	if err != nil || len(got) != 2 || got[0].ID != "Q1" || got[1].ID != "Q2" {
+		t.Fatalf("measurements %v %v", got, err)
+	}
+}

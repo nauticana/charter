@@ -12,6 +12,7 @@ Packages:
 - `authority`, `capability`, `binding`, `predicate`: governed decision and invocation contracts: grant and approval evaluation, the `BaseInvoker` pipeline, binding package materialization, feature support, fail-closed execution, and CEL evaluation of contract predicates
 - `evidence`, `information`: append-only evidence with supersession, integrity, and fact standing; information shapes and governance decisions
 - `validate`: structural/semantic validation, fixture execution, and conformance claims
+- `interchange`: JSON-LD export and import of document sets under the published context, with stable document IRIs and refusal of unaccepted loss
 - `adapter/keel`: the optional bridge to keel's principal and tenant context, RBAC permission checks, trust guards, table change log, message publishing, metrics, and request ids, plus a tenant-scoped document store and human account links in its own schema module; only this package imports keel
 
 Conventions: interfaces, `Abstract*` embed-only extension points, and complete `Base*` implementations live in separate files; behavior is a method on a class; `model` holds structs only. Providers resolve a reference relative to the owning document's namespace (`ownerNamespace`, `ref`), exactly as the schemas define `idRef`, and every decision fails closed with a reason and the requirement it enforces.

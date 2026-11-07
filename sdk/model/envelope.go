@@ -17,6 +17,15 @@ type Envelope struct {
 	// SourceEvidence is admitted by enterprise and process definition schemas only (CHR-INFO-009).
 	SourceEvidence []Ref       `json:"sourceEvidence,omitempty"`
 	DerivedFrom    *Provenance `json:"derivedFrom,omitempty"`
+	// ExternalIdentifiers is admitted by organization and human identity schemas only (CHR-ENT-013).
+	ExternalIdentifiers []ExternalIdentifier `json:"externalIdentifiers,omitempty"`
+}
+
+// ExternalIdentifier is the opaque key a system profile knows the document's object by, for the validity it held.
+type ExternalIdentifier struct {
+	SystemProfileID Ref       `json:"systemProfileId"`
+	ExternalID      string    `json:"externalId"`
+	Validity        *Validity `json:"validity,omitempty"`
 }
 
 const (

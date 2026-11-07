@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.3.0",
+  "charterSpecVersion": "1.7.0",
   "namespace": "harbor.example",
   "kind": "Task",
   "id": "TASK-OE-EXECUTE",
@@ -15,5 +15,13 @@
   ],
   "permittedParticipation": [
     "executes"
+  ],
+  "evidenceRequirements": [
+    {
+      "informationId": "INFO-ORDER-EXCEPTION",
+      "attribute": "eligibleQuantity",
+      "required": true
+    },
+    "approval bound to the proposal digest"
   ]
 }

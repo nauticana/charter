@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.3.0",
+  "charterSpecVersion": "1.7.0",
   "namespace": "harbor.example",
   "kind": "CapabilityContract",
   "id": "CAP-READ-ORDER-EXCEPTION",
@@ -39,6 +39,12 @@
   },
   "evidenceRequirements": [
     "invocation",
+    {
+      "informationId": "INFO-ORDER-EXCEPTION",
+      "attribute": "eligibleQuantity",
+      "required": true,
+      "maxAgeSeconds": 900
+    },
     "observation time and source"
   ]
 }

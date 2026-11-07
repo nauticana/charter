@@ -236,6 +236,7 @@ func NewBehavioralRuleSet() BehavioralRuleSet {
 		{AbstractRule{"CHR-RULE-RT-011", []string{"CHR-CAP-011"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-RT-012", []string{"CHR-CAP-012", "CHR-EVID-010"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-RT-013", []string{"CHR-EVID-016", "CHR-CAP-010"}}, SubjectRuntime},
+		{AbstractRule{"CHR-RULE-RT-014", []string{"CHR-CAP-013", "CHR-EVID-010"}}, SubjectRuntime},
 		{AbstractRule{"CHR-RULE-SA-001", []string{"CHR-BIND-002", "CHR-BIND-006", "CHR-BIND-009"}}, SubjectAdapter},
 		{AbstractRule{"CHR-RULE-SA-002", []string{"CHR-CAP-005", "CHR-BIND-005", "CHR-SEC-007", "CHR-SEC-008"}}, SubjectAdapter},
 		{AbstractRule{"CHR-RULE-SA-003", []string{"CHR-CAP-001", "CHR-CAP-007"}}, SubjectAdapter},

@@ -9,7 +9,9 @@
     "CHR-CONF-004",
     "CHR-CONF-012",
     "CHR-CONF-015",
-    "CHR-ENT-005"
+    "CHR-ENT-005",
+    "CHR-ENT-013",
+    "CHR-CAP-013"
   ],
   "$defs": {
     "identifier": {
@@ -191,6 +193,77 @@
         "digest"
       ],
       "additionalProperties": false
+    },
+    "externalIdentifiers": {
+      "description": "Identifiers the object carries in external systems; at most one per system profile is effective at a time (CHR-ENT-013).",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "systemProfileId": {
+            "$ref": "#/$defs/idRef",
+            "x-charter-ref-kinds": [
+              "SystemProfile"
+            ]
+          },
+          "externalId": {
+            "description": "The opaque key the system uses, as its adapter encodes it.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "validity": {
+            "$ref": "#/$defs/validity"
+          }
+        },
+        "required": [
+          "systemProfileId",
+          "externalId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "evidenceRequirement": {
+      "description": "Evidence the work rests on: prose, or the information and attribute whose current fact is required, with a maximum age no wider than the information's own (CHR-CAP-013).",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        {
+          "type": "object",
+          "properties": {
+            "informationId": {
+              "$ref": "#/$defs/idRef",
+              "x-charter-ref-kinds": [
+                "InformationDefinition"
+              ]
+            },
+            "attribute": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "required": {
+              "description": "A current fact is required for the work to proceed.",
+              "type": "boolean"
+            },
+            "maxAgeSeconds": {
+              "description": "A fact whose validAt is more than this many seconds before the decision does not satisfy the requirement.",
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "informationId",
+            "attribute",
+            "required"
+          ],
+          "additionalProperties": false
+        }
+      ]
     },
     "featureSupport": {
       "description": "Declared support for one or more contract features.",

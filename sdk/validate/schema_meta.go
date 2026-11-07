@@ -8,17 +8,20 @@ import (
 	"github.com/nauticana/charter/sdk/model"
 )
 
-// SchemaMeta derives the Charter kind set, every idRef- and objectRef-typed property name, and the document kinds each
-// idRef property may name (its x-charter-ref-kinds annotation) from the embedded schemas.
+// SchemaMeta derives the Charter kind set, every property name, every idRef- and objectRef-typed property name, the
+// document kinds each idRef property may name (its x-charter-ref-kinds annotation), and the date or date-time format
+// a property name consistently declares from the embedded schemas.
 type SchemaMeta struct {
 	Kinds         map[string]bool
+	Properties    map[string]bool
 	IDRefKeys     map[string]bool
 	ObjectRefKeys map[string]bool
 	RefKinds      map[string][]model.Kind
+	Formats       map[string]string
 }
 
 func NewSchemaMeta() (*SchemaMeta, error) {
-	m := &SchemaMeta{Kinds: map[string]bool{}, IDRefKeys: map[string]bool{}, ObjectRefKeys: map[string]bool{}, RefKinds: map[string][]model.Kind{}}
+	m := &SchemaMeta{Kinds: map[string]bool{}, Properties: map[string]bool{}, IDRefKeys: map[string]bool{}, ObjectRefKeys: map[string]bool{}, RefKinds: map[string][]model.Kind{}, Formats: map[string]string{}}
 	var cat Catalog
 	entries, err := cat.Entries()
 	if err != nil {
@@ -83,6 +86,15 @@ func (m *SchemaMeta) collect(v any) {
 	case map[string]any:
 		if props, ok := n["properties"].(map[string]any); ok {
 			for k, p := range props {
+				m.Properties[k] = true
+				if sub, ok := p.(map[string]any); ok {
+					format, _ := sub["format"].(string)
+					if have, seen := m.Formats[k]; !seen {
+						m.Formats[k] = format
+					} else if have != format {
+						m.Formats[k] = ""
+					}
+				}
 				if m.isIDRef(p) {
 					m.IDRefKeys[k] = true
 					if annotated, ok := p.(map[string]any); ok {

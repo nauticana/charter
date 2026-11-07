@@ -1,0 +1,11 @@
+id: CHR-RULE-RT-014
+title: Required evidence is observed before execution
+requirements: [CHR-CAP-013, CHR-EVID-010]
+profile: agent-runtime
+verification: runtime-behavioral
+applies_to: [CapabilityContract, ActionRecord]
+check: >-
+  For a mutating capability whose contract requires structured evidence, the runtime observes the facts of every required item for a new attempt before submitting the external operation and proceeds only when each is present with observed-fact evidence; an attempt whose required fact is absent or unevidenced is refused as denied, without a transport call, and recorded with its evaluations.
+fixtures:
+  valid: fixtures/valid/typed-conditions-met
+  invalid: fixtures/invalid/required-evidence-unobserved

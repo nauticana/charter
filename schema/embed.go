@@ -3,5 +3,5 @@ package schema
 
 import "embed"
 
-//go:embed catalog.json common.schema.json */*.schema.json
+//go:embed catalog.json common.schema.json context.jsonld */*.schema.json
 var FS embed.FS

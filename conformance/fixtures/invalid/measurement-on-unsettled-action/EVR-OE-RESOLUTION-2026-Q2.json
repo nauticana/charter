@@ -1,0 +1,29 @@
+{
+  "charterSpecVersion": "1.7.0",
+  "namespace": "harbor.example",
+  "kind": "EvidenceRecord",
+  "id": "EVR-OE-RESOLUTION-2026-Q2",
+  "enterpriseId": "ENT-HARBOR",
+  "category": "derived-conclusion",
+  "content": "Blocked orders took a median of 9 hours to resolve in 2026-Q2, the first quarter with agent support",
+  "recordedAt": "2026-07-01T08:00:00Z",
+  "sources": [
+    "SAP S/4HANA Cloud order block and release history, 2026-04-01 to 2026-06-30",
+    "ACT-0042-EXECUTE-TIMEOUT"
+  ],
+  "transformations": [
+    "median of block-to-release hours over released and rejected orders"
+  ],
+  "measurement": {
+    "measureId": "OM-OE-RESOLUTION-TIME",
+    "value": 9,
+    "window": {
+      "from": "2026-04-01",
+      "to": "2026-06-30"
+    },
+    "processDefinitionVersion": "1",
+    "actionRecordIds": [
+      "ACT-0042-EXECUTE-TIMEOUT"
+    ]
+  }
+}

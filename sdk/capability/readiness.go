@@ -19,7 +19,8 @@ type Blocker struct {
 // Readiness reports, before a binding goes live, every denial that follows from the documents and the composition
 // rather than from an action: the contract, the binding and its declared features, the input and output schemas and
 // the data bindings of their shapes, the authority binding that maps the contract's required authority, and the
-// approval gate, separation-of-duties checker, ledger, effect observer, predicate evaluator, and escalator the contract requires. No blockers means only action-specific gates remain.
+// approval gate, separation-of-duties checker, ledger, effect observer, predicate evaluator, and escalator the contract
+// requires. No blockers means only action-specific gates remain.
 func (i *BaseInvoker) Readiness(ctx context.Context, namespace string, capabilityID model.Ref, profile *model.Ref, features ...string) []Blocker {
 	if i.Catalog == nil || i.Identities == nil || i.Authority == nil || i.Bindings == nil || i.Transport == nil || i.Evidence == nil || i.IDs == nil {
 		return []Blocker{{"CHR-AUTH-010", "invoker is not fully composed"}}
@@ -51,6 +52,8 @@ func (i *BaseInvoker) Readiness(ctx context.Context, namespace string, capabilit
 		out = append(out, Blocker{"CHR-CAP-012", "capability declares predicates but no predicate evaluator is composed"})
 	case pre && i.Observer == nil:
 		out = append(out, Blocker{"CHR-CAP-012", "capability declares predicate preconditions but no observer is composed"})
+	case len(contract.ObservedEvidence()) > 0 && i.Observer == nil:
+		out = append(out, Blocker{"CHR-CAP-013", "capability requires observed evidence but no observer is composed"})
 	}
 	if _, err := lookup.AuthorityBindingFor(ctx, namespace, capabilityID, profile); err != nil {
 		out = append(out, Blocker{"CHR-BIND-006", "authority " + contract.RequiredAuthority + " is not mapped: " + err.Error()})

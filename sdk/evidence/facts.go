@@ -108,6 +108,19 @@ func (q Queries) CurrentFacts(ctx context.Context, ownerNamespace string, subjec
 	return out, nil
 }
 
+// Narrowed returns def with its fact age bound narrowed to maxAgeSeconds when that is tighter; zero keeps def's own.
+func Narrowed(def model.InformationDefinition, maxAgeSeconds int64) model.InformationDefinition {
+	var authority model.FactAuthority
+	if def.FactAuthority != nil {
+		authority = *def.FactAuthority
+	}
+	if maxAgeSeconds > 0 && (authority.MaxAgeSeconds == 0 || maxAgeSeconds < authority.MaxAgeSeconds) {
+		authority.MaxAgeSeconds = maxAgeSeconds
+	}
+	def.FactAuthority = &authority
+	return def
+}
+
 // rankOf is the position of the first source matching the record, or one past the last for an unranked source.
 func rankOf(a model.FactAuthority, defNamespace string, r model.EvidenceRecord) int {
 	for k, s := range a.Ranks {

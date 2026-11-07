@@ -1,0 +1,4 @@
+rules: [CHR-RULE-ENT-007]
+expected: fail
+reason: Alex Rivera carries two business partner numbers in the same SAP system at the same time
+documents: ../../../../examples/harbor-manufacturing/instances

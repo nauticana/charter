@@ -78,9 +78,10 @@ func jsonValue(v any) (any, error) {
 	return jsonschema.UnmarshalJSON(bytes.NewReader(b))
 }
 
-// checkPreconditions decides each predicate precondition on an observation taken for a new attempt, after its key is
-// claimed so a replay returns the settled result; violated or unknown releases the claim and denies before the
-// transport is called (CHR-CAP-012).
+// checkPreconditions decides each predicate precondition, and the presence of each fact a mutating contract requires,
+// on an observation taken for a new attempt after its key is claimed, so a replay returns the settled result; a
+// violated or unknown precondition or an unobserved required fact releases the claim and denies before the transport
+// is called (CHR-CAP-012, CHR-CAP-013).
 func (r *invocationRun) checkPreconditions(ctx context.Context) (Result, bool) {
 	var preds []model.Precondition
 	for _, p := range r.contract.Preconditions {
@@ -88,12 +89,13 @@ func (r *invocationRun) checkPreconditions(ctx context.Context) (Result, bool) {
 			preds = append(preds, p)
 		}
 	}
-	if len(preds) == 0 {
+	required := r.contract.ObservedEvidence()
+	if len(preds) == 0 && len(required) == 0 {
 		return Result{}, true
 	}
 	inv := r.inv
 	obs, err := r.invoker.Observer.Observe(ctx, binding.ObservationRequest{Capability: inv.CapabilityID, ContractVersion: r.contract.ContractVersion,
-		Inputs: inv.Inputs, IdempotencyKey: inv.IdempotencyKey, SubjectRefs: inv.SubjectRefs, Preconditions: preds})
+		Inputs: inv.Inputs, IdempotencyKey: inv.IdempotencyKey, SubjectRefs: inv.SubjectRefs, Preconditions: preds, Evidence: required})
 	if err != nil {
 		obs = binding.Observation{}
 	}
@@ -107,6 +109,12 @@ func (r *invocationRun) checkPreconditions(ctx context.Context) (Result, bool) {
 		}
 		e.Reason = clip(e.Reason)
 		r.result.Preconditions = append(r.result.Preconditions, e)
+	}
+	for _, e := range required {
+		if _, observed := obs.Facts[e.Attribute]; !observed || len(obs.EvidenceRecordIDs) == 0 {
+			r.ledger(ctx, r.contract.Idempotency.Mutating, true, Ledger.Release)
+			return r.deny(ctx, fmt.Sprintf("required evidence %s.%s was not observed with observed-fact evidence", e.InformationID.ID, e.Attribute), "CHR-CAP-013"), false
+		}
 	}
 	for _, e := range r.result.Preconditions {
 		if e.Result != model.PostconditionSatisfied {

@@ -127,3 +127,27 @@ func TestTypedModelsRoundTripHarbor(t *testing.T) {
 		t.Errorf("Harbor covers only %d kinds", len(seen))
 	}
 }
+
+func TestEvidenceRequirementCodec(t *testing.T) {
+	for _, raw := range []string{`"invocation"`, `{"informationId":"INFO","attribute":"eligibleQuantity","required":true,"maxAgeSeconds":900}`, `{"informationId":"INFO","attribute":"eligibleQuantity","required":false}`} {
+		var r model.EvidenceRequirement
+		if err := json.Unmarshal([]byte(raw), &r); err != nil {
+			t.Fatal(raw, err)
+		}
+		if out, err := json.Marshal(r); err != nil || string(out) != raw {
+			t.Errorf("%s: marshalled %s %v", raw, out, err)
+		}
+	}
+	reqs := []model.EvidenceRequirement{{Statement: "prose"}, {InformationID: &model.Ref{ID: "A"}, Attribute: "x", Required: true}, {InformationID: &model.Ref{ID: "B"}, Attribute: "y"}}
+	if got := model.RequiredEvidence(reqs); len(got) != 1 || got[0].Attribute != "x" {
+		t.Errorf("required: %+v", got)
+	}
+	c := model.CapabilityContract{EvidenceRequirements: reqs}
+	if len(c.ObservedEvidence()) != 0 {
+		t.Error("a read observes nothing before it runs")
+	}
+	c.Idempotency.Mutating = true
+	if len(c.ObservedEvidence()) != 1 {
+		t.Error("a mutation observes its required evidence")
+	}
+}

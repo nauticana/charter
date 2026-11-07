@@ -1,0 +1,4 @@
+rules: [CHR-RULE-CAP-003]
+expected: fail
+reason: The order read executed without citing any fact about the eligible quantity CAP-READ-ORDER-EXCEPTION requires
+documents: ../../../../examples/harbor-manufacturing/instances

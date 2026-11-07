@@ -1,11 +1,11 @@
 {
-  "charterSpecVersion": "1.6.0",
+  "charterSpecVersion": "1.7.0",
   "namespace": "nauticana.charter",
   "id": "CLAIM-core-model",
   "kind": "ConformanceClaim",
   "name": "Reference SDK core-model claim",
   "conformanceProfile": "core-model",
-  "implementationVersion": "1.6.1",
+  "implementationVersion": "1.7.0",
   "testedRuleIds": [
     "CHR-RULE-AGENT-001",
     "CHR-RULE-AGENT-002",
@@ -16,6 +16,7 @@
     "CHR-RULE-AUTH-003",
     "CHR-RULE-CAP-001",
     "CHR-RULE-CAP-002",
+    "CHR-RULE-CAP-003",
     "CHR-RULE-CONF-001",
     "CHR-RULE-CONF-002",
     "CHR-RULE-CONF-003",
@@ -25,6 +26,7 @@
     "CHR-RULE-ENT-004",
     "CHR-RULE-ENT-005",
     "CHR-RULE-ENT-006",
+    "CHR-RULE-ENT-007",
     "CHR-RULE-EVID-001",
     "CHR-RULE-EVID-002",
     "CHR-RULE-EVID-003",
@@ -39,14 +41,15 @@
     "CHR-RULE-PROC-002",
     "CHR-RULE-PROC-003",
     "CHR-RULE-PROC-004",
-    "CHR-RULE-PROC-005"
+    "CHR-RULE-PROC-005",
+    "CHR-RULE-PROC-006"
   ],
   "verificationTypes": [
     "structural",
     "semantic"
   ],
   "result": "conforming",
-  "resultDate": "2026-10-27",
+  "resultDate": "2026-11-06",
   "implementation": {
     "kind": "GoModule",
     "id": "charter-go-sdk",
@@ -215,6 +218,21 @@
     },
     {
       "ruleId": "CHR-RULE-CONF-003",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-CAP-003",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-ENT-007",
+      "verificationType": "semantic",
+      "result": "pass"
+    },
+    {
+      "ruleId": "CHR-RULE-PROC-006",
       "verificationType": "semantic",
       "result": "pass"
     }

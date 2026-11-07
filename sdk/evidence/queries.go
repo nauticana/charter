@@ -50,6 +50,23 @@ func (q Queries) ActionsIn(ctx context.Context, ownerNamespace, executionContext
 	return q.Provider.ActionsIn(ctx, ownerNamespace, executionContextID, limit)
 }
 
+// Measurements lists, in window order, the records stating a measurement of the outcome measure (CHR-PROC-011).
+func (q Queries) Measurements(ctx context.Context, ownerNamespace string, measure model.Ref) ([]model.EvidenceRecord, error) {
+	all, err := q.Provider.Records(ctx)
+	if err != nil {
+		return nil, err
+	}
+	want := corpus.KeyOf(ownerNamespace, measure)
+	var out []model.EvidenceRecord
+	for _, r := range all {
+		if m := r.Measurement; m != nil && corpus.KeyOf(r.Namespace, m.MeasureID) == want {
+			out = append(out, r)
+		}
+	}
+	sort.SliceStable(out, func(i, j int) bool { return out[i].Measurement.Window.From < out[j].Measurement.Window.From })
+	return out, nil
+}
+
 // RecordsAbout lists, in time order, the action records whose subjects include the subject, each followed by the
 // evidence records it cites, then the exception records affecting the subject; escalations carry no subject link.
 func (q Queries) RecordsAbout(ctx context.Context, ownerNamespace string, subject model.ObjectRef) ([]model.Ref, error) {

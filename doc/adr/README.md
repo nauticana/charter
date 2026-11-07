@@ -29,3 +29,5 @@ An accepted ADR does not itself create a normative requirement. Any normative re
 - [0004: Semantic rules built on SDK foundations](0004-semantic-rules-from-sdk-foundations.md)
 - [0005: Runtime-behavioral conformance harness](0005-behavioral-conformance-harness.md)
 - [0006: Keel adapter boundary](0006-keel-adapter-boundary.md)
+- [0007: Structured evidence items, external identifiers, and measurements](0007-evidence-items-identifiers-and-measurements.md)
+- [0008: JSON-LD interchange](0008-json-ld-interchange.md)

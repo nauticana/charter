@@ -1,0 +1,11 @@
+id: CHR-RULE-PROC-006
+title: Measurements rest on executed actions and agree with the baselines citing them
+requirements: [CHR-PROC-011]
+profile: core-model
+verification: semantic
+applies_to: [EvidenceRecord, OutcomeMeasure, ActionRecord]
+check: >-
+  Every EvidenceRecord measurement has a window that ends on or after it starts, states an integer value when its OutcomeMeasure declares a currency, and cites only ActionRecords with disposition executed whose effect, when stated, is complete. Every OutcomeMeasure baseline that cites an EvidenceRecord stating a measurement names that measure and states the same value and window.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/measurement-on-unsettled-action

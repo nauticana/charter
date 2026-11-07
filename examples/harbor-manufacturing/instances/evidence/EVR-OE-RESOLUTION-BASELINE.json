@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.3.0",
+  "charterSpecVersion": "1.7.0",
   "namespace": "harbor.example",
   "kind": "EvidenceRecord",
   "id": "EVR-OE-RESOLUTION-BASELINE",
@@ -12,5 +12,14 @@
   ],
   "transformations": [
     "median of block-to-release hours over released and rejected orders"
-  ]
+  ],
+  "measurement": {
+    "measureId": "OM-OE-RESOLUTION-TIME",
+    "value": 26,
+    "window": {
+      "from": "2026-01-01",
+      "to": "2026-03-31"
+    },
+    "processDefinitionVersion": "1"
+  }
 }

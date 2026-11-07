@@ -13,6 +13,8 @@ Harbor distinguishes identities from positions, assignments, credentials, sessio
 | `ASGN-ELENA-SALES-MANAGER` | `HUMAN-ELENA-TORRES` | Position | `POS-SALES-OPERATIONS-MANAGER` | Occupies | 2025-07-01 onward |
 | `ASGN-ALEX-CREDIT-MANAGER` | `HUMAN-ALEX-RIVERA` | Position | `POS-CREDIT-MANAGER` | Occupies | 2026-01-01 onward |
 | `ASGN-ALEX-CREDIT-APPROVAL` | `HUMAN-ALEX-RIVERA` | Responsibility | `RESP-APPROVE-CREDIT-EXCEPTION` | Approves | 2026-01-01 onward while `ASGN-ALEX-CREDIT-MANAGER` is active |
+
+`HUMAN-ALEX-RIVERA` records the business partner numbers SAP S/4HANA Cloud knows Alex by as external identifiers of `SYSPROFILE-HARBOR-S4-2602`: `BP-10004471` through 2025 and `BP-10009120` from 2026, never both at once; `OU-SALES-OPERATIONS` records its organizational unit `ORG-1200` there. They correlate the objects for synchronization and grant nothing (CHR-ENT-013).
 | `ASGN-DQA-PP-PLN-01`, `ASGN-DQA-PP-PLN-02` | `AGENT-PLANNING-DATA-QUALITY` | Position | `PP-PLN-01`, `PP-PLN-02` | Supports | 2026-04-01 onward |
 
 The work-context assignment does not place the agent in a position. The responsibility assignment does not change the organization tree. Authority is evaluated separately for each assignment context.

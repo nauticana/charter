@@ -1,9 +1,26 @@
 {
-  "charterSpecVersion": "1.3.0",
+  "charterSpecVersion": "1.7.0",
   "namespace": "harbor.example",
   "kind": "HumanIdentity",
   "id": "HUMAN-ALEX-RIVERA",
   "enterpriseId": "ENT-HARBOR",
   "name": "Alex Rivera",
-  "lifecycleState": "active"
+  "lifecycleState": "active",
+  "externalIdentifiers": [
+    {
+      "systemProfileId": "SYSPROFILE-HARBOR-S4-2602",
+      "externalId": "BP-10004471",
+      "validity": {
+        "from": "2024-01-01",
+        "to": "2025-12-31"
+      }
+    },
+    {
+      "systemProfileId": "SYSPROFILE-HARBOR-S4-2602",
+      "externalId": "BP-10009120",
+      "validity": {
+        "from": "2026-01-01"
+      }
+    }
+  ]
 }

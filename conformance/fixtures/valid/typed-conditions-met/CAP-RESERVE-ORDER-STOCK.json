@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.6.0",
+  "charterSpecVersion": "1.7.0",
   "namespace": "harbor.example",
   "kind": "CapabilityContract",
   "id": "CAP-RESERVE-ORDER-STOCK",
@@ -72,6 +72,12 @@
     "retrySemantics": "reconcile by idempotency key before any retry; timeout is an unknown outcome"
   },
   "evidenceRequirements": [
+    {
+      "informationId": "INFO-ORDER-EXCEPTION",
+      "attribute": "eligibleQuantity",
+      "required": true,
+      "maxAgeSeconds": 900
+    },
     "invocation and input provenance",
     "authority and approval decisions",
     "execution reference",

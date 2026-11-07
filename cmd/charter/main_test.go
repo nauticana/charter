@@ -3,6 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -32,7 +35,7 @@ func TestValidateHarbor(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &r); err != nil {
 		t.Fatal(err)
 	}
-	if r.Result != model.ResultConforming || r.Documents < 80 || r.Profile != "core-model" || len(r.Rules) < 19 || r.SpecVersion != "1.6.0" {
+	if r.Result != model.ResultConforming || r.Documents < 80 || r.Profile != "core-model" || len(r.Rules) < 19 || r.SpecVersion != "1.7.0" {
 		t.Errorf("report: %+v", r)
 	}
 	if code, out, _ := exec(t, "validate", harbor); code != exitOK || !strings.Contains(out, "result: conforming") {
@@ -132,12 +135,69 @@ func TestConformanceAndClaim(t *testing.T) {
 
 func TestVersion(t *testing.T) {
 	code, out, _ := exec(t, "version", "-conformance", conf)
-	if code != exitOK || !strings.Contains(out, "specification 1.6.0") || !strings.Contains(out, "active profiles core-model") {
+	if code != exitOK || !strings.Contains(out, "specification 1.7.0") || !strings.Contains(out, "active profiles core-model") {
 		t.Errorf("version: %d %s", code, out)
 	}
 	code, out, _ = exec(t, "version", "-format", "json")
 	var v versionReport
 	if code != exitOK || json.Unmarshal([]byte(out), &v) != nil || len(v.ImplementedRules) < 19 || v.SpecVersion == "" {
 		t.Errorf("version json: %d %s", code, out)
+	}
+}
+
+func TestExportImportRoundTrip(t *testing.T) {
+	code, out, errOut := exec(t, "export", harbor)
+	if code != exitOK {
+		t.Fatalf("export: %d %s", code, errOut)
+	}
+	dir := t.TempDir()
+	graph := filepath.Join(dir, "harbor.jsonld")
+	if err := os.WriteFile(graph, []byte(out), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	c, err := corpus.NewDirLoader(harbor).Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	target := filepath.Join(dir, "imported")
+	if code, out, errOut := exec(t, "import", "-out", target, graph); code != exitOK || !strings.Contains(out, fmt.Sprintf("imported %d documents", c.Len())) {
+		t.Fatalf("import: %d %s%s", code, out, errOut)
+	}
+	if code, _, errOut := exec(t, "validate", filepath.Join(target, "harbor.example")); code != exitOK {
+		t.Fatalf("imported set does not validate: %s", errOut)
+	}
+	lossy := filepath.Join(dir, "lossy.jsonld")
+	if err := os.WriteFile(lossy, []byte(`{"@graph":[{"@id":"urn:charter:t:OU-1","@type":"OrganizationUnit","charterSpecVersion":"1.7.0","name":"x","enterpriseId":"urn:charter:t:E","headcount":3}]}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if code, _, errOut := exec(t, "import", "-out", target, lossy); code != exitFailed || !strings.Contains(errOut, "term headcount") {
+		t.Fatalf("lossy import: %d %s", code, errOut)
+	}
+	if code, out, _ := exec(t, "import", "-out", target, "-accept-loss", "term headcount", lossy); code != exitOK || !strings.Contains(out, "accepting loss of term headcount") {
+		t.Fatalf("accepted loss: %d %s", code, out)
+	}
+	uri := filepath.Join(dir, "uri.jsonld")
+	if err := os.WriteFile(uri, []byte(`{"@graph":[{"@id":"urn:charter:https%3A%2F%2Fharbor.example%2Fcharter:ENT-1","@type":"Enterprise","charterSpecVersion":"1.7.0","name":"x"}]}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if code, _, errOut := exec(t, "import", "-out", target, uri); code != exitOK {
+		t.Fatalf("URI namespace: %s", errOut)
+	}
+	if _, err := os.Stat(filepath.Join(target, "https%3A%2F%2Fharbor.example%2Fcharter", "ENT-1.json")); err != nil {
+		t.Error(err)
+	}
+	for name, raw := range map[string]string{
+		"traversal": `{"@graph":[{"@id":"urn:charter:..:ENT-1","@type":"Enterprise","charterSpecVersion":"1.7.0","name":"x"}]}`,
+		"trailing":  `{"@graph":[]} {}`,
+	} {
+		if err := os.WriteFile(uri, []byte(raw), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if code, _, _ := exec(t, "import", "-out", target, uri); code != exitUsage {
+			t.Errorf("%s accepted", name)
+		}
+	}
+	if code, out, _ := exec(t, "context"); code != exitOK || !strings.Contains(out, `"@vocab"`) {
+		t.Fatalf("context: %d %s", code, out)
 	}
 }

@@ -1,6 +1,6 @@
-rules: [CHR-RULE-RT-011, CHR-RULE-RT-012, CHR-RULE-RT-013]
+rules: [CHR-RULE-RT-011, CHR-RULE-RT-012, CHR-RULE-RT-013, CHR-RULE-RT-014]
 expected: pass
-reason: Inputs match the order-exception shape, the observed eligible stock covers the quantity, and both postconditions hold, so the reservation executes with its whole effect
+reason: Inputs match the order-exception shape, the required eligible-stock fact is observed and covers the quantity, and both postconditions hold, so the reservation executes with its whole effect
 documents: ../../../../examples/harbor-manufacturing/instances
 scenario:
   namespace: harbor.example

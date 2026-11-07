@@ -7,8 +7,8 @@ import (
 )
 
 // ObservationRequest asks for the external state a capability's postconditions describe, or, before execution, the
-// facts its predicate preconditions read. Outcome is the declared outcome the mutation reported, empty when that
-// outcome is unknown.
+// facts its predicate preconditions and required evidence read. Outcome is the declared outcome the mutation reported,
+// empty when that outcome is unknown.
 type ObservationRequest struct {
 	Capability        model.Ref
 	ContractVersion   string
@@ -19,6 +19,8 @@ type ObservationRequest struct {
 	Outcome           string
 	Postconditions    []model.Postcondition
 	Preconditions     []model.Precondition
+	// Evidence names the required structured evidence whose facts must be observed before execution (CHR-CAP-013).
+	Evidence []model.EvidenceRequirement
 }
 
 // Observation is the external state read independently of the mutation's response. Outcome names the declared outcome

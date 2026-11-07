@@ -1,0 +1,22 @@
+{
+  "@context": "https://nauticana.github.io/charter/schema/context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:charter:other.example:OU-1",
+      "@type": "OrganizationUnit",
+      "charterSpecVersion": "1.7.0",
+      "name": "Sales",
+      "description": {"@value": "Vertrieb", "@language": "de"},
+      "enterpriseId": {"@id": "urn:charter:other.example:ENT-1"},
+      "parentUnitId": {"@id": "https://other.example/positions/7"},
+      "headcount": 12,
+      "validity": {"from": "2026-01-01", "note": "planned"},
+      "https://other.example/vocab#costCenter": "CC-1200"
+    },
+    {
+      "@id": "_:b0",
+      "@type": "Position",
+      "name": "Blank"
+    }
+  ]
+}

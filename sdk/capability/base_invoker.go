@@ -178,6 +178,8 @@ func (r *invocationRun) gate(ctx context.Context) (Result, bool) {
 		return r.deny(ctx, "capability declares predicates but no predicate evaluator is composed", "CHR-CAP-012"), false
 	case pre && i.Observer == nil:
 		return r.deny(ctx, "capability declares predicate preconditions but no observer is composed", "CHR-CAP-012"), false
+	case len(contract.ObservedEvidence()) > 0 && i.Observer == nil:
+		return r.deny(ctx, "capability requires observed evidence but no observer is composed", "CHR-CAP-013"), false
 	}
 	return Result{}, true
 }

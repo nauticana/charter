@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type RuntimeContext struct {
 	RuntimeInstanceID  Ref    `json:"runtimeInstanceId"`
@@ -153,9 +156,20 @@ type EvidenceRecord struct {
 	Transformations []string  `json:"transformations,omitempty"`
 	Supersedes      *Ref      `json:"supersedes,omitempty"`
 	// Integrity digests Content, so one immutable record is verifiable outside a bundle (CHR-EVID-005).
-	Integrity  *Integrity  `json:"integrity,omitempty"`
-	Assessment *Assessment `json:"assessment,omitempty"`
-	Fact       *Fact       `json:"fact,omitempty"`
+	Integrity   *Integrity   `json:"integrity,omitempty"`
+	Assessment  *Assessment  `json:"assessment,omitempty"`
+	Fact        *Fact        `json:"fact,omitempty"`
+	Measurement *Measurement `json:"measurement,omitempty"`
+}
+
+// Measurement is the value of an outcome measure observed over a closed window, under a process definition version,
+// resting on the executed actions it names (CHR-PROC-011).
+type Measurement struct {
+	MeasureID                Ref         `json:"measureId"`
+	Value                    json.Number `json:"value"`
+	Window                   Validity    `json:"window"`
+	ProcessDefinitionVersion string      `json:"processDefinitionVersion,omitempty"`
+	ActionRecordIDs          []Ref       `json:"actionRecordIds,omitempty"`
 }
 
 // Fact is the value of one attribute of a subject at a time, as its source stated it (CHR-EVID-014).
