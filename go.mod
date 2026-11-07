@@ -4,7 +4,7 @@ go 1.27.3
 
 require (
 	cel.dev/cel-go v0.33.0
-	github.com/nauticana/keel v1.3.0
+	github.com/nauticana/keel v1.3.2
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	gopkg.in/yaml.v3 v3.0.1
 )
