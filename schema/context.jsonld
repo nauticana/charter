@@ -66,6 +66,10 @@
       "@id": "chr:boundaryControlIds",
       "@type": "@id"
     },
+    "broaderConceptIds": {
+      "@id": "chr:broaderConceptIds",
+      "@type": "@id"
+    },
     "capabilityId": {
       "@id": "chr:capabilityId",
       "@type": "@id"
@@ -79,6 +83,14 @@
       "@type": "xsd:dateTime"
     },
     "chr": "https://nauticana.github.io/charter/vocab#",
+    "classificationId": {
+      "@id": "chr:classificationId",
+      "@type": "@id"
+    },
+    "conceptIds": {
+      "@id": "chr:conceptIds",
+      "@type": "@id"
+    },
     "constrainedActions": {
       "@id": "chr:constrainedActions",
       "@type": "@id"
@@ -147,6 +159,10 @@
       "@id": "chr:issuedAt",
       "@type": "xsd:dateTime"
     },
+    "locator": {
+      "@id": "chr:locator",
+      "@type": "@id"
+    },
     "measureId": {
       "@id": "chr:measureId",
       "@type": "@id"
@@ -196,6 +212,10 @@
     "recordedAt": {
       "@id": "chr:recordedAt",
       "@type": "xsd:dateTime"
+    },
+    "relatedConceptIds": {
+      "@id": "chr:relatedConceptIds",
+      "@type": "@id"
     },
     "responsibilityId": {
       "@id": "chr:responsibilityId",
@@ -260,6 +280,10 @@
     "to": {
       "@id": "chr:to",
       "@type": "xsd:date"
+    },
+    "url": {
+      "@id": "chr:url",
+      "@type": "@id"
     },
     "validAt": {
       "@id": "chr:validAt",

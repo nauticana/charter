@@ -132,7 +132,8 @@ func TestPublishedContextIsCurrent(t *testing.T) {
 		t.Error("schema/context.jsonld differs from the generated context; run charter context > schema/context.jsonld")
 	}
 	terms := generated.(map[string]any)["@context"].(map[string]any)
-	if terms["@vocab"] != Vocab || terms["capabilityId"].(map[string]any)["@type"] != "@id" || terms["recordedAt"].(map[string]any)["@type"] != "xsd:dateTime" || terms["from"].(map[string]any)["@type"] != "xsd:date" {
+	if terms["@vocab"] != Vocab || terms["capabilityId"].(map[string]any)["@type"] != "@id" || terms["recordedAt"].(map[string]any)["@type"] != "xsd:dateTime" ||
+		terms["from"].(map[string]any)["@type"] != "xsd:date" || terms["locator"].(map[string]any)["@type"] != "@id" {
 		t.Errorf("context terms: %v", terms)
 	}
 }
@@ -159,6 +160,11 @@ func TestLossIsRefusedUnlessAccepted(t *testing.T) {
 	ou, err := corpus.Decode[model.OrganizationUnit](docs[0])
 	if err != nil || ou.ID != "OU-1" || ou.Kind != model.KindOrganizationUnit || ou.Description != "Vertrieb" || ou.ParentUnitID != nil {
 		t.Errorf("imported %+v %v", ou, err)
+	}
+	locator := transport(t, map[string]any{"@graph": []any{map[string]any{"@id": "urn:charter:t:EVR-1", "@type": "EvidenceRecord", "charterSpecVersion": "1.8.0",
+		"category": "observed-fact", "content": "c", "recordedAt": "2026-01-01T00:00:00Z", "sources": []any{map[string]any{"locator": map[string]any{"@id": "https://docs.example/a.md#s1"}}}}}})
+	if evr, loss, err := codec.Import(locator, nil); err != nil || len(loss) != 0 || evr[0].Value.(map[string]any)["sources"].([]any)[0].(map[string]any)["locator"] != "https://docs.example/a.md#s1" {
+		t.Errorf("locator as a node reference: %v %v", loss, err)
 	}
 	if value := docs[0].Value.(map[string]any); value["headcount"] != nil || value["validity"].(map[string]any)["note"] != nil || len(value["validity"].(map[string]any)) != 1 {
 		t.Errorf("lost terms were written: %v", value)

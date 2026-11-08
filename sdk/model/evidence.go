@@ -152,7 +152,7 @@ type EvidenceRecord struct {
 	Category        string    `json:"category"`
 	Content         string    `json:"content"`
 	RecordedAt      time.Time `json:"recordedAt"`
-	Sources         []string  `json:"sources,omitempty"`
+	Sources         []Source  `json:"sources,omitempty"`
 	Transformations []string  `json:"transformations,omitempty"`
 	Supersedes      *Ref      `json:"supersedes,omitempty"`
 	// Integrity digests Content, so one immutable record is verifiable outside a bundle (CHR-EVID-005).
@@ -170,6 +170,38 @@ type Measurement struct {
 	Window                   Validity    `json:"window"`
 	ProcessDefinitionVersion string      `json:"processDefinitionVersion,omitempty"`
 	ActionRecordIDs          []Ref       `json:"actionRecordIds,omitempty"`
+}
+
+// Source is a prose provenance reference, or the artifact version a record rests on: its locator, whose fragment may
+// name a passage, media type, version, and content digest (CHR-EVID-017).
+type Source struct {
+	Statement string
+	Locator   string
+	MediaType string
+	Version   string
+	Digest    string
+}
+
+type sourceObject struct {
+	Locator   string `json:"locator"`
+	MediaType string `json:"mediaType"`
+	Version   string `json:"version"`
+	Digest    string `json:"digest"`
+}
+
+func (s *Source) UnmarshalJSON(b []byte) error {
+	var o sourceObject
+	var statement string
+	err := stringOr(b, &statement, &o)
+	*s = Source{Statement: statement, Locator: o.Locator, MediaType: o.MediaType, Version: o.Version, Digest: o.Digest}
+	return err
+}
+
+func (s Source) MarshalJSON() ([]byte, error) {
+	if s.Locator == "" {
+		return json.Marshal(s.Statement)
+	}
+	return json.Marshal(sourceObject{s.Locator, s.MediaType, s.Version, s.Digest})
 }
 
 // Fact is the value of one attribute of a subject at a time, as its source stated it (CHR-EVID-014).

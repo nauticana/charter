@@ -20,6 +20,9 @@ This catalogue gives the recurring Harbor Manufacturing objects stable example i
 | Role | `ROLE-ORDER-EXCEPTION-SUPPORT` | Groups work used to coordinate order exceptions |
 | Responsibility | `RESP-COORDINATE-ORDER-EXCEPTION` | Bring an order exception to a governed disposition |
 | Responsibility | `RESP-APPROVE-CREDIT-EXCEPTION` | Decide whether a credit exception is acceptable |
+| Work classification | `WORKCLASS-ONET-SOC-2019` | O*NET-SOC 2019 occupational taxonomy |
+| Work concept | `WC-ONET-ORDER-CLERKS` | O*NET-SOC 43-4151.00 Order Clerks |
+| Work concept | `WC-ONET-CREDIT-ANALYSTS` | O*NET-SOC 13-2041.00 Credit Analysts |
 | Human identity | `HUMAN-MORGAN-LEE` | Morgan Lee |
 | Human identity | `HUMAN-PRIYA-SHAH` | Priya Shah, former occupant of `PP-PLN-01` |
 | Human identity | `HUMAN-JORDAN-KIM` | Jordan Kim |

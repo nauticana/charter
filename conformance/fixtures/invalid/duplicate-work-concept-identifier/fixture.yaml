@@ -1,0 +1,4 @@
+rules: [CHR-RULE-ENT-008]
+expected: fail
+reason: Two O*NET-SOC concepts carry the identifier 43-4151.00
+documents: ../../../../examples/harbor-manufacturing/instances

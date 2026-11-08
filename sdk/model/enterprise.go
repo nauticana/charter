@@ -29,6 +29,7 @@ type Responsibility struct {
 	Envelope
 	ExpectedOutcome string    `json:"expectedOutcome"`
 	Accountable     ObjectRef `json:"accountable"`
+	ConceptIDs      []Ref     `json:"conceptIds,omitempty"`
 }
 
 type Assignment struct {

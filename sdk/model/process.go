@@ -32,6 +32,7 @@ type Task struct {
 	PermittedParticipation      []string `json:"permittedParticipation,omitempty"`
 	// EvidenceRequirements are what the decisions of the task's performer rest on (CHR-CAP-013).
 	EvidenceRequirements []EvidenceRequirement `json:"evidenceRequirements,omitempty"`
+	ConceptIDs           []Ref                 `json:"conceptIds,omitempty"`
 }
 
 const (
@@ -211,6 +212,7 @@ type CapabilityContract struct {
 	Idempotency          Idempotency           `json:"idempotency"`
 	EvidenceRequirements []EvidenceRequirement `json:"evidenceRequirements"`
 	Postconditions       []Postcondition       `json:"postconditions,omitempty"`
+	ConceptIDs           []Ref                 `json:"conceptIds,omitempty"`
 }
 
 // RequiredEvidence returns the structured requirements whose current fact an executed action must rely on.

@@ -1,5 +1,5 @@
 {
-  "charterSpecVersion": "1.3.0",
+  "charterSpecVersion": "1.8.0",
   "namespace": "harbor.example",
   "kind": "Responsibility",
   "id": "RESP-COORDINATE-ORDER-EXCEPTION",
@@ -9,5 +9,8 @@
   "accountable": {
     "kind": "Position",
     "id": "POS-SALES-OPERATIONS-MANAGER"
-  }
+  },
+  "conceptIds": [
+    "WC-ONET-ORDER-CLERKS"
+  ]
 }

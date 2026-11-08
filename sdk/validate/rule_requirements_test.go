@@ -121,3 +121,29 @@ func TestMeasurementRule(t *testing.T) {
 		}
 	}
 }
+
+func TestWorkConceptRule(t *testing.T) {
+	concept := func(id, classification, external string, broader ...string) model.WorkConcept {
+		w := model.WorkConcept{Envelope: envelope(model.KindWorkConcept, id), ClassificationID: model.Ref{ID: classification}, ExternalID: external, PreferredLabel: id}
+		for _, b := range broader {
+			w.BroaderConceptIDs = append(w.BroaderConceptIDs, model.Ref{ID: b})
+		}
+		return w
+	}
+	rule := WorkConceptRule{AbstractRule{"CHR-RULE-ENT-008", nil}}
+	for name, tc := range map[string]struct {
+		docs []any
+		want int
+	}{
+		"distinct":            {[]any{concept("A", "C1", "1"), concept("B", "C1", "2", "A")}, 0},
+		"same id other class": {[]any{concept("A", "C1", "1"), concept("B", "C2", "1")}, 0},
+		"duplicate":           {[]any{concept("A", "C1", "1"), concept("B", "C1", "1")}, 1},
+		"broader elsewhere":   {[]any{concept("A", "C1", "1"), concept("B", "C2", "2", "A")}, 1},
+		"broader is itself":   {[]any{concept("A", "C1", "1", "A")}, 1},
+		"broader unresolved":  {[]any{concept("A", "C1", "1", "NONE")}, 0},
+	} {
+		if got := len(rule.Validate(effectCorpus(t, tc.docs...))); got != tc.want {
+			t.Errorf("%s: %d findings, want %d", name, got, tc.want)
+		}
+	}
+}

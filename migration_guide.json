@@ -9,6 +9,16 @@
   },
   "migrations": [
     {
+      "version": "1.8.0",
+      "title": "Work vocabulary and structured sources",
+      "tags": [
+        "additive",
+        "breaking"
+      ],
+      "summary": "Responsibilities, tasks, and capability contracts may cite concepts of external work classifications, two new document kinds, and an evidence record's sources may be structured artifact references with locator, media type, version, and digest. Two requirements and one core-model rule, additive for documents; Go callers of EvidenceRecord.Sources change type. Specification 1.8.0.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`schema/catalog.json` `specVersion`) | 1.8.0 |\n| Go module `github.com/nauticana/charter` | v1.8.0 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.3.3 |\n\n## Compatibility impact\n\nAdditive for documents: a source may still be a string and every new member and kind is optional. Breaking for Go callers of `EvidenceRecord.Sources`.\n\n## New requirements and rules\n\n| Id | Meaning |\n|---|---|\n| `CHR-ENT-014` | `WorkClassification` and `WorkConcept` documents; `conceptIds` on `Responsibility`, `Task`, and `CapabilityContract`; identifiers distinct within a classification and links within it; a citation confers nothing. |\n| `CHR-EVID-017` | A `sources` entry may be `{locator, mediaType, version, digest}`, the digest being that of the artifact's bytes. |\n| `CHR-RULE-ENT-008` (core-model) | Work concepts distinct within their classification and linked within it. |\n\n## Schema\n\n- New domain `work/`: `work_classification` and `work_concept`, catalogued as kinds `WorkClassification` and `WorkConcept`; neither is enterprise-scoped.\n- `conceptIds` on `Responsibility`, `Task`, and `CapabilityContract`.\n- `common.schema.json`: `source`; `EvidenceRecord.sources` items use it. `locator` and `url` are `@id`-typed terms of the JSON-LD context.\n\n## Go SDK\n\n| Before | After |\n|---|---|\n| `EvidenceRecord.Sources []string` | `[]model.Source`, decoding a string or an object; `Statement` holds the prose form |\n\n- New: `model.WorkClassification`, `WorkConcept`, `Label`, `Source`, `KindWorkClassification`, `KindWorkConcept`, `ConceptIDs` on the citing types; `validate.WorkConceptRule`.\n\n## Adoption\n\n1. `go get github.com/nauticana/charter@v1.8.0`.\n2. Read sources as `model.Source` values.\n3. Import the classifications and concepts your work maps to, cite them from responsibilities, tasks, and contracts, write artifact provenance as structured sources, and re-run `charter claim`.\n"
+    },
+    {
       "version": "1.7.0",
       "title": "Structured evidence items, external identifiers, measurements, and JSON-LD interchange",
       "tags": [

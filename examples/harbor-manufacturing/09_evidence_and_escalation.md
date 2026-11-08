@@ -13,6 +13,8 @@ Status: Conceptual, non-normative example
 | Observed fact | `EVR-0042-RESERVATION-OBSERVED` | Reservation `0000088421` read back with matching lines, quantities, and expiry; supports postcondition `POST-RESERVATION-HELD` |
 | Derived conclusion | `EVR-0042-COVERAGE` | The requested 30 units are covered after subtracting 8 existing allocations from the 40 observed |
 
+`EVR-GAP-EVIDENCE-DISCOVERY` rests on a structured source: version 3 of the interview notes at a locator whose fragment names the findings section, with the document's media type and content digest, so the artifact can be fetched and verified (CHR-EVID-017).
+
 Every governed action record links the actor identity, runtime and execution context, assignment or responsibility, capability, time, authority and approval evaluations, binding, material inputs, and outcome. Source references and transformations make provenance verifiable to the declared level.
 
 When a late goods issue reduced availability to 38 units, `EVR-0042-STOCK-CORRECTED` superseded `EVR-0042-STOCK-OBSERVED` and explained the correction. The original remains addressable; it is not silently edited. Both records state the eligible quantity of order line `ORD-2026-0173-10` as a `fact` from `SYSPROFILE-HARBOR-S4-2602`, so the correction is the only current value once recorded, and either becomes stale an hour after it held, the maximum age `INFO-ORDER-EXCEPTION` declares. `ACT-0042-EXECUTE-1` links the action to its authority and approval evaluations and to these records.

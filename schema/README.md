@@ -11,6 +11,7 @@ This directory contains language-independent JSON Schemas for Charter instance d
 - `evidence/`: action evidence, decisions, exceptions, audit trails, and information provenance
 - `information/`: information definitions and governance policies
 - `mediation/`: mediation profiles and the decisions taken at them
+- `work/`: external work classifications and the concepts responsibilities, tasks, and capabilities cite
 - `conformance/`: bounded conformance claims; rule activation remains outside the schema directory
 
 ## Authority and versioning
@@ -65,6 +66,8 @@ flowchart LR
     evidence -->|measurement.measureId| process
     enterprise -->|externalIdentifiers.systemProfileId| binding
     agent -->|externalIdentifiers.systemProfileId| binding
+    enterprise -->|conceptIds| work
+    process -->|conceptIds| work
 
     binding["binding<br/>EnterpriseSystem, SystemProfile, CapabilityBinding,<br/>DataBinding, AuthorityBinding, EventBinding,<br/>BindingConformance"]
     information["information<br/>InformationDefinition,<br/>InformationGovernancePolicy"]
@@ -73,6 +76,7 @@ flowchart LR
     process["process<br/>ValueStream, BusinessProcess, Task, ProcessRelationship,<br/>ProcessInstance, TaskInstance, CapabilityContract,<br/>ArchitectureState, Gap, RoadmapItem,<br/>OutcomeMeasure"]
     evidence["evidence<br/>EvidenceRecord, ActionRecord, ExceptionRecord,<br/>Escalation, EvidenceBundle"]
     conformance["conformance<br/>ConformanceClaim"]
+    work["work<br/>WorkClassification, WorkConcept"]
 ```
 
-Every document also references its `Enterprise` through `enterpriseId`, except binding and conformance documents.
+Every document also references its `Enterprise` through `enterpriseId`, except binding, work, and conformance documents.

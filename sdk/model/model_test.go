@@ -77,6 +77,8 @@ func typed(d *model.Document) (any, error) {
 		model.KindConformanceClaim:            func() (any, error) { return corpus.Decode[model.ConformanceClaim](d) },
 		model.KindMediationProfile:            func() (any, error) { return corpus.Decode[model.MediationProfile](d) },
 		model.KindMediationDecision:           func() (any, error) { return corpus.Decode[model.MediationDecision](d) },
+		model.KindWorkClassification:          func() (any, error) { return corpus.Decode[model.WorkClassification](d) },
+		model.KindWorkConcept:                 func() (any, error) { return corpus.Decode[model.WorkConcept](d) },
 	}
 	return decode[d.Kind]()
 }
@@ -149,5 +151,17 @@ func TestEvidenceRequirementCodec(t *testing.T) {
 	c.Idempotency.Mutating = true
 	if len(c.ObservedEvidence()) != 1 {
 		t.Error("a mutation observes its required evidence")
+	}
+}
+
+func TestSourceCodec(t *testing.T) {
+	for _, raw := range []string{`"interview notes"`, `{"locator":"https://docs.example/a.md#s1","mediaType":"text/markdown","version":"3","digest":"sha256:00"}`} {
+		var s model.Source
+		if err := json.Unmarshal([]byte(raw), &s); err != nil {
+			t.Fatal(raw, err)
+		}
+		if out, err := json.Marshal(s); err != nil || string(out) != raw {
+			t.Errorf("%s: marshalled %s %v", raw, out, err)
+		}
 	}
 }

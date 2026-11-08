@@ -51,8 +51,8 @@ func ParseDocumentIRI(iri string) (namespace, id string, ok bool) {
 	return namespace, rest, err == nil
 }
 
-// Context is the JSON-LD context document: every Charter term under the vocabulary, references typed as IRIs, and
-// dates typed as xsd values.
+// Context is the JSON-LD context document: every Charter term under the vocabulary, references and locators typed as
+// IRIs, and dates typed as xsd values.
 func (c *Codec) Context() map[string]any {
 	terms := map[string]any{"@version": 1.1, "@vocab": Vocab, "chr": Vocab, "xsd": xsd,
 		"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdfs": "http://www.w3.org/2000/01/rdf-schema#"}
@@ -60,7 +60,7 @@ func (c *Codec) Context() map[string]any {
 		terms[k] = map[string]any{"@id": "chr:" + k, "@type": "@id"}
 	}
 	for k, format := range c.meta.Formats {
-		if t, ok := map[string]string{"date": "xsd:date", "date-time": "xsd:dateTime"}[format]; ok && !c.meta.IDRefKeys[k] {
+		if t, ok := map[string]string{"date": "xsd:date", "date-time": "xsd:dateTime", "uri": "@id"}[format]; ok && !c.meta.IDRefKeys[k] {
 			terms[k] = map[string]any{"@id": "chr:" + k, "@type": t}
 		}
 	}
@@ -261,6 +261,9 @@ func (in *importer) value(term string, v any) any {
 			return literal
 		}
 		if iri, ok := n["@id"].(string); ok {
+			if in.meta.Formats[term] == "uri" {
+				return iri
+			}
 			for key := range n {
 				if key != "@id" && key != "@type" {
 					in.lose(key + " of reference " + iri)

@@ -1,6 +1,6 @@
 # Charter Specification
 
-Status: Version 1.7.0
+Status: Version 1.8.0
 
 Read the chapters in this order:
 

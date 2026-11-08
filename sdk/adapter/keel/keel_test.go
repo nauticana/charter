@@ -516,7 +516,7 @@ func TestTableLogStorePreservesNamespacesAndExtensions(t *testing.T) {
 	rec.Kind = model.KindEvidenceRecord
 	rec.Namespace = "one.example"
 	rec.EnterpriseID = &model.Ref{Namespace: "other.example", ID: "ENT-O"}
-	rec.Sources = []string{"SYSPROFILE-HARBOR-S4-2602 reservation-document-read at 17:03:12Z"}
+	rec.Sources = []model.Source{{Statement: "SYSPROFILE-HARBOR-S4-2602 reservation-document-read at 17:03:12Z"}}
 	rec.Extensions = map[string]json.RawMessage{
 		"vendor:sap":            json.RawMessage(`{"reservation":"0000088421","nested":{"ratio":1.5,"list":["a","b"],"ok":true}}`),
 		"https://example.com/x": json.RawMessage(`"free text with token-like word"`),

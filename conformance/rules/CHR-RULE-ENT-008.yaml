@@ -1,0 +1,11 @@
+id: CHR-RULE-ENT-008
+title: Work concepts are distinct within their classification and link within it
+requirements: [CHR-ENT-014]
+profile: core-model
+verification: semantic
+applies_to: [WorkConcept, WorkClassification]
+check: >-
+  No two WorkConcepts of one WorkClassification carry the same externalId, and every broaderConceptIds or relatedConceptIds entry of a WorkConcept resolves to a WorkConcept of the same classification other than itself.
+fixtures:
+  valid: fixtures/valid/harbor
+  invalid: fixtures/invalid/duplicate-work-concept-identifier

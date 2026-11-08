@@ -11,6 +11,7 @@
     "CHR-EVID-013",
     "CHR-EVID-014",
     "CHR-EVID-015",
+    "CHR-EVID-017",
     "CHR-PROC-011",
     "CHR-INFO-004"
   ],
@@ -103,9 +104,7 @@
       "type": "array",
       "minItems": 1,
       "items": {
-        "type": "string",
-        "minLength": 1,
-        "maxLength": 500
+        "$ref": "../common.schema.json#/$defs/source"
       },
       "description": "Provenance references for material sources and transformations."
     },

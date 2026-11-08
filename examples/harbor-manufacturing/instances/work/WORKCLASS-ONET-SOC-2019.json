@@ -1,0 +1,11 @@
+{
+  "charterSpecVersion": "1.8.0",
+  "namespace": "harbor.example",
+  "kind": "WorkClassification",
+  "id": "WORKCLASS-ONET-SOC-2019",
+  "name": "O*NET-SOC 2019 occupational taxonomy",
+  "publisher": "U.S. Department of Labor, Employment and Training Administration",
+  "version": "2019",
+  "url": "https://www.onetcenter.org/taxonomy.html",
+  "license": "Creative Commons Attribution 4.0 International"
+}

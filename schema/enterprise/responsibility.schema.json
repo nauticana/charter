@@ -8,7 +8,8 @@
     "CHR-ENT-002",
     "CHR-ENT-004",
     "CHR-ENT-005",
-    "CHR-INFO-009"
+    "CHR-INFO-009",
+    "CHR-ENT-014"
   ],
   "type": "object",
   "allOf": [
@@ -68,6 +69,18 @@
           ]
         }
       }
+    },
+    "conceptIds": {
+      "description": "Terms of external work classifications this work corresponds to (CHR-ENT-014).",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "x-charter-ref-kinds": [
+        "WorkConcept"
+      ]
     }
   },
   "required": [

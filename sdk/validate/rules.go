@@ -45,6 +45,7 @@ func NewRuleSet() (RuleSet, error) {
 		EvidenceRequirementsRule{AbstractRule{"CHR-RULE-CAP-003", []string{"CHR-CAP-013"}}},
 		ExternalIdentifiersRule{AbstractRule{"CHR-RULE-ENT-007", []string{"CHR-ENT-013"}}},
 		MeasurementRule{AbstractRule{"CHR-RULE-PROC-006", []string{"CHR-PROC-011"}}},
+		WorkConceptRule{AbstractRule{"CHR-RULE-ENT-008", []string{"CHR-ENT-014"}}},
 	}
 	set := RuleSet{}
 	for _, r := range all {

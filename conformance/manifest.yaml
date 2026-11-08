@@ -38,6 +38,7 @@ profiles:
       - CHR-RULE-CAP-003
       - CHR-RULE-ENT-007
       - CHR-RULE-PROC-006
+      - CHR-RULE-ENT-008
   - id: agent-runtime
     status: active
     rules:
@@ -225,3 +226,6 @@ rules:
   - id: CHR-RULE-RT-014
     status: active
     path: rules/CHR-RULE-RT-014.yaml
+  - id: CHR-RULE-ENT-008
+    status: active
+    path: rules/CHR-RULE-ENT-008.yaml

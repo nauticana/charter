@@ -35,7 +35,7 @@ func TestValidateHarbor(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &r); err != nil {
 		t.Fatal(err)
 	}
-	if r.Result != model.ResultConforming || r.Documents < 80 || r.Profile != "core-model" || len(r.Rules) < 19 || r.SpecVersion != "1.7.0" {
+	if r.Result != model.ResultConforming || r.Documents < 80 || r.Profile != "core-model" || len(r.Rules) < 19 || r.SpecVersion != "1.8.0" {
 		t.Errorf("report: %+v", r)
 	}
 	if code, out, _ := exec(t, "validate", harbor); code != exitOK || !strings.Contains(out, "result: conforming") {
@@ -135,7 +135,7 @@ func TestConformanceAndClaim(t *testing.T) {
 
 func TestVersion(t *testing.T) {
 	code, out, _ := exec(t, "version", "-conformance", conf)
-	if code != exitOK || !strings.Contains(out, "specification 1.7.0") || !strings.Contains(out, "active profiles core-model") {
+	if code != exitOK || !strings.Contains(out, "specification 1.8.0") || !strings.Contains(out, "active profiles core-model") {
 		t.Errorf("version: %d %s", code, out)
 	}
 	code, out, _ = exec(t, "version", "-format", "json")

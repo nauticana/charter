@@ -1,5 +1,5 @@
 {
-  "specVersion": "1.7.0",
+  "specVersion": "1.8.0",
   "entries": [
     {
       "name": "common",
@@ -250,6 +250,16 @@
       "kind": "MediationDecision",
       "id": "https://nauticana.github.io/charter/schema/mediation/mediation_decision.schema.json",
       "path": "mediation/mediation_decision.schema.json"
+    },
+    {
+      "kind": "WorkClassification",
+      "id": "https://nauticana.github.io/charter/schema/work/work_classification.schema.json",
+      "path": "work/work_classification.schema.json"
+    },
+    {
+      "kind": "WorkConcept",
+      "id": "https://nauticana.github.io/charter/schema/work/work_concept.schema.json",
+      "path": "work/work_concept.schema.json"
     }
   ]
 }

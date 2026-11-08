@@ -1,0 +1,16 @@
+{
+  "charterSpecVersion": "1.8.0",
+  "namespace": "harbor.example",
+  "kind": "WorkConcept",
+  "id": "WC-ONET-CREDIT-ANALYSTS",
+  "name": "Credit Analysts",
+  "classificationId": "WORKCLASS-ONET-SOC-2019",
+  "externalId": "43-4151.00",
+  "preferredLabel": "Credit Analysts",
+  "labels": [
+    {
+      "language": "en",
+      "label": "Credit Analysts"
+    }
+  ]
+}

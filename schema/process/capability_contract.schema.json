@@ -16,7 +16,8 @@
     "CHR-CAP-011",
     "CHR-CAP-012",
     "CHR-INFO-009",
-    "CHR-CAP-013"
+    "CHR-CAP-013",
+    "CHR-ENT-014"
   ],
   "type": "object",
   "$defs": {
@@ -331,6 +332,18 @@
         ],
         "additionalProperties": false
       }
+    },
+    "conceptIds": {
+      "description": "Terms of external work classifications this work corresponds to (CHR-ENT-014).",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "../common.schema.json#/$defs/idRef"
+      },
+      "x-charter-ref-kinds": [
+        "WorkConcept"
+      ]
     }
   },
   "required": [

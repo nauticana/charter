@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nauticana.github.io/charter/schema/work/work_classification.schema.json",
+  "title": "WorkClassification",
+  "description": "One version of an external classification of work whose concepts responsibilities, tasks, and capabilities cite; a shared catalog, not enterprise-scoped.",
+  "x-charter-requirements": [
+    "CHR-ENT-014"
+  ],
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../common.schema.json#/$defs/documentBase"
+    }
+  ],
+  "properties": {
+    "charterSpecVersion": true,
+    "namespace": true,
+    "id": true,
+    "name": true,
+    "description": true,
+    "lifecycleState": true,
+    "validity": true,
+    "extensions": true,
+    "derivedFrom": true,
+    "kind": {
+      "const": "WorkClassification"
+    },
+    "publisher": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "maxLength": 2000
+    },
+    "license": {
+      "description": "The terms under which the classification's content may be used and redistributed.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    }
+  },
+  "required": [
+    "kind",
+    "name",
+    "publisher",
+    "version"
+  ],
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,16 @@
+{
+  "charterSpecVersion": "1.8.0",
+  "namespace": "harbor.example",
+  "kind": "WorkConcept",
+  "id": "WC-ONET-ORDER-CLERKS",
+  "name": "Order Clerks",
+  "classificationId": "WORKCLASS-ONET-SOC-2019",
+  "externalId": "43-4151.00",
+  "preferredLabel": "Order Clerks",
+  "labels": [
+    {
+      "language": "en",
+      "label": "Order Clerks"
+    }
+  ]
+}

@@ -49,6 +49,8 @@ const (
 	KindMediationProfile            Kind = "MediationProfile"
 	KindMediationDecision           Kind = "MediationDecision"
 	KindConformanceClaim            Kind = "ConformanceClaim"
+	KindWorkClassification          Kind = "WorkClassification"
+	KindWorkConcept                 Kind = "WorkConcept"
 )
 
 const (
