@@ -1,0 +1,17 @@
+comment: Code lists of the charter_identity module and the columns they govern
+seeds:
+  - table: constant_header
+    columns: [id, caption]
+    rows:
+      - [charter_identity_lifecycle_state, Charter Identity Lifecycle State]
+  - table: constant_value
+    columns: [constant_id, value, caption]
+    rows:
+      - [charter_identity_lifecycle_state, P, Proposed]
+      - [charter_identity_lifecycle_state, A, Active]
+      - [charter_identity_lifecycle_state, S, Suspended]
+      - [charter_identity_lifecycle_state, R, Retired]
+  - table: constant_lookup
+    columns: [constant_id, table_name, column_name]
+    rows:
+      - [charter_identity_lifecycle_state, identity_lifecycle_transition, lifecycle_state]

@@ -1,0 +1,21 @@
+tables:
+  - exception_record
+  - escalation_record
+  - evidence_bundle
+  - evidence_bundle_evidence_record
+  - evidence_bundle_exception_record
+  - evidence_bundle_escalation_record
+  - action_record
+  - action_record_subject
+  - action_record_authority_evaluation
+  - action_record_approval_evaluation
+  - action_record_information_evaluation
+  - action_record_approval
+  - action_record_evidence
+  - action_record_precondition_evaluation
+  - action_record_precondition_evidence
+  - action_record_postcondition_evaluation
+  - action_record_postcondition_evidence
+  - action_record_limit_evaluation
+  - evidence_measurement_action
+  - evidence_bundle_action_record

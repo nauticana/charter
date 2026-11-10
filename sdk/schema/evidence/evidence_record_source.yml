@@ -1,0 +1,36 @@
+table: evidence_record_source
+comment: "A source of an evidence record, as prose or an artifact version with its digest."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_record_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(500)
+    nullable: true
+    comment: Prose form
+  - name: locator
+    type: VARCHAR(2000)
+    nullable: true
+    comment: Artifact form
+  - name: media_type
+    type: VARCHAR(120)
+    nullable: true
+  - name: artifact_version
+    type: VARCHAR(60)
+    nullable: true
+  - name: digest
+    type: VARCHAR(135)
+    nullable: true
+primary_key: [partner_id, evidence_record_id, ordinal]
+foreign_keys:
+  - name: record_sources
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]
+checks:
+  - name: evidence_record_source_form_ck
+    expression: (statement IS NOT NULL AND locator IS NULL AND media_type IS NULL AND artifact_version IS NULL AND digest IS NULL) OR (statement IS NULL AND locator IS NOT NULL AND media_type IS NOT NULL AND artifact_version IS NOT NULL AND digest IS NOT NULL)

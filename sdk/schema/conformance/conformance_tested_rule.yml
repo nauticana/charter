@@ -1,0 +1,18 @@
+table: conformance_tested_rule
+comment: A rule a conformance claim or binding conformance tested.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: enterprise_object_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: rule_id
+    type: VARCHAR(20)
+primary_key: [partner_id, enterprise_object_id, version_no, rule_id]
+foreign_keys:
+  - name: version_tested_rules
+    columns: [partner_id, enterprise_object_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]

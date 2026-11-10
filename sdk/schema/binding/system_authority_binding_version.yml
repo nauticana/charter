@@ -1,0 +1,42 @@
+table: system_authority_binding_version
+comment: "One immutable mapping of a capability's authority to external enforcement in a system profile."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: authority_binding_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: system_profile_id
+    type: BIGINT
+  - name: capability_contract_id
+    type: BIGINT
+  - name: external_enforcement
+    type: VARCHAR(1000)
+primary_key: [partner_id, authority_binding_id, version_no]
+indexes:
+  - name: profile_authority_bindings_ix
+    columns: [partner_id, system_profile_id]
+  - name: contract_authority_bindings_ix
+    columns: [partner_id, capability_contract_id]
+foreign_keys:
+  - name: system_authority_binding_version_envelope
+    columns: [partner_id, authority_binding_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: authority_binding_versions
+    columns: [partner_id, authority_binding_id]
+    references:
+      table: system_authority_binding
+      columns: [partner_id, id]
+  - name: profile_authority_bindings
+    columns: [partner_id, system_profile_id]
+    references:
+      table: system_profile
+      columns: [partner_id, id]
+  - name: contract_authority_bindings
+    columns: [partner_id, capability_contract_id]
+    references:
+      table: capability_contract
+      columns: [partner_id, id]

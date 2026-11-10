@@ -1,0 +1,19 @@
+tables:
+  - mediation_profile
+  - mediation_scope_agent
+  - mediation_scope_capability
+  - mediation_scope_information
+  - mediation_declared_outcome
+  - mediation_coverage_exclusion
+  - mediation_attribute_trust
+  - mediation_evidence_information
+  - mediation_boundary_sod_constraint
+  - mediation_boundary_policy
+  - mediation_boundary_grant
+  - mediation_decision
+  - mediation_subject_capability
+  - mediation_subject_information
+  - mediation_applied_obligation
+  - mediation_proposed_obligation
+  - mediation_decision_attribute
+  - mediation_decision_evidence

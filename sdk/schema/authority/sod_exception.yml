@@ -1,0 +1,63 @@
+table: sod_exception
+comment: "An exception to a separation of duties constraint for one beneficiary, with its grantor and compensating review."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: sod_constraint_id
+    type: BIGINT
+  - name: beneficiary_human_id
+    type: BIGINT
+    nullable: true
+  - name: beneficiary_agent_id
+    type: BIGINT
+    nullable: true
+  - name: grantor_id
+    type: BIGINT
+  - name: reason
+    type: VARCHAR(500)
+  - name: compensating_review
+    type: VARCHAR(500)
+  - name: revoked_at
+    type: TIMESTAMP
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: constraint_exceptions_ix
+    columns: [partner_id, sod_constraint_id]
+  - name: agent_exceptions_ix
+    columns: [partner_id, beneficiary_agent_id]
+  - name: human_exceptions_ix
+    columns: [partner_id, beneficiary_human_id]
+  - name: exception_grantor_ix
+    columns: [partner_id, grantor_id]
+foreign_keys:
+  - name: object_sod_exception
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: constraint_exceptions
+    columns: [partner_id, sod_constraint_id]
+    references:
+      table: sod_constraint
+      columns: [partner_id, id]
+  - name: agent_exceptions
+    columns: [partner_id, beneficiary_agent_id]
+    references:
+      table: agent_identity
+      columns: [partner_id, id]
+  - name: human_exceptions
+    columns: [partner_id, beneficiary_human_id]
+    references:
+      table: human_identity
+      columns: [partner_id, id]
+  - name: exception_grantor
+    columns: [partner_id, grantor_id]
+    references:
+      table: human_identity
+      columns: [partner_id, id]
+checks:
+  - name: sod_exception_beneficiary_ck
+    expression: "(CASE WHEN beneficiary_human_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN beneficiary_agent_id IS NOT NULL THEN 1 ELSE 0 END) = 1"

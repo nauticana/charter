@@ -1,0 +1,24 @@
+table: mediation_subject_information
+comment: An information definition a mediation decision concerns.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_decision_id
+    type: BIGINT
+  - name: information_definition_id
+    type: BIGINT
+primary_key: [partner_id, mediation_decision_id, information_definition_id]
+indexes:
+  - name: information_decisions_ix
+    columns: [partner_id, information_definition_id]
+foreign_keys:
+  - name: decision_information
+    columns: [partner_id, mediation_decision_id]
+    references:
+      table: mediation_decision
+      columns: [partner_id, id]
+  - name: information_decisions
+    columns: [partner_id, information_definition_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]

@@ -1,0 +1,14 @@
+table: enterprise
+comment: The enterprise every organizational object belongs to.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_enterprise
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

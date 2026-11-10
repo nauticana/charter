@@ -1,0 +1,28 @@
+table: conformance_claim_result
+comment: The result of one rule under one verification type in a claim.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: conformance_claim_id
+    type: BIGINT
+  - name: rule_id
+    type: VARCHAR(120)
+  - name: verification_type
+    type: CHAR(1)
+  - name: result
+    type: CHAR(1)
+  - name: details
+    type: VARCHAR(2000)
+    nullable: true
+primary_key: [partner_id, conformance_claim_id, rule_id, verification_type]
+foreign_keys:
+  - name: claim_results
+    columns: [partner_id, conformance_claim_id]
+    references:
+      table: conformance_claim
+      columns: [partner_id, id]
+checks:
+  - name: conformance_claim_result_verification_type_ck
+    expression: "verification_type IN ('S', 'M', 'R')"
+  - name: conformance_claim_result_result_ck
+    expression: "result IN ('P', 'F', 'N')"

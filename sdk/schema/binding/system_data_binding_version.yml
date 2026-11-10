@@ -1,0 +1,40 @@
+table: system_data_binding_version
+comment: "One immutable mapping of an information definition to a system profile's representation."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: data_binding_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: system_profile_id
+    type: BIGINT
+  - name: information_definition_id
+    type: BIGINT
+primary_key: [partner_id, data_binding_id, version_no]
+indexes:
+  - name: information_data_bindings_ix
+    columns: [partner_id, information_definition_id]
+  - name: profile_data_bindings_ix
+    columns: [partner_id, system_profile_id]
+foreign_keys:
+  - name: system_data_binding_version_envelope
+    columns: [partner_id, data_binding_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: information_data_bindings
+    columns: [partner_id, information_definition_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]
+  - name: data_binding_versions
+    columns: [partner_id, data_binding_id]
+    references:
+      table: system_data_binding
+      columns: [partner_id, id]
+  - name: profile_data_bindings
+    columns: [partner_id, system_profile_id]
+    references:
+      table: system_profile
+      columns: [partner_id, id]

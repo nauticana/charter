@@ -1,0 +1,27 @@
+comment: Code lists of the charter_conformance module and the columns they govern
+seeds:
+  - table: constant_header
+    columns: [id, caption]
+    rows:
+      - [charter_conformance_result, Charter Conformance Result]
+      - [charter_verification_type, Charter Verification Type]
+      - [charter_rule_result, Charter Rule Result]
+  - table: constant_value
+    columns: [constant_id, value, caption]
+    rows:
+      - [charter_conformance_result, C, Conforming]
+      - [charter_conformance_result, P, Partial]
+      - [charter_conformance_result, N, Nonconforming]
+      - [charter_verification_type, S, Structural]
+      - [charter_verification_type, M, Semantic]
+      - [charter_verification_type, R, Runtime-behavioral]
+      - [charter_rule_result, P, Pass]
+      - [charter_rule_result, F, Fail]
+      - [charter_rule_result, N, Not tested]
+  - table: constant_lookup
+    columns: [constant_id, table_name, column_name]
+    rows:
+      - [charter_conformance_result, conformance_claim, result]
+      - [charter_rule_result, conformance_claim_result, result]
+      - [charter_verification_type, conformance_claim_result, verification_type]
+      - [charter_verification_type, conformance_verification_type, verification_type]

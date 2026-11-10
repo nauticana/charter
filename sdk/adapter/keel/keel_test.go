@@ -23,7 +23,6 @@ import (
 	"github.com/nauticana/charter/sdk/capability/ledgertest"
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/evidence"
-	"github.com/nauticana/charter/sdk/evidence/evidencetest"
 	"github.com/nauticana/charter/sdk/identity"
 	"github.com/nauticana/charter/sdk/model"
 )
@@ -207,38 +206,6 @@ func TestGuardedInvoker(t *testing.T) {
 	}
 }
 
-// memoryLogger is a ChangeLog whose reads can be made to fail.
-type memoryLogger struct {
-	rows        []*kmodel.TableChangeLog
-	readBroken  bool
-	lastPartner int64
-	lastOwner   int
-}
-
-func (l *memoryLogger) Init() error { return nil }
-func (l *memoryLogger) LogChange(_ context.Context, c *kmodel.TableChangeLog) error {
-	c.ID = int64(len(l.rows) + 1)
-	l.rows = append(l.rows, c)
-	return nil
-}
-func (l *memoryLogger) GetChange(_ context.Context, id int64, _ int64, _ int) (*kmodel.TableChangeLog, error) {
-	return l.rows[id-1], nil
-}
-func (l *memoryLogger) FindChanges(_ context.Context, filter port.ChangeFilter, partnerID int64, ownerID int) ([]*kmodel.TableChangeLog, error) {
-	if l.readBroken {
-		return nil, errors.New("FindChanges failed")
-	}
-	l.lastPartner, l.lastOwner = partnerID, ownerID
-	var out []*kmodel.TableChangeLog
-	for _, r := range l.rows {
-		if r.InScope(partnerID, ownerID) && r.TableName == filter.TableName && r.Action == filter.Action && (filter.RecordKey == "" || r.RecordKey == filter.RecordKey) {
-			out = append(out, r)
-		}
-	}
-	return out, nil
-}
-func (l *memoryLogger) Close() {}
-
 func record(id string, supersedes *model.Ref) model.EvidenceRecord {
 	r := model.EvidenceRecord{Category: model.CategoryObservedFact, Content: "40 units", RecordedAt: at, Supersedes: supersedes}
 	r.CharterSpecVersion, r.Namespace, r.ID = "1.0.0", ns, id
@@ -246,14 +213,14 @@ func record(id string, supersedes *model.Ref) model.EvidenceRecord {
 	return r
 }
 
-func TestTableLogStoreIsAppendOnlyAndVerifiable(t *testing.T) {
+func TestEvidenceStoreIsAppendOnlyAndVerifiable(t *testing.T) {
 	ctx := context.Background()
-	logger := &memoryLogger{}
-	store := &TableLogStore{Logger: logger, PartnerID: 7, OwnerUserID: 42, CreatedBy: 42}
-	if err := store.Append(ctx, nil); err == nil {
+	store, db := newDocumentStore(t)
+	ev := store.Evidence(partner)
+	if err := ev.Append(ctx, nil); err == nil {
 		t.Error("nil evidence document was accepted")
 	}
-	sink := &evidence.AbstractSink{Store: store, Digester: evidence.BaseSHA256Digester{}}
+	sink := &evidence.AbstractSink{Store: ev, Digester: evidence.BaseSHA256Digester{}}
 	if err := sink.Record(ctx, record("EVR-1", nil)); err != nil {
 		t.Fatal(err)
 	}
@@ -263,35 +230,27 @@ func TestTableLogStoreIsAppendOnlyAndVerifiable(t *testing.T) {
 	if err := sink.Record(ctx, record("EVR-2", &model.Ref{ID: "EVR-1"})); err != nil {
 		t.Fatal(err)
 	}
-	if logger.rows[0].TableName != "charter_evidencerecord" || logger.rows[0].RecordKey != "harbor.example:EVR-1" || logger.rows[0].PartnerID != 7 || logger.rows[0].OwnerUserID != 42 || logger.rows[0].CreatedBy != 42 || logger.rows[0].Action != "I" {
-		t.Errorf("change row: %+v", logger.rows[0])
-	}
-	if logger.lastPartner != 7 || logger.lastOwner != 42 {
-		t.Errorf("read scope: partner=%d owner=%d", logger.lastPartner, logger.lastOwner)
-	}
-	bundle := model.EvidenceBundle{Subject: model.ObjectRef{Kind: model.KindProcessInstance, ID: "PI-1"}, RecordIDs: []model.Ref{{ID: "EVR-1"}, {ID: "EVR-2"}}, AssuranceProfile: "standard"}
+	bundle := model.EvidenceBundle{Subject: model.ObjectRef{Kind: model.KindProcessInstance, ID: "PROCINST-OE-2026-0042"},
+		RecordIDs: []model.Ref{{ID: "EVR-1"}, {ID: "EVR-2"}}, AssuranceProfile: "standard"}
 	bundle.CharterSpecVersion, bundle.Namespace, bundle.ID = "1.0.0", ns, "EVID-1"
 	bundle.EnterpriseID = &model.Ref{ID: "ENT-HARBOR"}
 	if err := sink.Bundle(ctx, bundle); err != nil {
 		t.Fatal(err)
 	}
-	if err := (evidence.Verifier{Source: store, Digester: evidence.BaseSHA256Digester{}}).Verify(ctx, ns, model.Ref{ID: "EVID-1"}); err != nil {
+	if err := (evidence.Verifier{Source: ev, Digester: evidence.BaseSHA256Digester{}}).Verify(ctx, ns, model.Ref{ID: "EVID-1"}); err != nil {
 		t.Errorf("verify: %v", err)
 	}
-	if records, err := evidence.NewBaseProvider(store).Records(ctx); err != nil || len(records) != 2 || records[1].Supersedes == nil {
-		t.Errorf("records: %v %v", records, err)
-	}
-	if lineage, err := (evidence.Queries{Provider: evidence.NewBaseProvider(store)}).Lineage(ctx, ns, model.Ref{ID: "EVR-2"}); err != nil || len(lineage) != 2 {
+	if lineage, err := (evidence.Queries{Provider: evidence.NewBaseProvider(ev)}).Lineage(ctx, ns, model.Ref{ID: "EVR-2"}); err != nil || len(lineage) != 2 {
 		t.Errorf("lineage: %v %v", lineage, err)
 	}
-	readBroken := &memoryLogger{readBroken: true}
-	if err := (&evidence.AbstractSink{Store: &TableLogStore{Logger: readBroken, PartnerID: 7, OwnerUserID: 42}, Digester: evidence.BaseSHA256Digester{}}).Record(ctx, record("EVR-3", nil)); err == nil || len(readBroken.rows) != 0 {
-		t.Errorf("unanswerable duplicate check must fail closed: %v rows=%d", err, len(readBroken.rows))
+	stored := db.count("evidence_record")
+	db.failQuery = qObjectByName
+	if err := sink.Record(ctx, record("EVR-3", nil)); err == nil || db.count("evidence_record") != stored {
+		t.Errorf("unanswerable duplicate check must fail closed: %v", err)
 	}
-	poisoned := &memoryLogger{rows: []*kmodel.TableChangeLog{{ID: 1, TableName: "charter_evidencerecord", RecordKey: "harbor.example:EVR-WANT",
-		Action: appendAction, OldData: map[string]any{"charterSpecVersion": "1.0.0", "namespace": "harbor.example", "kind": "EvidenceRecord", "id": "EVR-OTHER"}}}}
-	if _, err := (&TableLogStore{Logger: poisoned}).Fetch(ctx, corpus.DocumentKey{Namespace: ns, ID: "EVR-WANT"}); err == nil {
-		t.Error("table-log row whose payload does not match its key was accepted")
+	db.failQuery = ""
+	if _, err := (tenantStore{}).Fetch(ctx, corpus.DocumentKey{Namespace: ns, ID: "EVR-1"}); !errors.Is(err, evidence.ErrNoStore) {
+		t.Errorf("a store-less view answered: %v", err)
 	}
 }
 
@@ -501,17 +460,19 @@ func TestLedgerStoresResultsInKeelLedger(t *testing.T) {
 	}
 }
 
-func TestTableLogStoreContract(t *testing.T) {
-	evidencetest.Run(t, func(*testing.T) evidence.Store { return &TableLogStore{Logger: &memoryLogger{}} },
-		func(s evidence.Store) evidence.Provider { return evidence.NewBaseProvider(s) })
-}
-
-func TestTableLogStorePreservesNamespacesAndExtensions(t *testing.T) {
+func TestEvidenceStorePreservesNamespacesAndExtensions(t *testing.T) {
 	ctx := oauthContext(nil)
-	logger := &memoryLogger{}
-	store := &TableLogStore{Logger: logger}
+	store, _ := newRelationalStore(t)
+	for _, raw := range []string{
+		`{"charterSpecVersion":"1.8.0","namespace":"other.example","kind":"Enterprise","id":"ENT-O","name":"Other"}`,
+	} {
+		if err := store.Save(ctx, partner, parseDocument(t, raw)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	ev := store.Evidence(partner)
 	pub := &publisher{}
-	sink := &PublishingSink{Next: &evidence.AbstractSink{Store: store, Digester: evidence.BaseSHA256Digester{}, Redactor: evidence.BaseRedactor{}}, Publisher: pub, Topic: "t", Redactor: evidence.BaseRedactor{}}
+	sink := &PublishingSink{Next: &evidence.AbstractSink{Store: ev, Digester: evidence.BaseSHA256Digester{}, Redactor: evidence.BaseRedactor{}}, Publisher: pub, Topic: "t", Redactor: evidence.BaseRedactor{}}
 	rec := record("EVR-X", nil)
 	rec.Kind = model.KindEvidenceRecord
 	rec.Namespace = "one.example"
@@ -528,7 +489,7 @@ func TestTableLogStorePreservesNamespacesAndExtensions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	d, err := store.Fetch(ctx, corpus.DocumentKey{Namespace: "one.example", ID: "EVR-X"})
+	d, err := ev.Fetch(ctx, corpus.DocumentKey{Namespace: "one.example", ID: "EVR-X"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -539,7 +500,7 @@ func TestTableLogStorePreservesNamespacesAndExtensions(t *testing.T) {
 	if err != nil || back.Namespace != "one.example" || back.EnterpriseID.Namespace != "other.example" || string(back.Extensions["vendor:sap"]) == "" {
 		t.Errorf("typed read-back: %+v %v", back, err)
 	}
-	if _, err := store.Fetch(ctx, corpus.DocumentKey{Namespace: "other.example", ID: "EVR-X"}); err == nil {
+	if _, err := ev.Fetch(ctx, corpus.DocumentKey{Namespace: "other.example", ID: "EVR-X"}); err == nil {
 		t.Error("namespace is part of the key")
 	}
 }

@@ -1,0 +1,27 @@
+table: json_schema_example
+comment: One example value of a schema node.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: json_schema_node_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: json_value_id
+    type: BIGINT
+primary_key: [partner_id, json_schema_node_id, ordinal]
+indexes:
+  - name: json_schema_example_value_ux
+    columns: [partner_id, json_value_id]
+    unique: true
+foreign_keys:
+  - name: example_value
+    columns: [partner_id, json_value_id]
+    references:
+      table: json_value
+      columns: [partner_id, id]
+  - name: node_examples
+    columns: [partner_id, json_schema_node_id]
+    references:
+      table: json_schema_node
+      columns: [partner_id, id]

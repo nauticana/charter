@@ -1,0 +1,11 @@
+tables:
+  - capability_contract
+  - capability_contract_version
+  - capability_contract_input
+  - capability_contract_output
+  - capability_contract_outcome
+  - capability_contract_business_error
+  - capability_contract_precondition
+  - capability_contract_postcondition
+  - capability_contract_postcondition_outcome
+  - capability_contract_concept

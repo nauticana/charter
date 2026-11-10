@@ -1,0 +1,18 @@
+table: evidence_assessment_score
+comment: A metric score of an evidence assessment.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_record_id
+    type: BIGINT
+  - name: metric
+    type: VARCHAR(120)
+  - name: score
+    type: NUMERIC
+primary_key: [partner_id, evidence_record_id, metric]
+foreign_keys:
+  - name: assessment_scores
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_assessment
+      columns: [partner_id, evidence_record_id]

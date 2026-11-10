@@ -1,0 +1,34 @@
+table: action_record_authority_evaluation
+comment: "The result of one authority evaluation for an action, with the grant used."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: action_record_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: authority_grant_id
+    type: BIGINT
+    nullable: true
+  - name: result
+    type: CHAR(1)
+  - name: reason
+    type: VARCHAR(500)
+primary_key: [partner_id, action_record_id, ordinal]
+indexes:
+  - name: grant_evaluations_ix
+    columns: [partner_id, authority_grant_id]
+foreign_keys:
+  - name: action_authority_evaluations
+    columns: [partner_id, action_record_id]
+    references:
+      table: action_record
+      columns: [partner_id, id]
+  - name: grant_evaluations
+    columns: [partner_id, authority_grant_id]
+    references:
+      table: authority_grant
+      columns: [partner_id, id]
+checks:
+  - name: action_record_authority_evaluation_result_ck
+    expression: "result IN ('A', 'D', 'M', 'E')"

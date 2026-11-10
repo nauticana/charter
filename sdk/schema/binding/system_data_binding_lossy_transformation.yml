@@ -1,0 +1,26 @@
+table: system_data_binding_lossy_transformation
+comment: "A lossy transformation of a data binding version and its effects on validation, decisions, and evidence."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: data_binding_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: ordinal
+    type: SMALLINT
+  - name: transformation
+    type: VARCHAR(500)
+  - name: effect_on_validation
+    type: VARCHAR(500)
+  - name: effect_on_decisions
+    type: VARCHAR(500)
+  - name: effect_on_evidence
+    type: VARCHAR(500)
+primary_key: [partner_id, data_binding_id, version_no, ordinal]
+foreign_keys:
+  - name: binding_lossy_transformations
+    columns: [partner_id, data_binding_id, version_no]
+    references:
+      table: system_data_binding_version
+      columns: [partner_id, data_binding_id, version_no]

@@ -1,0 +1,18 @@
+table: work_concept_label
+comment: An alternative label of a work concept in one language.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: work_concept_id
+    type: BIGINT
+  - name: language
+    type: VARCHAR(35)
+  - name: label
+    type: VARCHAR(200)
+primary_key: [partner_id, work_concept_id, language, label]
+foreign_keys:
+  - name: concept_labels
+    columns: [partner_id, work_concept_id]
+    references:
+      table: work_concept
+      columns: [partner_id, id]

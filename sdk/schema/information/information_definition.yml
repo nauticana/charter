@@ -1,0 +1,34 @@
+table: information_definition
+comment: "Business information: meaning, owner or steward, classification, and maximum fact age."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: business_meaning
+    type: VARCHAR(1000)
+  - name: owner_or_steward_id
+    type: BIGINT
+  - name: classification
+    type: VARCHAR(120)
+  - name: fact_max_age_seconds
+    type: INT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: information_steward_ix
+    columns: [partner_id, owner_or_steward_id]
+foreign_keys:
+  - name: object_information_definition
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: information_steward
+    columns: [partner_id, owner_or_steward_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: information_definition_fact_max_age_ck
+    expression: "fact_max_age_seconds IS NULL OR fact_max_age_seconds > 0"

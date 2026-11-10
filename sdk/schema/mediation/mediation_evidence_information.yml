@@ -1,0 +1,24 @@
+table: mediation_evidence_information
+comment: An information definition a mediation profile records as evidence.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_profile_id
+    type: BIGINT
+  - name: information_definition_id
+    type: BIGINT
+primary_key: [partner_id, mediation_profile_id, information_definition_id]
+indexes:
+  - name: information_evidence_profiles_ix
+    columns: [partner_id, information_definition_id]
+foreign_keys:
+  - name: information_evidence_profiles
+    columns: [partner_id, information_definition_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]
+  - name: profile_evidence_information
+    columns: [partner_id, mediation_profile_id]
+    references:
+      table: mediation_profile
+      columns: [partner_id, id]

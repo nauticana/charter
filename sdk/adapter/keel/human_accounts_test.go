@@ -19,13 +19,27 @@ func newHumanAccounts(t *testing.T) (*HumanAccounts, *DocumentStore, *memoryDB) 
 	t.Helper()
 	store, db := newDocumentStore(t)
 	for _, user := range []int64{42, 43} {
-		db.state.memberships[membershipKey{partner, user, membershipBegda}] = nil
+		db.state.rows["partner_user"] = append(db.state.rows["partner_user"],
+			map[string]any{"partner_id": partner, "user_id": user, "begda": membershipBegda, "endda": nil})
 	}
 	accounts, err := NewHumanAccounts(context.Background(), db, func() time.Time { return at })
 	if err != nil {
 		t.Fatal(err)
 	}
 	return accounts, store, db
+}
+
+// endMembership sets when a user's membership in the test partner ends; nil reopens it.
+func endMembership(db *memoryDB, user int64, endda *time.Time) {
+	for _, row := range db.state.rows["partner_user"] {
+		if row["user_id"] == user {
+			if endda == nil {
+				row["endda"] = nil
+			} else {
+				row["endda"] = *endda
+			}
+		}
+	}
 }
 
 func alexLink() HumanAccount {
@@ -39,8 +53,8 @@ func TestHumanAccountLinksNeverOverlap(t *testing.T) {
 	if err := accounts.Link(ctx, alexLink()); err != nil {
 		t.Fatal(err)
 	}
-	if err := accounts.Link(ctx, alexLink()); err != nil || len(db.state.accounts) != 1 {
-		t.Fatalf("an identical replay is not a no-op: %v, %d rows", err, len(db.state.accounts))
+	if err := accounts.Link(ctx, alexLink()); err != nil || db.count("human_identity_partner_user") != 1 {
+		t.Fatalf("an identical replay is not a no-op: %v, %d rows", err, db.count("human_identity_partner_user"))
 	}
 	otherHuman := alexLink()
 	otherHuman.Human.ID = "HUMAN-ELENA-TORRES"
@@ -73,16 +87,16 @@ func TestHumanAccountLinksNeverOverlap(t *testing.T) {
 		}
 	}
 	ended := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-	db.state.memberships[membershipKey{partner, 43, membershipBegda}] = &ended
+	endMembership(db, 43, &ended)
 	outlives := alexLink()
 	outlives.Human.ID, outlives.UserID = "HUMAN-JORDAN-KIM", 43
 	if err := accounts.Link(ctx, outlives); !errors.Is(err, ErrNoMembership) {
 		t.Errorf("a link outliving its membership: %v", err)
 	}
-	if len(db.state.accounts) != 1 {
-		t.Fatalf("refused links were stored: %d rows", len(db.state.accounts))
+	if db.count("human_identity_partner_user") != 1 {
+		t.Fatalf("refused links were stored: %d rows", db.count("human_identity_partner_user"))
 	}
-	db.state.memberships[membershipKey{partner, 43, membershipBegda}] = nil
+	endMembership(db, 43, nil)
 	future := alexLink()
 	future.Human.ID, future.UserID = "HUMAN-JORDAN-KIM", 43
 	future.Begda = time.Date(10000, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -137,7 +151,7 @@ func TestHumanAccountsResolveTheLinkEffectiveAtATime(t *testing.T) {
 		t.Fatalf("a link following an ended one: %v", err)
 	}
 	membershipEnd := at.Add(-time.Minute)
-	db.state.memberships[membershipKey{partner, 42, membershipBegda}] = &membershipEnd
+	endMembership(db, 42, &membershipEnd)
 	if _, err := accounts.Human(ctx, partner, 42, at); !errors.Is(err, ErrUnmapped) {
 		t.Errorf("resolved after the membership ended: %v", err)
 	}

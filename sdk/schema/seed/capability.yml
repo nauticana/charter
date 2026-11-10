@@ -1,0 +1,21 @@
+comment: Code lists of the charter_capability module and the columns they govern
+seeds:
+  - table: constant_header
+    columns: [id, caption]
+    rows:
+      - [charter_operation_class, Charter Operation Class]
+      - [charter_predicate_language, Charter Predicate Language]
+  - table: constant_value
+    columns: [constant_id, value, caption]
+    rows:
+      - [charter_operation_class, R, Read]
+      - [charter_operation_class, P, Propose]
+      - [charter_operation_class, A, Approve]
+      - [charter_operation_class, E, Execute]
+      - [charter_predicate_language, C, CEL]
+  - table: constant_lookup
+    columns: [constant_id, table_name, column_name]
+    rows:
+      - [charter_operation_class, capability_contract_version, operation_class]
+      - [charter_predicate_language, capability_contract_postcondition, predicate_language]
+      - [charter_predicate_language, capability_contract_precondition, predicate_language]

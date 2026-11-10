@@ -1,0 +1,53 @@
+table: enterprise_object_limit
+comment: "A machine-comparable limit of a version: kind, operator, exactly one typed value, and an optional unit or currency. Owner kinds: AD, AR, AG, AP, CC."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: enterprise_object_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: ordinal
+    type: SMALLINT
+  - name: limit_kind
+    type: VARCHAR(120)
+  - name: operator
+    type: CHAR(2)
+  - name: amount
+    type: BIGINT
+    nullable: true
+    comment: Minor units of the currency
+  - name: number_value
+    type: NUMERIC
+    nullable: true
+  - name: text_value
+    type: VARCHAR(500)
+    nullable: true
+  - name: boolean_value
+    type: BOOLEAN
+    nullable: true
+  - name: unit
+    type: VARCHAR(60)
+    nullable: true
+  - name: currency_code
+    type: CHAR(3)
+    nullable: true
+primary_key: [partner_id, enterprise_object_id, version_no, ordinal]
+foreign_keys:
+  - name: version_limits
+    columns: [partner_id, enterprise_object_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: currency_limits
+    columns: [currency_code]
+    references:
+      table: currency
+      columns: [code]
+checks:
+  - name: enterprise_object_limit_operator_ck
+    expression: "operator IN ('LT', 'LE', 'EQ', 'GE', 'GT')"
+  - name: enterprise_object_limit_value_ck
+    expression: "(CASE WHEN amount IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN number_value IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN text_value IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN boolean_value IS NOT NULL THEN 1 ELSE 0 END) = 1"
+  - name: enterprise_object_limit_currency_ck
+    expression: "(amount IS NULL) = (currency_code IS NULL)"

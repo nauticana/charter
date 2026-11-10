@@ -1,0 +1,18 @@
+table: json_schema_vocabulary
+comment: "One vocabulary a metaschema node declares, and whether it is required."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: json_schema_node_id
+    type: BIGINT
+  - name: vocabulary_uri
+    type: VARCHAR(2000)
+  - name: required
+    type: BOOLEAN
+primary_key: [partner_id, json_schema_node_id, vocabulary_uri]
+foreign_keys:
+  - name: node_vocabularies
+    columns: [partner_id, json_schema_node_id]
+    references:
+      table: json_schema_node
+      columns: [partner_id, id]

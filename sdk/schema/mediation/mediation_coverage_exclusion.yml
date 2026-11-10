@@ -1,0 +1,26 @@
+table: mediation_coverage_exclusion
+comment: "An object excluded from a mediation profile's coverage, with the reason."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_profile_id
+    type: BIGINT
+  - name: subject_id
+    type: BIGINT
+  - name: reason
+    type: VARCHAR(500)
+primary_key: [partner_id, mediation_profile_id, subject_id]
+indexes:
+  - name: excluded_subject_ix
+    columns: [partner_id, subject_id]
+foreign_keys:
+  - name: excluded_subject
+    columns: [partner_id, subject_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: profile_exclusions
+    columns: [partner_id, mediation_profile_id]
+    references:
+      table: mediation_profile
+      columns: [partner_id, id]

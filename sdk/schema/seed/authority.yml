@@ -1,0 +1,15 @@
+comment: Code lists of the charter_authority module and the columns they govern
+seeds:
+  - table: constant_header
+    columns: [id, caption]
+    rows:
+      - [charter_validity_mode, Charter Approval Validity Mode]
+  - table: constant_value
+    columns: [constant_id, value, caption]
+    rows:
+      - [charter_validity_mode, E, Expires at]
+      - [charter_validity_mode, O, Open-ended]
+  - table: constant_lookup
+    columns: [constant_id, table_name, column_name]
+    rows:
+      - [charter_validity_mode, authority_approval, validity_mode]

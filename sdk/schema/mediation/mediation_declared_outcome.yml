@@ -1,0 +1,19 @@
+table: mediation_declared_outcome
+comment: An outcome a mediation profile may decide.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_profile_id
+    type: BIGINT
+  - name: outcome
+    type: CHAR(1)
+primary_key: [partner_id, mediation_profile_id, outcome]
+foreign_keys:
+  - name: profile_declared_outcomes
+    columns: [partner_id, mediation_profile_id]
+    references:
+      table: mediation_profile
+      columns: [partner_id, id]
+checks:
+  - name: mediation_declared_outcome_outcome_ck
+    expression: "outcome IN ('A', 'D', 'M', 'K', 'F')"

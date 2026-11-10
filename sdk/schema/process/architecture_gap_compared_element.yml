@@ -1,0 +1,24 @@
+table: architecture_gap_compared_element
+comment: An object a gap compares.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: gap_id
+    type: BIGINT
+  - name: element_id
+    type: BIGINT
+primary_key: [partner_id, gap_id, element_id]
+indexes:
+  - name: element_gaps_ix
+    columns: [partner_id, element_id]
+foreign_keys:
+  - name: gap_compared_elements
+    columns: [partner_id, gap_id]
+    references:
+      table: architecture_gap
+      columns: [partner_id, id]
+  - name: element_gaps
+    columns: [partner_id, element_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

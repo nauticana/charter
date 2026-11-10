@@ -1,0 +1,35 @@
+table: enterprise_agent_runtime
+comment: A running instance of one agent definition version and the object operating it.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: agent_definition_id
+    type: BIGINT
+  - name: agent_definition_version_no
+    type: INT
+  - name: operator_id
+    type: BIGINT
+primary_key: [partner_id, id]
+indexes:
+  - name: runtime_operator_ix
+    columns: [partner_id, operator_id]
+  - name: definition_runtimes_ix
+    columns: [partner_id, agent_definition_id, agent_definition_version_no]
+foreign_keys:
+  - name: object_enterprise_agent_runtime
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: runtime_operator
+    columns: [partner_id, operator_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: definition_runtimes
+    columns: [partner_id, agent_definition_id, agent_definition_version_no]
+    references:
+      table: enterprise_agent_definition_version
+      columns: [partner_id, agent_definition_id, version_no]

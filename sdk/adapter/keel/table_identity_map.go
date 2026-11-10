@@ -17,7 +17,7 @@ import (
 // KeelUserSubjectPrefix is the subject prefix keel's authorization server gives a user's access token.
 const KeelUserSubjectPrefix = "user:"
 
-// TableIdentityMap resolves a human session through charter_human_account instead of Charter identity claims: the
+// TableIdentityMap resolves a human session through HumanAccounts instead of Charter identity claims: the
 // session's keel user in its partner maps to the HumanIdentity linked at the current time. Agent sessions keep the
 // claim mapping of Agents, so their keel principal remains Principal{Kind: AgentPrincipalKind}.
 type TableIdentityMap struct {

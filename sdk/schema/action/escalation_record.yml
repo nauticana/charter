@@ -1,0 +1,33 @@
+table: escalation_record
+comment: "A recorded escalation: reason, recipient, requested decision, and urgency."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: reason
+    type: VARCHAR(500)
+  - name: recipient_id
+    type: BIGINT
+  - name: requested_decision
+    type: VARCHAR(500)
+  - name: urgency
+    type: VARCHAR(60)
+  - name: resulting_disposition
+    type: VARCHAR(500)
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: escalation_recipient_ix
+    columns: [partner_id, recipient_id]
+foreign_keys:
+  - name: object_escalation_record
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: escalation_recipient
+    columns: [partner_id, recipient_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

@@ -3,6 +3,8 @@
 Status: Accepted
 Date: 2026-08-25
 
+The `TableLogStore` and `DocumentStore` decisions are superseded by [0010](0010-relational-document-store.md).
+
 ## Context
 
 Keel is the backend framework beneath the reference runtime. The adapter was originally reviewed against v1.2.55 and is verified against the version `go.mod` requires. Those reviews concluded that keel already exposes the primitives a Charter adapter needs (principal and tenant context keys, `CheckActionPermission`, trust guards, the table change logger, message publishing, metrics, request ids) and that everything Charter-shaped belongs in Charter or an adapter. Charter's core must stay platform-free, and keel must never depend on Charter.

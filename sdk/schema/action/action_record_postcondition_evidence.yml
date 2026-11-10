@@ -1,0 +1,26 @@
+table: action_record_postcondition_evidence
+comment: An evidence record supporting a postcondition evaluation.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: action_record_id
+    type: BIGINT
+  - name: postcondition_key
+    type: VARCHAR(120)
+  - name: evidence_record_id
+    type: BIGINT
+primary_key: [partner_id, action_record_id, postcondition_key, evidence_record_id]
+indexes:
+  - name: evidence_postconditions_ix
+    columns: [partner_id, evidence_record_id]
+foreign_keys:
+  - name: postcondition_evidence
+    columns: [partner_id, action_record_id, postcondition_key]
+    references:
+      table: action_record_postcondition_evaluation
+      columns: [partner_id, action_record_id, postcondition_key]
+  - name: evidence_postconditions
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]

@@ -1,0 +1,21 @@
+table: process_task_performer_kind
+comment: "A kind of performer, human or agent, a task version admits."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: task_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: performer_kind
+    type: CHAR(1)
+primary_key: [partner_id, task_id, version_no, performer_kind]
+foreign_keys:
+  - name: task_performer_kinds
+    columns: [partner_id, task_id, version_no]
+    references:
+      table: process_task_version
+      columns: [partner_id, task_id, version_no]
+checks:
+  - name: process_task_performer_kind_performer_kind_ck
+    expression: "performer_kind IN ('H', 'A')"

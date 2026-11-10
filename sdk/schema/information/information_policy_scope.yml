@@ -1,0 +1,24 @@
+table: information_policy_scope
+comment: An object a governance policy applies to.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: information_governance_policy_id
+    type: BIGINT
+  - name: scope_object_id
+    type: BIGINT
+primary_key: [partner_id, information_governance_policy_id, scope_object_id]
+indexes:
+  - name: scoped_policies_ix
+    columns: [partner_id, scope_object_id]
+foreign_keys:
+  - name: scoped_policies
+    columns: [partner_id, scope_object_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: policy_scope
+    columns: [partner_id, information_governance_policy_id]
+    references:
+      table: information_governance_policy
+      columns: [partner_id, id]

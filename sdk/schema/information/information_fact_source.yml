@@ -1,0 +1,37 @@
+table: information_fact_source
+comment: "A ranked source of facts for an information definition: a system profile or an evidence category."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: information_definition_id
+    type: BIGINT
+  - name: rank_no
+    type: SMALLINT
+  - name: system_profile_id
+    type: BIGINT
+    nullable: true
+  - name: evidence_category
+    type: CHAR(1)
+    nullable: true
+primary_key: [partner_id, information_definition_id, rank_no]
+indexes:
+  - name: profile_fact_sources_ix
+    columns: [partner_id, system_profile_id]
+foreign_keys:
+  - name: information_fact_sources
+    columns: [partner_id, information_definition_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]
+  - name: profile_fact_sources
+    columns: [partner_id, system_profile_id]
+    references:
+      table: system_profile
+      columns: [partner_id, id]
+checks:
+  - name: information_fact_source_evidence_category_ck
+    expression: "evidence_category IN ('O', 'A', 'H', 'X', 'D')"
+  - name: information_fact_source_source_ck
+    expression: "(CASE WHEN system_profile_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN evidence_category IS NOT NULL THEN 1 ELSE 0 END) = 1"
+  - name: information_fact_source_rank_ck
+    expression: "rank_no > 0"

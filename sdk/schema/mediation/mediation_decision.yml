@@ -1,0 +1,121 @@
+table: mediation_decision
+comment: "A decision taken at a mediation profile on one submission, with the profile's values in force at the time."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: mediation_profile_id
+    type: BIGINT
+  - name: submission_key
+    type: VARCHAR(120)
+  - name: actor_human_id
+    type: BIGINT
+    nullable: true
+  - name: actor_agent_id
+    type: BIGINT
+    nullable: true
+  - name: runtime_instance_id
+    type: BIGINT
+    nullable: true
+  - name: execution_context_id
+    type: VARCHAR(120)
+  - name: stage
+    type: VARCHAR(200)
+  - name: decided_at
+    type: TIMESTAMP
+  - name: enforced
+    type: BOOLEAN
+  - name: outcome
+    type: CHAR(1)
+  - name: mediator_availability
+    type: CHAR(1)
+  - name: applied_failure_policy
+    type: CHAR(1)
+    nullable: true
+  - name: not_decided_reason
+    type: CHAR(1)
+    nullable: true
+  - name: subject_reason
+    type: VARCHAR(500)
+    nullable: true
+  - name: audit_reference
+    type: VARCHAR(200)
+    nullable: true
+  - name: handoff_destination
+    type: VARCHAR(200)
+    nullable: true
+  - name: handoff_request
+    type: VARCHAR(500)
+    nullable: true
+  - name: supersedes_id
+    type: BIGINT
+    nullable: true
+  - name: action_record_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: profile_decisions_ix
+    columns: [partner_id, mediation_profile_id]
+  - name: human_decisions_ix
+    columns: [partner_id, actor_human_id]
+  - name: agent_decisions_ix
+    columns: [partner_id, actor_agent_id]
+  - name: runtime_decisions_ix
+    columns: [partner_id, runtime_instance_id]
+  - name: superseded_decisions_ix
+    columns: [partner_id, supersedes_id]
+  - name: action_decisions_ix
+    columns: [partner_id, action_record_id]
+foreign_keys:
+  - name: object_mediation_decision
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: profile_decisions
+    columns: [partner_id, mediation_profile_id]
+    references:
+      table: mediation_profile
+      columns: [partner_id, id]
+  - name: human_decisions
+    columns: [partner_id, actor_human_id]
+    references:
+      table: human_identity
+      columns: [partner_id, id]
+  - name: agent_decisions
+    columns: [partner_id, actor_agent_id]
+    references:
+      table: agent_identity
+      columns: [partner_id, id]
+  - name: runtime_decisions
+    columns: [partner_id, runtime_instance_id]
+    references:
+      table: enterprise_agent_runtime
+      columns: [partner_id, id]
+  - name: superseded_decisions
+    columns: [partner_id, supersedes_id]
+    references:
+      table: mediation_decision
+      columns: [partner_id, id]
+  - name: action_decisions
+    columns: [partner_id, action_record_id]
+    references:
+      table: action_record
+      columns: [partner_id, id]
+checks:
+  - name: mediation_decision_outcome_ck
+    expression: "outcome IN ('A', 'D', 'M', 'K', 'F', 'N')"
+  - name: mediation_decision_mediator_availability_ck
+    expression: "mediator_availability IN ('A', 'U', 'B', 'N')"
+  - name: mediation_decision_applied_failure_policy_ck
+    expression: "applied_failure_policy IN ('C', 'O', 'B')"
+  - name: mediation_decision_not_decided_reason_ck
+    expression: "not_decided_reason IN ('S', 'E', 'N', 'U')"
+  - name: mediation_decision_actor_ck
+    expression: "(CASE WHEN actor_human_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN actor_agent_id IS NOT NULL THEN 1 ELSE 0 END) = 1"
+  - name: mediation_decision_non_allow_ck
+    expression: "outcome = 'A' OR (audit_reference IS NOT NULL AND subject_reason IS NOT NULL)"
+  - name: mediation_decision_handoff_ck
+    expression: "(handoff_request IS NULL) = (handoff_destination IS NULL)"

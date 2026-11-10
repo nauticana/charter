@@ -1,0 +1,25 @@
+table: human_identity
+comment: A human identity and the authority for its lifecycle.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: lifecycle_authority_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: human_lifecycle_authority_ix
+    columns: [partner_id, lifecycle_authority_id]
+foreign_keys:
+  - name: object_human_identity
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: human_lifecycle_authority
+    columns: [partner_id, lifecycle_authority_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

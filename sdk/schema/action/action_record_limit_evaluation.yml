@@ -1,0 +1,23 @@
+table: action_record_limit_evaluation
+comment: The result of evaluating one limit kind for an action.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: action_record_id
+    type: BIGINT
+  - name: limit_kind
+    type: VARCHAR(120)
+  - name: result
+    type: CHAR(1)
+  - name: reason
+    type: VARCHAR(500)
+primary_key: [partner_id, action_record_id, limit_kind]
+foreign_keys:
+  - name: action_limit_evaluations
+    columns: [partner_id, action_record_id]
+    references:
+      table: action_record
+      columns: [partner_id, id]
+checks:
+  - name: action_record_limit_evaluation_result_ck
+    expression: "result IN ('W', 'E')"

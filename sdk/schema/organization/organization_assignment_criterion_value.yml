@@ -1,0 +1,18 @@
+table: organization_assignment_criterion_value
+comment: One value of an assignment criterion dimension.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: assignment_id
+    type: BIGINT
+  - name: dimension
+    type: VARCHAR(120)
+  - name: criterion_value
+    type: VARCHAR(200)
+primary_key: [partner_id, assignment_id, dimension, criterion_value]
+foreign_keys:
+  - name: criterion_values
+    columns: [partner_id, assignment_id, dimension]
+    references:
+      table: organization_assignment_criterion
+      columns: [partner_id, assignment_id, dimension]

@@ -41,7 +41,7 @@ Structural validation alone cannot establish graph acyclicity, reference existen
 
 ## Relational model
 
-[database.md](database.md) is the target relational model for storing these documents in PostgreSQL: one table per kind and per array property, in BCNF, with every reference a declared foreign key. It is a design under review and is not implemented.
+[database.md](database.md) is the relational model for storing these documents in PostgreSQL: one table per kind and per array property, in BCNF, with modeled object references declared as foreign keys. The tables are defined as keel schema modules in [`sdk/schema/`](../sdk/schema/), and the keel adapter's `DocumentStore` reads and writes them.
 
 ## Interchange
 

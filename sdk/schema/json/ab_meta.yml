@@ -1,0 +1,10 @@
+tables:
+  - json_value
+  - json_schema_node
+  - json_schema_type
+  - json_schema_required
+  - json_schema_dependent_required
+  - json_schema_enum
+  - json_schema_example
+  - json_schema_vocabulary
+  - json_schema_annotation

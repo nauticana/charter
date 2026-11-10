@@ -1,0 +1,16 @@
+table: information_policy_use
+comment: A use a governance policy permits.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: information_governance_policy_id
+    type: BIGINT
+  - name: permitted_use
+    type: VARCHAR(500)
+primary_key: [partner_id, information_governance_policy_id, permitted_use]
+foreign_keys:
+  - name: policy_uses
+    columns: [partner_id, information_governance_policy_id]
+    references:
+      table: information_governance_policy
+      columns: [partner_id, id]

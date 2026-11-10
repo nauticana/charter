@@ -1,0 +1,30 @@
+table: architecture_state
+comment: A baseline or target architecture state and its deciding authority.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: state_type
+    type: CHAR(1)
+  - name: decision_authority_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: state_decision_authority_ix
+    columns: [partner_id, decision_authority_id]
+foreign_keys:
+  - name: object_architecture_state
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: state_decision_authority
+    columns: [partner_id, decision_authority_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: architecture_state_state_type_ck
+    expression: "state_type IN ('B', 'T')"

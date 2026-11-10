@@ -1,0 +1,49 @@
+table: mediation_profile
+comment: "A mediator at a stage: party, enforcement mode, failure policy, decision budget, and coverage."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: stage
+    type: VARCHAR(200)
+  - name: mediator_party
+    type: CHAR(1)
+  - name: mediator_key
+    type: VARCHAR(120)
+  - name: mediator_name
+    type: VARCHAR(200)
+    nullable: true
+  - name: enforcement_mode
+    type: CHAR(1)
+  - name: failure_policy
+    type: CHAR(1)
+  - name: decision_budget_value
+    type: NUMERIC
+  - name: decision_budget_unit
+    type: CHAR(1)
+  - name: coverage_submitted_share
+    type: NUMERIC
+  - name: evidence_retention
+    type: VARCHAR(500)
+    nullable: true
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_mediation_profile
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: mediation_profile_mediator_party_ck
+    expression: "mediator_party IN ('E', 'P', 'T')"
+  - name: mediation_profile_enforcement_mode_ck
+    expression: "enforcement_mode IN ('E', 'S')"
+  - name: mediation_profile_failure_policy_ck
+    expression: "failure_policy IN ('C', 'O', 'B')"
+  - name: mediation_profile_decision_budget_unit_ck
+    expression: "decision_budget_unit IN ('M', 'S')"
+  - name: mediation_profile_budget_ck
+    expression: "decision_budget_value > 0"
+  - name: mediation_profile_coverage_ck
+    expression: "coverage_submitted_share >= 0 AND coverage_submitted_share <= 1"

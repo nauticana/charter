@@ -1,0 +1,49 @@
+table: action_record_approval_evaluation
+comment: "The result of one approval evaluation for an action, with the approved capability or action class in force."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: action_record_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: approval_id
+    type: BIGINT
+    nullable: true
+  - name: approved_capability_id
+    type: BIGINT
+    nullable: true
+  - name: approved_action_class
+    type: VARCHAR(200)
+    nullable: true
+  - name: result
+    type: CHAR(1)
+  - name: reason
+    type: VARCHAR(500)
+primary_key: [partner_id, action_record_id, ordinal]
+indexes:
+  - name: approved_capability_evaluations_ix
+    columns: [partner_id, approved_capability_id]
+  - name: approval_evaluations_ix
+    columns: [partner_id, approval_id]
+foreign_keys:
+  - name: approved_capability_evaluations
+    columns: [partner_id, approved_capability_id]
+    references:
+      table: capability_contract
+      columns: [partner_id, id]
+  - name: approval_evaluations
+    columns: [partner_id, approval_id]
+    references:
+      table: authority_approval
+      columns: [partner_id, id]
+  - name: action_approval_evaluations
+    columns: [partner_id, action_record_id]
+    references:
+      table: action_record
+      columns: [partner_id, id]
+checks:
+  - name: action_record_approval_evaluation_result_ck
+    expression: "result IN ('A', 'R', 'N', 'M', 'S')"
+  - name: action_record_approval_evaluation_approved_ck
+    expression: "(result = 'A' AND approval_id IS NOT NULL AND (approved_capability_id IS NULL) <> (approved_action_class IS NULL)) OR (result <> 'A' AND approval_id IS NULL AND approved_capability_id IS NULL AND approved_action_class IS NULL)"

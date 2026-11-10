@@ -1,0 +1,24 @@
+table: capability_contract_business_error
+comment: A business error a contract version declares.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: capability_contract_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: business_error
+    type: VARCHAR(500)
+  - name: ordinal
+    type: SMALLINT
+primary_key: [partner_id, capability_contract_id, version_no, business_error]
+indexes:
+  - name: capability_contract_business_error_ordinal_ux
+    columns: [partner_id, capability_contract_id, version_no, ordinal]
+    unique: true
+foreign_keys:
+  - name: contract_business_errors
+    columns: [partner_id, capability_contract_id, version_no]
+    references:
+      table: capability_contract_version
+      columns: [partner_id, capability_contract_id, version_no]

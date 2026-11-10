@@ -1,0 +1,6 @@
+tables:
+  - enterprise_system
+  - system_profile
+  - system_profile_feature
+  - system_profile_constraint
+  - enterprise_object_external_identifier

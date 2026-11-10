@@ -1,0 +1,45 @@
+table: evidence_record
+comment: "An append-only evidence record: category, content, integrity, and the record it supersedes."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: category
+    type: CHAR(1)
+  - name: content
+    type: VARCHAR(2000)
+  - name: recorded_at
+    type: TIMESTAMP
+  - name: supersedes_id
+    type: BIGINT
+    nullable: true
+  - name: integrity_method
+    type: VARCHAR(120)
+    nullable: true
+  - name: integrity_value
+    type: VARCHAR(1000)
+    nullable: true
+  - name: integrity_verified_at
+    type: TIMESTAMP
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: superseded_records_ix
+    columns: [partner_id, supersedes_id]
+foreign_keys:
+  - name: object_evidence_record
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: superseded_records
+    columns: [partner_id, supersedes_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]
+checks:
+  - name: evidence_record_category_ck
+    expression: "category IN ('O', 'A', 'H', 'X', 'D')"
+  - name: evidence_record_integrity_ck
+    expression: integrity_method IS NOT NULL OR (integrity_value IS NULL AND integrity_verified_at IS NULL)

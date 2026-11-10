@@ -1,0 +1,17 @@
+table: sod_constraint
+comment: A separation of duties constraint and its scope.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: scope
+    type: VARCHAR(200)
+    nullable: true
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_sod_constraint
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

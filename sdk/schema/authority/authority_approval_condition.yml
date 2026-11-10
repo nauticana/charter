@@ -1,0 +1,18 @@
+table: authority_approval_condition
+comment: "A condition statement attached to an approval, in order."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: approval_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(500)
+primary_key: [partner_id, approval_id, ordinal]
+foreign_keys:
+  - name: approval_conditions
+    columns: [partner_id, approval_id]
+    references:
+      table: authority_approval
+      columns: [partner_id, id]

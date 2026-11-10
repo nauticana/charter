@@ -1,0 +1,27 @@
+table: mediation_attribute_trust
+comment: "How far a mediation profile trusts one attribute, by provenance and permitted effect."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_profile_id
+    type: BIGINT
+  - name: attribute
+    type: VARCHAR(200)
+  - name: provenance
+    type: CHAR(1)
+  - name: permitted_effect
+    type: CHAR(1)
+primary_key: [partner_id, mediation_profile_id, attribute]
+foreign_keys:
+  - name: profile_attribute_trust
+    columns: [partner_id, mediation_profile_id]
+    references:
+      table: mediation_profile
+      columns: [partner_id, id]
+checks:
+  - name: mediation_attribute_trust_provenance_ck
+    expression: "provenance IN ('A', 'S')"
+  - name: mediation_attribute_trust_permitted_effect_ck
+    expression: "permitted_effect IN ('T', 'R')"
+  - name: mediation_attribute_trust_tighten_ck
+    expression: "provenance = 'A' OR permitted_effect = 'T'"

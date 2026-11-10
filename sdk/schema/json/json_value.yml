@@ -1,0 +1,58 @@
+table: json_value
+comment: "One node of a JSON value tree: an object, array, or scalar with its member name or item index."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: parent_id
+    type: BIGINT
+    nullable: true
+    comment: Null for a root
+  - name: member_name
+    type: VARCHAR(500)
+    nullable: true
+    comment: Object member
+  - name: item_index
+    type: INT
+    nullable: true
+    comment: Array item
+  - name: value_type
+    type: CHAR(1)
+  - name: scalar_value
+    type: TEXT
+    nullable: true
+    comment: "Null for object, array, and null"
+primary_key: [partner_id, id]
+sequence:
+  name: json_value_seq
+  column: id
+indexes:
+  - name: json_value_member_ux
+    columns: [partner_id, parent_id, member_name]
+    unique: true
+    where: member_name IS NOT NULL
+  - name: json_value_item_ux
+    columns: [partner_id, parent_id, item_index]
+    unique: true
+    where: item_index IS NOT NULL
+foreign_keys:
+  - name: value_members
+    columns: [partner_id, parent_id]
+    references:
+      table: json_value
+      columns: [partner_id, id]
+  - name: partner_json_values
+    columns: [partner_id]
+    references:
+      table: business_partner
+      columns: [id]
+checks:
+  - name: json_value_value_type_ck
+    expression: "value_type IN ('O', 'A', 'S', 'N', 'B', 'Z')"
+  - name: json_value_position_ck
+    expression: "(parent_id IS NULL AND member_name IS NULL AND item_index IS NULL) OR (parent_id IS NOT NULL AND (member_name IS NULL) <> (item_index IS NULL))"
+  - name: json_value_item_index_ck
+    expression: "item_index IS NULL OR item_index >= 0"
+  - name: json_value_scalar_ck
+    expression: "CASE value_type WHEN 'S' THEN scalar_value IS NOT NULL WHEN 'N' THEN scalar_value IS NOT NULL WHEN 'B' THEN scalar_value IN ('true', 'false') ELSE scalar_value IS NULL END"

@@ -1,0 +1,26 @@
+table: enterprise_object_source_evidence
+comment: "An evidence record that a version rests on. Owner kinds: EN, OU, PT, PO, RL, RS, OR, AS, VS, BP, TK, PR, CC, AT, GP, RM."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: enterprise_object_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: evidence_record_id
+    type: BIGINT
+primary_key: [partner_id, enterprise_object_id, version_no, evidence_record_id]
+indexes:
+  - name: evidence_sourced_objects_ix
+    columns: [partner_id, evidence_record_id]
+foreign_keys:
+  - name: version_source_evidence
+    columns: [partner_id, enterprise_object_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: evidence_sourced_objects
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]

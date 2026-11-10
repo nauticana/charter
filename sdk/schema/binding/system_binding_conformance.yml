@@ -1,0 +1,68 @@
+table: system_binding_conformance
+comment: "Evaluation of one binding against its declared features, with its result."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: capability_binding_id
+    type: BIGINT
+    nullable: true
+  - name: data_binding_id
+    type: BIGINT
+    nullable: true
+  - name: authority_binding_id
+    type: BIGINT
+    nullable: true
+  - name: event_binding_id
+    type: BIGINT
+    nullable: true
+  - name: conformance_profile
+    type: VARCHAR(120)
+  - name: implementation_version
+    type: VARCHAR(120)
+  - name: result
+    type: CHAR(1)
+  - name: result_date
+    type: DATE
+primary_key: [partner_id, id]
+indexes:
+  - name: capability_binding_conformance_ix
+    columns: [partner_id, capability_binding_id]
+  - name: data_binding_conformance_ix
+    columns: [partner_id, data_binding_id]
+  - name: authority_binding_conformance_ix
+    columns: [partner_id, authority_binding_id]
+  - name: event_binding_conformance_ix
+    columns: [partner_id, event_binding_id]
+foreign_keys:
+  - name: object_system_binding_conformance
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: capability_binding_conformance
+    columns: [partner_id, capability_binding_id]
+    references:
+      table: system_capability_binding
+      columns: [partner_id, id]
+  - name: data_binding_conformance
+    columns: [partner_id, data_binding_id]
+    references:
+      table: system_data_binding
+      columns: [partner_id, id]
+  - name: authority_binding_conformance
+    columns: [partner_id, authority_binding_id]
+    references:
+      table: system_authority_binding
+      columns: [partner_id, id]
+  - name: event_binding_conformance
+    columns: [partner_id, event_binding_id]
+    references:
+      table: system_event_binding
+      columns: [partner_id, id]
+checks:
+  - name: system_binding_conformance_result_ck
+    expression: "result IN ('C', 'P', 'N')"
+  - name: system_binding_conformance_binding_ck
+    expression: "(CASE WHEN capability_binding_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN data_binding_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN authority_binding_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN event_binding_id IS NOT NULL THEN 1 ELSE 0 END) = 1"

@@ -1,0 +1,24 @@
+table: mediation_boundary_sod_constraint
+comment: A separation of duties constraint that bounds a mediation profile.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_profile_id
+    type: BIGINT
+  - name: sod_constraint_id
+    type: BIGINT
+primary_key: [partner_id, mediation_profile_id, sod_constraint_id]
+indexes:
+  - name: constraint_boundary_profiles_ix
+    columns: [partner_id, sod_constraint_id]
+foreign_keys:
+  - name: profile_boundary_sod_constraints
+    columns: [partner_id, mediation_profile_id]
+    references:
+      table: mediation_profile
+      columns: [partner_id, id]
+  - name: constraint_boundary_profiles
+    columns: [partner_id, sod_constraint_id]
+    references:
+      table: sod_constraint
+      columns: [partner_id, id]

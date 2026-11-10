@@ -1,0 +1,20 @@
+table: business_process_alias
+comment: "An alternative name of a business process version, in order."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: business_process_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: ordinal
+    type: SMALLINT
+  - name: alias
+    type: VARCHAR(500)
+primary_key: [partner_id, business_process_id, version_no, ordinal]
+foreign_keys:
+  - name: process_aliases
+    columns: [partner_id, business_process_id, version_no]
+    references:
+      table: business_process_version
+      columns: [partner_id, business_process_id, version_no]

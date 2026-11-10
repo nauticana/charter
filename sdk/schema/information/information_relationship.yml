@@ -1,0 +1,36 @@
+table: information_relationship
+comment: "A named relationship from an information definition to another, with its cardinality."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: information_definition_id
+    type: BIGINT
+  - name: relationship_name
+    type: VARCHAR(120)
+  - name: ordinal
+    type: SMALLINT
+  - name: target_information_id
+    type: BIGINT
+  - name: cardinality
+    type: CHAR(1)
+primary_key: [partner_id, information_definition_id, relationship_name]
+indexes:
+  - name: information_relationship_ordinal_ux
+    columns: [partner_id, information_definition_id, ordinal]
+    unique: true
+  - name: relationship_target_ix
+    columns: [partner_id, target_information_id]
+foreign_keys:
+  - name: information_relationships
+    columns: [partner_id, information_definition_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]
+  - name: relationship_target
+    columns: [partner_id, target_information_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]
+checks:
+  - name: information_relationship_cardinality_ck
+    expression: "cardinality IN ('O', 'M')"

@@ -1,0 +1,14 @@
+tables:
+  - binding_feature_support
+  - system_capability_binding
+  - system_capability_binding_version
+  - system_capability_binding_lossy_mapping
+  - system_authority_binding
+  - system_authority_binding_version
+  - system_event_binding
+  - system_event_binding_version
+  - system_data_binding
+  - system_binding_conformance
+  - system_data_binding_version
+  - system_data_binding_field_mapping
+  - system_data_binding_lossy_transformation

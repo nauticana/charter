@@ -1,0 +1,26 @@
+table: capability_contract_concept
+comment: A work concept a contract version cites.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: capability_contract_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: work_concept_id
+    type: BIGINT
+primary_key: [partner_id, capability_contract_id, version_no, work_concept_id]
+indexes:
+  - name: concept_contracts_ix
+    columns: [partner_id, work_concept_id]
+foreign_keys:
+  - name: concept_contracts
+    columns: [partner_id, work_concept_id]
+    references:
+      table: work_concept
+      columns: [partner_id, id]
+  - name: contract_concepts
+    columns: [partner_id, capability_contract_id, version_no]
+    references:
+      table: capability_contract_version
+      columns: [partner_id, capability_contract_id, version_no]

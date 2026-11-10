@@ -1,0 +1,76 @@
+table: process_task_instance
+comment: "One run of a task version in a process instance, with its performer, assignment, state, and outcome."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: process_instance_id
+    type: BIGINT
+  - name: task_id
+    type: BIGINT
+  - name: task_version_no
+    type: INT
+  - name: performer_id
+    type: BIGINT
+  - name: assignment_id
+    type: BIGINT
+  - name: participation
+    type: CHAR(2)
+  - name: state
+    type: CHAR(1)
+  - name: created_at
+    type: TIMESTAMP
+  - name: due_at
+    type: TIMESTAMP
+    nullable: true
+  - name: started_at
+    type: TIMESTAMP
+    nullable: true
+  - name: ended_at
+    type: TIMESTAMP
+    nullable: true
+  - name: outcome
+    type: VARCHAR(500)
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: task_instance_performer_ix
+    columns: [partner_id, performer_id]
+  - name: process_task_instances_ix
+    columns: [partner_id, process_instance_id]
+  - name: task_version_instances_ix
+    columns: [partner_id, task_id, task_version_no]
+  - name: assignment_task_instances_ix
+    columns: [partner_id, assignment_id]
+foreign_keys:
+  - name: object_process_task_instance
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: task_instance_performer
+    columns: [partner_id, performer_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: process_task_instances
+    columns: [partner_id, process_instance_id]
+    references:
+      table: process_instance
+      columns: [partner_id, id]
+  - name: task_version_instances
+    columns: [partner_id, task_id, task_version_no]
+    references:
+      table: process_task_version
+      columns: [partner_id, task_id, version_no]
+  - name: assignment_task_instances
+    columns: [partner_id, assignment_id]
+    references:
+      table: organization_assignment
+      columns: [partner_id, id]
+checks:
+  - name: process_task_instance_participation_ck
+    expression: "participation IN ('OB', 'RC', 'PP', 'AP', 'EX')"
+  - name: process_task_instance_state_ck
+    expression: "state IN ('P', 'R', 'S', 'C', 'X', 'F', 'E')"

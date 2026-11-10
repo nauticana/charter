@@ -1,0 +1,24 @@
+table: mediation_boundary_grant
+comment: An authority grant that bounds a mediation profile.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_profile_id
+    type: BIGINT
+  - name: authority_grant_id
+    type: BIGINT
+primary_key: [partner_id, mediation_profile_id, authority_grant_id]
+indexes:
+  - name: grant_boundary_profiles_ix
+    columns: [partner_id, authority_grant_id]
+foreign_keys:
+  - name: profile_boundary_grants
+    columns: [partner_id, mediation_profile_id]
+    references:
+      table: mediation_profile
+      columns: [partner_id, id]
+  - name: grant_boundary_profiles
+    columns: [partner_id, authority_grant_id]
+    references:
+      table: authority_grant
+      columns: [partner_id, id]

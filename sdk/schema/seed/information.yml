@@ -1,0 +1,42 @@
+comment: Code lists of the charter_information module and the columns they govern
+seeds:
+  - table: constant_header
+    columns: [id, caption]
+    rows:
+      - [charter_json_property_type, Charter Information Property Type]
+      - [charter_cardinality, Charter Relationship Cardinality]
+      - [charter_evidence_category, Charter Evidence Category]
+      - [charter_conflict_behavior, Charter Policy Conflict Behavior]
+      - [charter_artifact_kind, Charter Retention Artifact Kind]
+  - table: constant_value
+    columns: [constant_id, value, caption]
+    rows:
+      - [charter_json_property_type, O, Object]
+      - [charter_json_property_type, A, Array]
+      - [charter_json_property_type, S, String]
+      - [charter_json_property_type, N, Number]
+      - [charter_json_property_type, I, Integer]
+      - [charter_json_property_type, B, Boolean]
+      - [charter_cardinality, O, One]
+      - [charter_cardinality, M, Many]
+      - [charter_evidence_category, O, Observed fact]
+      - [charter_evidence_category, A, Agent assertion]
+      - [charter_evidence_category, H, Human decision]
+      - [charter_evidence_category, X, External response]
+      - [charter_evidence_category, D, Derived conclusion]
+      - [charter_conflict_behavior, C, Fail closed]
+      - [charter_conflict_behavior, P, Apply declared precedence]
+      - [charter_artifact_kind, S, Source data]
+      - [charter_artifact_kind, A, Action evidence]
+      - [charter_artifact_kind, P, Prompt]
+      - [charter_artifact_kind, I, Intermediate artifact]
+      - [charter_artifact_kind, C, Cache]
+      - [charter_artifact_kind, E, External reference]
+  - table: constant_lookup
+    columns: [constant_id, table_name, column_name]
+    rows:
+      - [charter_artifact_kind, information_retention_rule, artifact_kind]
+      - [charter_cardinality, information_relationship, cardinality]
+      - [charter_conflict_behavior, information_governance_policy, conflict_behavior]
+      - [charter_evidence_category, information_fact_source, evidence_category]
+      - [charter_json_property_type, information_property, json_type]

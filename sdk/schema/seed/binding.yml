@@ -1,0 +1,22 @@
+comment: Code lists of the charter_binding module and the columns they govern
+seeds:
+  - table: constant_header
+    columns: [id, caption]
+    rows:
+      - [charter_feature_support, Charter Feature Support]
+      - [charter_delivery_semantics, Charter Event Delivery Semantics]
+  - table: constant_value
+    columns: [constant_id, value, caption]
+    rows:
+      - [charter_feature_support, S, Supported]
+      - [charter_feature_support, P, Partial]
+      - [charter_feature_support, U, Unsupported]
+      - [charter_delivery_semantics, M, At most once]
+      - [charter_delivery_semantics, L, At least once]
+      - [charter_delivery_semantics, E, Exactly once]
+  - table: constant_lookup
+    columns: [constant_id, table_name, column_name]
+    rows:
+      - [charter_conformance_result, system_binding_conformance, result]
+      - [charter_delivery_semantics, system_event_binding_version, delivery_semantics]
+      - [charter_feature_support, binding_feature_support, support]

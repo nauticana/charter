@@ -1,0 +1,24 @@
+table: evidence_bundle_escalation_record
+comment: An escalation record in a bundle.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_bundle_id
+    type: BIGINT
+  - name: escalation_id
+    type: BIGINT
+primary_key: [partner_id, evidence_bundle_id, escalation_id]
+indexes:
+  - name: escalation_bundles_ix
+    columns: [partner_id, escalation_id]
+foreign_keys:
+  - name: bundle_escalations
+    columns: [partner_id, evidence_bundle_id]
+    references:
+      table: evidence_bundle
+      columns: [partner_id, id]
+  - name: escalation_bundles
+    columns: [partner_id, escalation_id]
+    references:
+      table: escalation_record
+      columns: [partner_id, id]

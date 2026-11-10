@@ -1,0 +1,39 @@
+table: process_instance
+comment: "One run of a business process version, with its state and times."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: business_process_id
+    type: BIGINT
+  - name: business_process_version_no
+    type: INT
+  - name: state
+    type: CHAR(1)
+  - name: created_at
+    type: TIMESTAMP
+  - name: started_at
+    type: TIMESTAMP
+    nullable: true
+  - name: ended_at
+    type: TIMESTAMP
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: process_version_instances_ix
+    columns: [partner_id, business_process_id, business_process_version_no]
+foreign_keys:
+  - name: object_process_instance
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: process_version_instances
+    columns: [partner_id, business_process_id, business_process_version_no]
+    references:
+      table: business_process_version
+      columns: [partner_id, business_process_id, version_no]
+checks:
+  - name: process_instance_state_ck
+    expression: "state IN ('P', 'R', 'S', 'C', 'X', 'F')"

@@ -1,0 +1,24 @@
+table: work_concept_related
+comment: A related concept of a work concept.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: work_concept_id
+    type: BIGINT
+  - name: related_concept_id
+    type: BIGINT
+primary_key: [partner_id, work_concept_id, related_concept_id]
+indexes:
+  - name: related_inverse_ix
+    columns: [partner_id, related_concept_id]
+foreign_keys:
+  - name: concept_related
+    columns: [partner_id, work_concept_id]
+    references:
+      table: work_concept
+      columns: [partner_id, id]
+  - name: related_inverse
+    columns: [partner_id, related_concept_id]
+    references:
+      table: work_concept
+      columns: [partner_id, id]

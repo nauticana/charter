@@ -1,0 +1,18 @@
+table: architecture_roadmap_item_dependency
+comment: "A dependency statement of a roadmap item, in order."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: roadmap_item_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(500)
+primary_key: [partner_id, roadmap_item_id, ordinal]
+foreign_keys:
+  - name: item_dependencies
+    columns: [partner_id, roadmap_item_id]
+    references:
+      table: architecture_roadmap_item
+      columns: [partner_id, id]

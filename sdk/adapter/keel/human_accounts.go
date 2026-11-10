@@ -31,44 +31,47 @@ type HumanAccount struct {
 }
 
 const (
-	qMembership        = "charter_human_account_membership"
-	qHumanDocumentKind = "charter_human_account_document_kind"
-	qAccountOverlaps   = "charter_human_account_overlaps"
-	qAccountInsert     = "charter_human_account_insert"
-	qAccountOpenAt     = "charter_human_account_open_at"
-	qAccountEnd        = "charter_human_account_end"
-	qHumanOfUser       = "charter_human_account_human_of_user"
-	qUserOfHuman       = "charter_human_account_user_of_human"
-	effectiveAccount   = `a.begda <= ? AND (a.endda IS NULL OR a.endda > ?) AND (p.endda IS NULL OR p.endda > ?)`
-	membershipJoin     = `JOIN partner_user p ON p.partner_id = a.partner_id AND p.user_id = a.user_id AND p.begda = a.partner_user_begda`
+	qMembership      = "charter.human_account.membership"
+	qHumanObject     = "charter.human_account.human"
+	qAccountOverlaps = "charter.human_account.overlaps"
+	qAccountInsert   = "charter.human_account.insert"
+	qAccountOpenAt   = "charter.human_account.open_at"
+	qAccountEnd      = "charter.human_account.end"
+	qHumanOfUser     = "charter.human_account.human_of_user"
+	qUserOfHuman     = "charter.human_account.user_of_human"
+	effectiveAccount = `a.begda <= ? AND (a.endda IS NULL OR a.endda > ?) AND (p.endda IS NULL OR p.endda > ?)`
+	membershipJoin   = `JOIN partner_user p ON p.partner_id = a.partner_id AND p.user_id = a.user_id AND p.begda = a.partner_user_begda`
+	humanJoin        = `JOIN enterprise_object o ON o.partner_id = a.partner_id AND o.id = a.human_identity_id`
 )
+
+var humanKindCode = kindCodes.codes[string(model.KindHumanIdentity)]
 
 var humanAccountQueries = map[string]string{
 	qMembership: `
 SELECT endda FROM partner_user WHERE partner_id = ? AND user_id = ? AND begda = ? FOR UPDATE`,
-	qHumanDocumentKind: `
-SELECT document_kind FROM charter_document WHERE partner_id = ? AND namespace = ? AND document_id = ? FOR UPDATE`,
+	qHumanObject: `
+SELECT id FROM enterprise_object WHERE partner_id = ? AND namespace = ? AND identifier = ? AND kind = '` + humanKindCode + `'`,
 	qAccountOverlaps: `
-SELECT human_namespace, human_id, user_id, begda, endda FROM charter_human_account
- WHERE partner_id = ? AND ((human_namespace = ? AND human_id = ?) OR user_id = ?)
-   AND (? OR begda < ?) AND (endda IS NULL OR endda > ?)`,
+SELECT a.human_identity_id, a.user_id, a.begda, a.endda FROM human_identity_partner_user a
+ WHERE a.partner_id = ? AND (a.human_identity_id = ? OR a.user_id = ?)
+   AND (? OR a.begda < ?) AND (a.endda IS NULL OR a.endda > ?)`,
 	qAccountInsert: `
-INSERT INTO charter_human_account (partner_id, human_namespace, human_id, user_id, partner_user_begda, begda, endda)
-VALUES (?, ?, ?, ?, ?, ?, ?)`,
+INSERT INTO human_identity_partner_user (partner_id, human_identity_id, begda, user_id, partner_user_begda, endda)
+VALUES (?, ?, ?, ?, ?, ?)`,
 	qAccountOpenAt: `
-SELECT begda FROM charter_human_account
- WHERE partner_id = ? AND human_namespace = ? AND human_id = ? AND begda < ? AND (endda IS NULL OR endda > ?) FOR UPDATE`,
+SELECT a.begda FROM human_identity_partner_user a
+ WHERE a.partner_id = ? AND a.human_identity_id = ? AND a.begda < ? AND (a.endda IS NULL OR a.endda > ?) FOR UPDATE`,
 	qAccountEnd: `
-UPDATE charter_human_account SET endda = ? WHERE partner_id = ? AND human_namespace = ? AND human_id = ? AND begda = ?`,
+UPDATE human_identity_partner_user SET endda = ? WHERE partner_id = ? AND human_identity_id = ? AND begda = ?`,
 	qHumanOfUser: `
-SELECT a.human_namespace, a.human_id FROM charter_human_account a ` + membershipJoin + `
+SELECT o.namespace, o.identifier FROM human_identity_partner_user a ` + membershipJoin + ` ` + humanJoin + `
  WHERE a.partner_id = ? AND a.user_id = ? AND ` + effectiveAccount,
 	qUserOfHuman: `
-SELECT a.user_id FROM charter_human_account a ` + membershipJoin + `
- WHERE a.partner_id = ? AND a.human_namespace = ? AND a.human_id = ? AND ` + effectiveAccount,
+SELECT a.user_id FROM human_identity_partner_user a ` + membershipJoin + ` ` + humanJoin + `
+ WHERE a.partner_id = ? AND o.namespace = ? AND o.identifier = ? AND o.kind = '` + humanKindCode + `' AND ` + effectiveAccount,
 }
 
-// HumanAccounts keeps charter_human_account links. A link lies within its membership, targets a stored
+// HumanAccounts keeps human_identity_partner_user links. A link lies within its membership, targets a stored
 // HumanIdentity, and never overlaps another link of the same human or the same user, so each resolves to one
 // counterpart at any time; a link whose membership has ended no longer resolves.
 type HumanAccounts struct {
@@ -121,29 +124,26 @@ func (a *HumanAccounts) Link(ctx context.Context, link HumanAccount) (err error)
 	if ends, ended := common.AsTimeOK(membership.Rows[0][0]); ended && (link.Endda == nil || link.Endda.After(ends)) {
 		return fmt.Errorf("%w: membership ends %s", ErrNoMembership, ends.Format(time.RFC3339))
 	}
-	kind, err := tx.Query(ctx, qHumanDocumentKind, link.PartnerID, link.Human.Namespace, link.Human.ID)
+	human, err := humanObject(ctx, tx, link.PartnerID, link.Human)
 	if err != nil {
-		return fmt.Errorf("human account identity: %w", err)
-	}
-	if len(kind.Rows) == 0 || common.AsString(kind.Rows[0][0]) != string(model.KindHumanIdentity) {
-		return fmt.Errorf("%w: %s:%s", ErrNotHumanIdentity, link.Human.Namespace, link.Human.ID)
+		return err
 	}
 	var endda any
 	if link.Endda != nil {
 		endda = *link.Endda
 	}
-	overlaps, err := tx.Query(ctx, qAccountOverlaps, link.PartnerID, link.Human.Namespace, link.Human.ID, link.UserID, link.Endda == nil, endda, link.Begda)
+	overlaps, err := tx.Query(ctx, qAccountOverlaps, link.PartnerID, human, link.UserID, link.Endda == nil, endda, link.Begda)
 	if err != nil {
 		return fmt.Errorf("human account overlaps: %w", err)
 	}
 	for _, row := range overlaps.Rows {
-		if !link.sameAs(row) {
+		if !link.sameAs(human, row) {
 			return fmt.Errorf("%w: %s:%s or user %d is already linked from %s", ErrAccountLinkOverlap, link.Human.Namespace, link.Human.ID, link.UserID,
-				common.AsTime(row[3]).Format(time.RFC3339))
+				common.AsTime(row[2]).Format(time.RFC3339))
 		}
 	}
 	if len(overlaps.Rows) == 0 {
-		if _, err := tx.Query(ctx, qAccountInsert, link.PartnerID, link.Human.Namespace, link.Human.ID, link.UserID, link.PartnerUserBegda, link.Begda, endda); err != nil {
+		if _, err := tx.Query(ctx, qAccountInsert, link.PartnerID, human, link.Begda, link.UserID, link.PartnerUserBegda, endda); err != nil {
 			return fmt.Errorf("human account insert: %w", err)
 		}
 	}
@@ -170,14 +170,18 @@ func (a *HumanAccounts) End(ctx context.Context, partnerID int64, human model.Re
 			err = errors.Join(err, tx.Rollback(context.WithoutCancel(ctx)))
 		}
 	}()
-	open, err := tx.Query(ctx, qAccountOpenAt, partnerID, human.Namespace, human.ID, endda, endda)
+	id, err := humanObject(ctx, tx, partnerID, human)
+	if err != nil {
+		return err
+	}
+	open, err := tx.Query(ctx, qAccountOpenAt, partnerID, id, endda, endda)
 	if err != nil {
 		return fmt.Errorf("human account: %w", err)
 	}
 	if len(open.Rows) != 1 {
 		return fmt.Errorf("%w: %s:%s has no link open at %s", ErrUnmapped, human.Namespace, human.ID, endda.Format(time.RFC3339))
 	}
-	if _, err := tx.Query(ctx, qAccountEnd, endda, partnerID, human.Namespace, human.ID, open.Rows[0][0]); err != nil {
+	if _, err := tx.Query(ctx, qAccountEnd, endda, partnerID, id, open.Rows[0][0]); err != nil {
 		return fmt.Errorf("human account end: %w", err)
 	}
 	if err := tx.Commit(ctx); err != nil {
@@ -251,10 +255,25 @@ func (l HumanAccount) stored() HumanAccount {
 func storedTime(t time.Time) time.Time { return t.UTC().Truncate(time.Microsecond) }
 
 // sameAs reports whether an overlapping row is this exact link, which makes Link a replay.
-func (l HumanAccount) sameAs(row []any) bool {
-	begda, _ := common.AsTimeOK(row[3])
-	endda, open := common.AsTimeOK(row[4])
+func (l HumanAccount) sameAs(human int64, row []any) bool {
+	begda, _ := common.AsTimeOK(row[2])
+	endda, open := common.AsTimeOK(row[3])
 	sameEnd := (l.Endda == nil && !open) || (l.Endda != nil && open && l.Endda.Equal(endda))
-	return common.AsString(row[0]) == l.Human.Namespace && common.AsString(row[1]) == l.Human.ID &&
-		common.AsInt64(row[2]) == l.UserID && begda.Equal(l.Begda) && sameEnd
+	return common.AsInt64(row[0]) == human && common.AsInt64(row[1]) == l.UserID && begda.Equal(l.Begda) && sameEnd
+}
+
+// humanObject resolves a stored HumanIdentity to its object id.
+func humanObject(ctx context.Context, q port.QueryService, partnerID int64, human model.Ref) (int64, error) {
+	res, err := q.Query(ctx, qHumanObject, partnerID, human.Namespace, human.ID)
+	if err != nil {
+		return 0, fmt.Errorf("human account identity: %w", err)
+	}
+	if len(res.Rows) != 1 {
+		return 0, fmt.Errorf("%w: %s:%s", ErrNotHumanIdentity, human.Namespace, human.ID)
+	}
+	id, ok := common.AsInt64OK(res.Rows[0][0])
+	if !ok {
+		return 0, fmt.Errorf("%w: %s:%s", ErrNotHumanIdentity, human.Namespace, human.ID)
+	}
+	return id, nil
 }

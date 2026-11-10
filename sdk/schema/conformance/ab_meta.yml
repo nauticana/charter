@@ -1,0 +1,5 @@
+tables:
+  - conformance_claim
+  - conformance_claim_result
+  - conformance_tested_rule
+  - conformance_verification_type

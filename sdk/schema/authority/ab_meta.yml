@@ -1,0 +1,21 @@
+tables:
+  - enterprise_agent_definition
+  - enterprise_agent_definition_version
+  - enterprise_agent_definition_responsibility
+  - enterprise_agent_definition_trigger
+  - enterprise_agent_definition_required_input
+  - enterprise_agent_definition_expected_outcome
+  - enterprise_agent_definition_policy
+  - enterprise_agent_definition_escalation_condition
+  - enterprise_agent_definition_confidence_boundary
+  - enterprise_agent_runtime
+  - sod_constraint
+  - sod_constrained_responsibility
+  - sod_exception
+  - enterprise_agent_definition_capability
+  - authority_grant
+  - authority_approval
+  - authority_approval_subject
+  - authority_approval_condition
+  - sod_constrained_capability
+  - capability_contract_sod_constraint

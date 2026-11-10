@@ -1,0 +1,18 @@
+table: system_profile_constraint
+comment: "An operational constraint of a system profile, in order."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: system_profile_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(500)
+primary_key: [partner_id, system_profile_id, ordinal]
+foreign_keys:
+  - name: profile_constraints
+    columns: [partner_id, system_profile_id]
+    references:
+      table: system_profile
+      columns: [partner_id, id]

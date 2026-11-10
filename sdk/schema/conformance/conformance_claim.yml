@@ -1,0 +1,35 @@
+table: conformance_claim
+comment: "A bounded conformance claim of an implementation against a profile, with its result."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: implementation_id
+    type: BIGINT
+  - name: conformance_profile
+    type: VARCHAR(120)
+  - name: implementation_version
+    type: VARCHAR(120)
+  - name: result
+    type: CHAR(1)
+  - name: result_date
+    type: DATE
+primary_key: [partner_id, id]
+indexes:
+  - name: claimed_implementation_ix
+    columns: [partner_id, implementation_id]
+foreign_keys:
+  - name: object_conformance_claim
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: claimed_implementation
+    columns: [partner_id, implementation_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: conformance_claim_result_ck
+    expression: "result IN ('C', 'P', 'N')"

@@ -1,0 +1,25 @@
+table: mediation_proposed_obligation
+comment: "An obligation a mediation decision proposed, and to what."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_decision_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: obligation
+    type: VARCHAR(200)
+  - name: applied_to
+    type: VARCHAR(200)
+  - name: target_kind
+    type: CHAR(1)
+primary_key: [partner_id, mediation_decision_id, ordinal]
+foreign_keys:
+  - name: decision_proposed_obligations
+    columns: [partner_id, mediation_decision_id]
+    references:
+      table: mediation_decision
+      columns: [partner_id, id]
+checks:
+  - name: mediation_proposed_obligation_target_kind_ck
+    expression: "target_kind IN ('A', 'D')"

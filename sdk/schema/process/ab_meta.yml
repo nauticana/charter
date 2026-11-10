@@ -1,0 +1,21 @@
+tables:
+  - value_stream
+  - business_process
+  - business_process_version
+  - business_process_alias
+  - process_task
+  - process_task_version
+  - process_task_performer_kind
+  - process_task_participation
+  - process_task_concept
+  - process_relationship
+  - process_instance
+  - process_instance_context
+  - architecture_state
+  - architecture_gap
+  - architecture_gap_compared_element
+  - architecture_roadmap_item
+  - architecture_roadmap_item_gap
+  - architecture_roadmap_item_dependency
+  - outcome_measure
+  - process_task_instance

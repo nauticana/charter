@@ -1,0 +1,121 @@
+table: action_record
+comment: "Evidence of one action by a runtime or human under a capability contract, with its outcome and effect."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: actor_human_id
+    type: BIGINT
+    nullable: true
+    comment: "An agent actor is the runtime's identity"
+  - name: runtime_instance_id
+    type: BIGINT
+  - name: execution_context_id
+    type: VARCHAR(120)
+  - name: assignment_id
+    type: BIGINT
+    nullable: true
+  - name: assignment_basis
+    type: CHAR(1)
+    nullable: true
+  - name: responsibility_id
+    type: BIGINT
+    nullable: true
+  - name: capability_contract_id
+    type: BIGINT
+  - name: material_inputs_digest
+    type: VARCHAR(500)
+    nullable: true
+  - name: operation_class
+    type: CHAR(1)
+  - name: action_time
+    type: TIMESTAMP
+  - name: outcome
+    type: VARCHAR(500)
+  - name: disposition
+    type: CHAR(1)
+  - name: effect
+    type: CHAR(1)
+    nullable: true
+  - name: unknown_cause
+    type: CHAR(1)
+    nullable: true
+  - name: reconciles_action_id
+    type: BIGINT
+    nullable: true
+  - name: sod_exception_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: human_actions_ix
+    columns: [partner_id, actor_human_id]
+  - name: runtime_actions_ix
+    columns: [partner_id, runtime_instance_id]
+  - name: capability_actions_ix
+    columns: [partner_id, capability_contract_id]
+  - name: assignment_actions_ix
+    columns: [partner_id, assignment_id]
+  - name: responsibility_actions_ix
+    columns: [partner_id, responsibility_id]
+  - name: exception_actions_ix
+    columns: [partner_id, sod_exception_id]
+  - name: reconciled_actions_ix
+    columns: [partner_id, reconciles_action_id]
+foreign_keys:
+  - name: object_action_record
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: human_actions
+    columns: [partner_id, actor_human_id]
+    references:
+      table: human_identity
+      columns: [partner_id, id]
+  - name: runtime_actions
+    columns: [partner_id, runtime_instance_id]
+    references:
+      table: enterprise_agent_runtime
+      columns: [partner_id, id]
+  - name: capability_actions
+    columns: [partner_id, capability_contract_id]
+    references:
+      table: capability_contract
+      columns: [partner_id, id]
+  - name: assignment_actions
+    columns: [partner_id, assignment_id]
+    references:
+      table: organization_assignment
+      columns: [partner_id, id]
+  - name: responsibility_actions
+    columns: [partner_id, responsibility_id]
+    references:
+      table: responsibility
+      columns: [partner_id, id]
+  - name: exception_actions
+    columns: [partner_id, sod_exception_id]
+    references:
+      table: sod_exception
+      columns: [partner_id, id]
+  - name: reconciled_actions
+    columns: [partner_id, reconciles_action_id]
+    references:
+      table: action_record
+      columns: [partner_id, id]
+checks:
+  - name: action_record_assignment_basis_ck
+    expression: "assignment_basis IN ('S', 'M', 'C', 'D')"
+  - name: action_record_operation_class_ck
+    expression: "operation_class IN ('R', 'P', 'A', 'E')"
+  - name: action_record_disposition_ck
+    expression: "disposition IN ('E', 'B', 'D', 'F', 'U')"
+  - name: action_record_effect_ck
+    expression: "effect IN ('C', 'P', 'A', 'U')"
+  - name: action_record_unknown_cause_ck
+    expression: "unknown_cause IN ('O', 'U', 'C')"
+  - name: action_record_basis_assignment_ck
+    expression: assignment_basis IS NULL OR assignment_id IS NOT NULL
+  - name: action_record_basis_ck
+    expression: assignment_id IS NOT NULL OR responsibility_id IS NOT NULL

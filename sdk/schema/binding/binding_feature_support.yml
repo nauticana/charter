@@ -1,0 +1,26 @@
+table: binding_feature_support
+comment: Declared support of a binding or binding conformance for one contract feature.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: enterprise_object_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: feature
+    type: VARCHAR(200)
+  - name: support
+    type: CHAR(1)
+  - name: notes
+    type: VARCHAR(1000)
+    nullable: true
+primary_key: [partner_id, enterprise_object_id, version_no, feature]
+foreign_keys:
+  - name: version_features
+    columns: [partner_id, enterprise_object_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+checks:
+  - name: binding_feature_support_support_ck
+    expression: "support IN ('S', 'P', 'U')"

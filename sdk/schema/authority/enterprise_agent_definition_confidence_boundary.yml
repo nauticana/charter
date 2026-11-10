@@ -1,0 +1,20 @@
+table: enterprise_agent_definition_confidence_boundary
+comment: "A confidence boundary of an agent definition version, in order."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: agent_definition_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(500)
+primary_key: [partner_id, agent_definition_id, version_no, ordinal]
+foreign_keys:
+  - name: definition_confidence_boundaries
+    columns: [partner_id, agent_definition_id, version_no]
+    references:
+      table: enterprise_agent_definition_version
+      columns: [partner_id, agent_definition_id, version_no]

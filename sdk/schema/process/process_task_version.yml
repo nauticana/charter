@@ -1,0 +1,42 @@
+table: process_task_version
+comment: "One immutable version of a task: its process, outcome, and accountable responsibility."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: task_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: business_process_id
+    type: BIGINT
+  - name: business_outcome
+    type: VARCHAR(500)
+  - name: accountable_responsibility_id
+    type: BIGINT
+primary_key: [partner_id, task_id, version_no]
+indexes:
+  - name: process_tasks_ix
+    columns: [partner_id, business_process_id]
+  - name: accountable_tasks_ix
+    columns: [partner_id, accountable_responsibility_id]
+foreign_keys:
+  - name: process_task_version_envelope
+    columns: [partner_id, task_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: task_versions
+    columns: [partner_id, task_id]
+    references:
+      table: process_task
+      columns: [partner_id, id]
+  - name: process_tasks
+    columns: [partner_id, business_process_id]
+    references:
+      table: business_process
+      columns: [partner_id, id]
+  - name: accountable_tasks
+    columns: [partner_id, accountable_responsibility_id]
+    references:
+      table: responsibility
+      columns: [partner_id, id]

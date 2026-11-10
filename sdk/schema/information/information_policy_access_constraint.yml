@@ -1,0 +1,18 @@
+table: information_policy_access_constraint
+comment: "An access constraint statement of a governance policy, in order."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: information_governance_policy_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(500)
+primary_key: [partner_id, information_governance_policy_id, ordinal]
+foreign_keys:
+  - name: policy_access_constraints
+    columns: [partner_id, information_governance_policy_id]
+    references:
+      table: information_governance_policy
+      columns: [partner_id, id]

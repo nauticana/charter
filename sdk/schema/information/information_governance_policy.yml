@@ -1,0 +1,23 @@
+table: information_governance_policy
+comment: "A governance policy for information, with its precedence and conflict behavior."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: precedence
+    type: INT
+  - name: conflict_behavior
+    type: CHAR(1)
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_information_governance_policy
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: information_governance_policy_conflict_behavior_ck
+    expression: "conflict_behavior IN ('C', 'P')"
+  - name: information_governance_policy_precedence_ck
+    expression: "precedence >= 0"

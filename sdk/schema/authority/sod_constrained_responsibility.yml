@@ -1,0 +1,24 @@
+table: sod_constrained_responsibility
+comment: A responsibility a separation of duties constraint covers.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: sod_constraint_id
+    type: BIGINT
+  - name: responsibility_id
+    type: BIGINT
+primary_key: [partner_id, sod_constraint_id, responsibility_id]
+indexes:
+  - name: responsibility_constraints_ix
+    columns: [partner_id, responsibility_id]
+foreign_keys:
+  - name: constraint_responsibilities
+    columns: [partner_id, sod_constraint_id]
+    references:
+      table: sod_constraint
+      columns: [partner_id, id]
+  - name: responsibility_constraints
+    columns: [partner_id, responsibility_id]
+    references:
+      table: responsibility
+      columns: [partner_id, id]

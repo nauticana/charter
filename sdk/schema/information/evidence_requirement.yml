@@ -1,0 +1,48 @@
+table: evidence_requirement
+comment: "Evidence a task or capability contract version rests on, as prose or as a required information attribute with a maximum age."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: enterprise_object_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(500)
+    nullable: true
+    comment: Prose form
+  - name: information_definition_id
+    type: BIGINT
+    nullable: true
+    comment: Structured form
+  - name: attribute
+    type: VARCHAR(120)
+    nullable: true
+  - name: required
+    type: BOOLEAN
+    nullable: true
+  - name: max_age_seconds
+    type: INT
+    nullable: true
+primary_key: [partner_id, enterprise_object_id, version_no, ordinal]
+indexes:
+  - name: information_evidence_requirements_ix
+    columns: [partner_id, information_definition_id]
+foreign_keys:
+  - name: version_evidence_requirements
+    columns: [partner_id, enterprise_object_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: information_evidence_requirements
+    columns: [partner_id, information_definition_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]
+checks:
+  - name: evidence_requirement_form_ck
+    expression: (statement IS NOT NULL AND information_definition_id IS NULL AND attribute IS NULL AND required IS NULL AND max_age_seconds IS NULL) OR (statement IS NULL AND information_definition_id IS NOT NULL AND attribute IS NOT NULL AND required IS NOT NULL)
+  - name: evidence_requirement_max_age_ck
+    expression: "max_age_seconds IS NULL OR max_age_seconds > 0"

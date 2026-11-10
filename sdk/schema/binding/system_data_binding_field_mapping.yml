@@ -1,0 +1,25 @@
+table: system_data_binding_field_mapping
+comment: "A field mapping of a data binding version, from Charter path to external path."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: data_binding_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: ordinal
+    type: SMALLINT
+  - name: charter_path
+    type: VARCHAR(500)
+  - name: external_path
+    type: VARCHAR(500)
+  - name: transformation
+    type: VARCHAR(1000)
+    nullable: true
+primary_key: [partner_id, data_binding_id, version_no, ordinal]
+foreign_keys:
+  - name: binding_field_mappings
+    columns: [partner_id, data_binding_id, version_no]
+    references:
+      table: system_data_binding_version
+      columns: [partner_id, data_binding_id, version_no]

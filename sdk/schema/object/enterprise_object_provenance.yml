@@ -1,0 +1,35 @@
+table: enterprise_object_provenance
+comment: "The document of another document set that a version was derived from, with its version and digest."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: enterprise_object_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: source_kind
+    type: VARCHAR(60)
+  - name: source_namespace
+    type: VARCHAR(200)
+    nullable: true
+  - name: source_identifier
+    type: VARCHAR(120)
+  - name: source_external
+    type: BOOLEAN
+  - name: source_version
+    type: VARCHAR(60)
+  - name: source_digest
+    type: VARCHAR(135)
+  - name: adoption
+    type: CHAR(1)
+    nullable: true
+primary_key: [partner_id, enterprise_object_id, version_no]
+foreign_keys:
+  - name: version_provenance
+    columns: [partner_id, enterprise_object_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+checks:
+  - name: enterprise_object_provenance_adoption_ck
+    expression: "adoption IN ('A', 'T')"

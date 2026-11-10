@@ -32,3 +32,4 @@ An accepted ADR does not itself create a normative requirement. Any normative re
 - [0007: Structured evidence items, external identifiers, and measurements](0007-evidence-items-identifiers-and-measurements.md)
 - [0008: JSON-LD interchange](0008-json-ld-interchange.md)
 - [0009: Work vocabulary and structured sources](0009-work-vocabulary-and-structured-sources.md)
+- [0010: Relational document store](0010-relational-document-store.md)

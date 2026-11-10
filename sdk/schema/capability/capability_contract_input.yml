@@ -1,0 +1,20 @@
+table: capability_contract_input
+comment: "An input statement of a contract version, in order."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: capability_contract_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(500)
+primary_key: [partner_id, capability_contract_id, version_no, ordinal]
+foreign_keys:
+  - name: contract_inputs
+    columns: [partner_id, capability_contract_id, version_no]
+    references:
+      table: capability_contract_version
+      columns: [partner_id, capability_contract_id, version_no]

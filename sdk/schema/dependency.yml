@@ -1,0 +1,93 @@
+# Charter keel schema modules. Pass the selected group directories to keel's schemagen -input after keel's core,
+# geo, and tenant_management, with their seed files to -seed; a group needs every group it depends on.
+# depends_on lists direct table-FK dependencies and fixes DDL order; charter_binding also needs charter_conformance,
+# whose tables hold a binding conformance's tested rules and verification types.
+version: 1
+groups:
+  - name: charter_json
+    path: json
+    seed: seed/json.yml
+    depends_on: [tenant_management]
+    seed_depends_on: [core]
+
+  - name: charter_object
+    path: object
+    seed: seed/object.yml
+    depends_on: [geo, tenant_management, charter_json]
+    seed_depends_on: [core]
+
+  - name: charter_conformance
+    path: conformance
+    seed: seed/conformance.yml
+    depends_on: [charter_object]
+    seed_depends_on: [core]
+
+  - name: charter_identity
+    path: identity
+    seed: seed/identity.yml
+    depends_on: [tenant_management, charter_object]
+    seed_depends_on: [core]
+
+  - name: charter_system
+    path: system
+    depends_on: [charter_object]
+    seed_depends_on: []
+
+  - name: charter_work
+    path: work
+    depends_on: [charter_object]
+    seed_depends_on: []
+
+  - name: charter_information
+    path: information
+    seed: seed/information.yml
+    depends_on: [charter_object, charter_system]
+    seed_depends_on: [core]
+
+  - name: charter_organization
+    path: organization
+    seed: seed/organization.yml
+    depends_on: [charter_object, charter_identity, charter_work]
+    seed_depends_on: [core]
+
+  - name: charter_capability
+    path: capability
+    seed: seed/capability.yml
+    depends_on: [charter_json, charter_object, charter_work, charter_information]
+    seed_depends_on: [core]
+
+  - name: charter_process
+    path: process
+    seed: seed/process.yml
+    depends_on: [geo, charter_object, charter_work, charter_organization]
+    seed_depends_on: [core]
+
+  - name: charter_binding
+    path: binding
+    seed: seed/binding.yml
+    depends_on: [charter_object, charter_conformance, charter_system, charter_information, charter_capability]
+    seed_depends_on: [core]
+
+  - name: charter_evidence
+    path: evidence
+    seed: seed/evidence.yml
+    depends_on: [charter_json, charter_object, charter_system, charter_information, charter_process]
+    seed_depends_on: [core]
+
+  - name: charter_authority
+    path: authority
+    seed: seed/authority.yml
+    depends_on: [charter_object, charter_identity, charter_organization, charter_capability, charter_evidence]
+    seed_depends_on: [core]
+
+  - name: charter_action
+    path: action
+    seed: seed/action.yml
+    depends_on: [charter_object, charter_identity, charter_information, charter_organization, charter_capability, charter_evidence, charter_authority]
+    seed_depends_on: [core]
+
+  - name: charter_mediation
+    path: mediation
+    seed: seed/mediation.yml
+    depends_on: [charter_object, charter_identity, charter_information, charter_capability, charter_evidence, charter_authority, charter_action]
+    seed_depends_on: [core]

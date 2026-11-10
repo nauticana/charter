@@ -1,0 +1,14 @@
+table: enterprise_system
+comment: An external system participating through profiles and bindings.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_enterprise_system
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

@@ -1,0 +1,25 @@
+table: organization_unit
+comment: "A unit of the organization tree, with its parent unit."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: parent_unit_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: unit_children_ix
+    columns: [partner_id, parent_unit_id]
+foreign_keys:
+  - name: object_organization_unit
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: unit_children
+    columns: [partner_id, parent_unit_id]
+    references:
+      table: organization_unit
+      columns: [partner_id, id]

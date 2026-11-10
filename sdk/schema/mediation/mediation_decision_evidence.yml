@@ -1,0 +1,24 @@
+table: mediation_decision_evidence
+comment: An evidence record a mediation decision rests on.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_decision_id
+    type: BIGINT
+  - name: evidence_record_id
+    type: BIGINT
+primary_key: [partner_id, mediation_decision_id, evidence_record_id]
+indexes:
+  - name: evidence_decisions_ix
+    columns: [partner_id, evidence_record_id]
+foreign_keys:
+  - name: decision_evidence
+    columns: [partner_id, mediation_decision_id]
+    references:
+      table: mediation_decision
+      columns: [partner_id, id]
+  - name: evidence_decisions
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]

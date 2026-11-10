@@ -1,0 +1,26 @@
+table: capability_contract_sod_constraint
+comment: A separation of duties constraint a contract version is subject to.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: capability_contract_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: sod_constraint_id
+    type: BIGINT
+primary_key: [partner_id, capability_contract_id, version_no, sod_constraint_id]
+indexes:
+  - name: constraint_contracts_ix
+    columns: [partner_id, sod_constraint_id]
+foreign_keys:
+  - name: constraint_contracts
+    columns: [partner_id, sod_constraint_id]
+    references:
+      table: sod_constraint
+      columns: [partner_id, id]
+  - name: contract_sod_constraints
+    columns: [partner_id, capability_contract_id, version_no]
+    references:
+      table: capability_contract_version
+      columns: [partner_id, capability_contract_id, version_no]

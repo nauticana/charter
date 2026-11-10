@@ -1,0 +1,106 @@
+table: organization_assignment
+comment: "Assignment of a human or agent to a position, responsibility, role, or work context, with its participation."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: subject_human_id
+    type: BIGINT
+    nullable: true
+  - name: subject_agent_id
+    type: BIGINT
+    nullable: true
+  - name: target_position_id
+    type: BIGINT
+    nullable: true
+  - name: target_responsibility_id
+    type: BIGINT
+    nullable: true
+  - name: target_role_id
+    type: BIGINT
+    nullable: true
+  - name: target_work_context_id
+    type: BIGINT
+    nullable: true
+    comment: External object
+  - name: participation
+    type: CHAR(2)
+  - name: condition
+    type: VARCHAR(500)
+    nullable: true
+  - name: reason
+    type: VARCHAR(120)
+    nullable: true
+  - name: classifier_id
+    type: BIGINT
+    nullable: true
+  - name: applies_by_default
+    type: BOOLEAN
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: role_assignments_ix
+    columns: [partner_id, target_role_id]
+  - name: responsibility_assignments_ix
+    columns: [partner_id, target_responsibility_id]
+  - name: position_assignments_ix
+    columns: [partner_id, target_position_id]
+  - name: human_assignments_ix
+    columns: [partner_id, subject_human_id]
+  - name: agent_assignments_ix
+    columns: [partner_id, subject_agent_id]
+  - name: work_context_assignments_ix
+    columns: [partner_id, target_work_context_id]
+  - name: assignment_classifier_ix
+    columns: [partner_id, classifier_id]
+foreign_keys:
+  - name: object_organization_assignment
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: role_assignments
+    columns: [partner_id, target_role_id]
+    references:
+      table: organization_role
+      columns: [partner_id, id]
+  - name: responsibility_assignments
+    columns: [partner_id, target_responsibility_id]
+    references:
+      table: responsibility
+      columns: [partner_id, id]
+  - name: position_assignments
+    columns: [partner_id, target_position_id]
+    references:
+      table: position
+      columns: [partner_id, id]
+  - name: human_assignments
+    columns: [partner_id, subject_human_id]
+    references:
+      table: human_identity
+      columns: [partner_id, id]
+  - name: agent_assignments
+    columns: [partner_id, subject_agent_id]
+    references:
+      table: agent_identity
+      columns: [partner_id, id]
+  - name: work_context_assignments
+    columns: [partner_id, target_work_context_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: assignment_classifier
+    columns: [partner_id, classifier_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: organization_assignment_participation_ck
+    expression: "participation IN ('OC', 'SU', 'OB', 'RC', 'PP', 'AP', 'PF', 'EX')"
+  - name: organization_assignment_subject_ck
+    expression: "(CASE WHEN subject_human_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN subject_agent_id IS NOT NULL THEN 1 ELSE 0 END) = 1"
+  - name: organization_assignment_target_ck
+    expression: "(CASE WHEN target_position_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN target_responsibility_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN target_role_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN target_work_context_id IS NOT NULL THEN 1 ELSE 0 END) = 1"
+  - name: organization_assignment_occupies_ck
+    expression: "participation <> 'OC' OR (subject_human_id IS NOT NULL AND target_position_id IS NOT NULL)"

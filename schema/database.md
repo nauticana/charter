@@ -1,8 +1,8 @@
 # Charter relational model
 
-Status: Target design under review. Nothing here is implemented.
+Status: Implemented. The tables are keel schema modules in [`sdk/schema/`](../sdk/schema/), and the keel adapter's `DocumentStore` reads and writes them.
 
-The model stores every catalogued document kind in its own PostgreSQL tables, in Boyce-Codd normal form. Every reference between documents is a declared foreign key. The JSON documents of the specification remain the interchange format. An import decomposes a document into rows, and an export rebuilds it from them.
+The model stores every catalogued document kind in its own PostgreSQL tables, in Boyce-Codd normal form. Modeled object references are declared foreign keys; provenance identifiers that intentionally name another document set remain external. The JSON documents of the specification remain the interchange format. An import decomposes a document into rows, and an export rebuilds it from them.
 
 ## Conventions
 
@@ -41,7 +41,7 @@ The specification versions eight kinds: AgentDefinition, BusinessProcess, Task, 
 - The declared version label, such as `processDefinitionVersion`, is stored once, in `enterprise_object_version.definition_version`, and is unique per object.
 - A fact that cannot change between versions lives on the identity table, not on the version table.
 
-Every other kind is mutable. It has one kind table updated in place and exactly one `enterprise_object_version` row with `version_no` 1. keel's table change log keeps its history.
+Every other kind is mutable. It has one kind table updated in place and exactly one `enterprise_object_version` row with `version_no` 1. Updates through this adapter are not recorded by keel's table change logger.
 
 `enterprise_object_version` holds the envelope every document carries: specification version, name, description, lifecycle state, and validity.
 
@@ -93,7 +93,7 @@ Every enumeration is a keel `constant_header` and `constant_value` list with 1-c
 Two kinds of content are open-ended by specification: extension values and embedded JSON Schemas. They are decomposed too.
 
 - **JSON values.** An arbitrary JSON value is a tree of `json_value` rows, one per object, array, or scalar, with its member name or item index. Extension values, fact values, and the literals inside a JSON Schema use it.
-- **JSON Schema.** An embedded JSON Schema is a tree of `json_schema_node` rows, one per subschema, linked through the applicator keyword that holds it. Each node has a typed column per assertion keyword. Keywords the 2020-12 vocabularies do not define, such as `x-charter-ref-kinds`, are kept in `json_schema_annotation`, so the decomposition is lossless.
+- **JSON Schema.** An embedded JSON Schema is a tree of `json_schema_node` rows, one per subschema, linked through the applicator keyword that holds it. Each node has a typed column per assertion keyword. Keywords the 2020-12 vocabularies do not define, such as `x-charter-ref-kinds`, and keywords whose value a typed column cannot hold exactly, are kept whole in `json_schema_annotation`, so the decomposition is lossless.
 
 ### Canonical round trip
 
@@ -106,7 +106,7 @@ Export produces the canonical form of a document. It is equal in meaning to what
 
 ### Write order
 
-A save inserts the `enterprise_object` row of every document in the batch first, then content rows in dependency order. Self-references, such as a parent unit or a superseded record, require the parent first. A cycle among them is already invalid under the acyclicity rules.
+A save inserts the `enterprise_object` row of every document in the batch first, then content rows in foreign-key order. Self-references, such as a parent unit or a superseded record, require the parent first. A cycle among them is already invalid under the acyclicity rules. Evidence is appended on its own, so a document whose optional property cites evidence that names the document, such as a measure whose baseline cites a measurement of it, is saved without that property first and completed once the evidence is stored.
 
 ## Core
 
@@ -224,7 +224,7 @@ erDiagram
 | `evidence_requirement` | Evidence a task or capability contract version rests on, as prose or as a required information attribute with a maximum age. |
 
 - `enterprise_object` has two partial unique keys. Documents are unique by namespace and identifier. External objects are unique by namespace, external kind, and identifier.
-- The `enterprise_id` of an Enterprise row is null. Kinds the schema places outside an enterprise, such as bindings and the work vocabulary, also leave it null.
+- The `enterprise_id` of an Enterprise row is null. Kinds the schema places outside an enterprise, such as bindings and the work vocabulary, also leave it null. The column references `enterprise_object`, not `enterprise`, because the Enterprise row is itself an `enterprise_object` and a foreign key to the subtype would make the two tables depend on each other; the service checks that the target's kind is EN.
 - `enterprise_object_provenance.source_*` names a document of another document set. By specification it is never resolved within this set (CHR-CONF-015), so it is deliberately not a foreign key.
 - A limit has exactly one value column set. `amount` is set exactly when `currency_code` is set. A CHECK enforces both.
 - A limit's currency is a foreign key to keel `currency`, the only source of exponents. The specification's `currencyExponent` is written on export from that table, and an import whose exponent disagrees is refused.
@@ -806,7 +806,7 @@ erDiagram
 
 - A grant's actor, an approval's approver, and an exception's beneficiary are each exactly one human or agent. CHECKs enforce these.
 - Delegation, meaning the delegator and the redelegation depth, is all or none. Certification, meaning the interval, time, certifier, and evidence, is all or none. CHECKs enforce both.
-- An approval approves exactly one of a capability contract or an action class. A CHECK enforces this. The specification's `approvedAction` is the capability's identifier or the class.
+- An approval approves exactly one of a capability contract or an action class. A CHECK enforces this. The specification's `approvedAction` is the capability's identifier or the class: an import stores the capability when the string names a capability contract stored in the document's namespace, and the class otherwise.
 - `expires_at` is present exactly when `validity_mode` is expires-at. `open_ended_justification` is present exactly when it is open-ended. A CHECK enforces this.
 - `constrainedActions` is split by target kind into two tables.
 - Grant and approval limits are rows of `enterprise_object_limit`.
@@ -2049,6 +2049,101 @@ erDiagram
 | `verification_type` | S structural, M semantic, R runtime-behavioral |
 | `conformance_claim_result.result` | P pass, F fail, N not-tested |
 
+## Modules
+
+The tables are keel schema modules under `sdk/schema/`: one directory per module with one YAML file per table, and the module's code lists in `seed/<module>.yml`. keel's `schemagen` generates the DDL after keel's `core`, `geo`, and `tenant_management`. A downstream installs any module together with the modules it depends on. `DocumentStore` serves the kinds of the modules it is given and refuses the others.
+
+### Module dependencies
+
+Each module depends only on modules below it, so the module graph has no cycle. The diagram omits dependencies implied by others; the table lists every direct one.
+
+```mermaid
+flowchart BT
+    object --> json
+    conformance --> object
+    identity --> object
+    system --> object
+    work --> object
+    information --> system
+    organization --> work
+    organization --> identity
+    capability --> information
+    capability --> work
+    process --> organization
+    binding --> conformance
+    binding --> capability
+    evidence --> information
+    evidence --> process
+    authority --> capability
+    authority --> evidence
+    action --> authority
+    mediation --> action
+```
+
+| Module | Tables | Holds | Depends on |
+|---|---|---|---|
+| `charter_json` | 9 | JSON value trees and embedded JSON Schemas | keel `tenant_management` |
+| `charter_object` | 5 | Document identity, version envelope, provenance, extensions, and limits | `charter_json`, keel `geo`, keel `tenant_management` |
+| `charter_conformance` | 4 | Conformance claims, and the tested rules and verification types of claims and binding conformance | `charter_object` |
+| `charter_identity` | 4 | Human and agent identities, their lifecycle, and account links to keel users | `charter_object`, keel `tenant_management` |
+| `charter_system` | 5 | Enterprise systems, system profiles, and the identifiers objects carry in them | `charter_object` |
+| `charter_work` | 5 | External work classifications and concepts | `charter_object` |
+| `charter_information` | 12 | Information definitions, governance policies, and the evidence requirements of tasks and contracts | `charter_object`, `charter_system` |
+| `charter_organization` | 12 | Enterprise, units, positions, roles, responsibilities, relationships, and assignments | `charter_object`, `charter_identity`, `charter_work` |
+| `charter_capability` | 10 | Capability contracts and their versions | `charter_json`, `charter_object`, `charter_work`, `charter_information` |
+| `charter_process` | 20 | Value streams, processes, tasks, instances, architecture, and outcome measures | `charter_object`, `charter_work`, `charter_organization`, keel `geo` |
+| `charter_binding` | 13 | Capability, data, authority, and event bindings, their feature support, and binding conformance | `charter_object`, `charter_conformance`, `charter_system`, `charter_information`, `charter_capability` |
+| `charter_evidence` | 9 | Evidence records, the evidence documents cite, and measure baselines | `charter_json`, `charter_object`, `charter_system`, `charter_information`, `charter_process` |
+| `charter_authority` | 20 | Agent definitions and runtimes, grants, approvals, separation of duties, and contracts' SoD constraints | `charter_object`, `charter_identity`, `charter_organization`, `charter_capability`, `charter_evidence` |
+| `charter_action` | 20 | Action records, exceptions, escalations, bundles, and the actions measurements count | `charter_object`, `charter_identity`, `charter_information`, `charter_organization`, `charter_capability`, `charter_evidence`, `charter_authority` |
+| `charter_mediation` | 18 | Mediation profiles and decisions | `charter_object`, `charter_identity`, `charter_information`, `charter_capability`, `charter_evidence`, `charter_authority`, `charter_action` |
+
+`charter_binding` depends on `charter_conformance` without a foreign key: a binding conformance's tested rules and verification types are rows of the conformance tables.
+
+### Tables in a higher module than their owner
+
+A table belongs to the module of the table it references, not of its owner, when the owner's module lies lower. It stays a child of its owner through a real foreign key. A document whose property maps to such a table needs that module: without it, the property must be absent, and a required list is written empty.
+
+| Table | Module | Owner |
+|---|---|---|
+| `enterprise_object_external_identifier` | `charter_system` | `enterprise_object_version` |
+| `evidence_requirement` | `charter_information` | `enterprise_object_version` |
+| `binding_feature_support` | `charter_binding` | `enterprise_object_version` |
+| `conformance_tested_rule` | `charter_conformance` | `enterprise_object_version` |
+| `conformance_verification_type` | `charter_conformance` | `enterprise_object_version` |
+| `enterprise_object_source_evidence` | `charter_evidence` | `enterprise_object_version` |
+| `outcome_measure_baseline_evidence` | `charter_evidence` | `outcome_measure` |
+| `capability_contract_sod_constraint` | `charter_authority` | `capability_contract_version` |
+| `evidence_measurement_action` | `charter_action` | `evidence_measurement` |
+
+### Module tables
+
+| Module | Tables |
+|---|---|
+| `charter_json` | `json_value`, `json_schema_node`, `json_schema_type`, `json_schema_required`, `json_schema_dependent_required`, `json_schema_enum`, `json_schema_example`, `json_schema_vocabulary`, `json_schema_annotation` |
+| `charter_object` | `enterprise_object`, `enterprise_object_version`, `enterprise_object_provenance`, `enterprise_object_extension`, `enterprise_object_limit` |
+| `charter_conformance` | `conformance_claim`, `conformance_claim_result`, `conformance_tested_rule`, `conformance_verification_type` |
+| `charter_identity` | `human_identity`, `agent_identity`, `identity_lifecycle_transition`, `human_identity_partner_user` |
+| `charter_system` | `enterprise_system`, `system_profile`, `system_profile_feature`, `system_profile_constraint`, `enterprise_object_external_identifier` |
+| `charter_work` | `work_classification`, `work_concept`, `work_concept_label`, `work_concept_broader`, `work_concept_related` |
+| `charter_information` | `information_definition`, `information_property`, `information_identity_property`, `information_relationship`, `information_fact_source`, `information_governance_policy`, `information_policy_scope`, `information_policy_use`, `information_policy_access_constraint`, `information_retention_rule`, `evidence_requirement`, `information_definition_policy` |
+| `charter_organization` | `enterprise`, `organization_unit`, `position_type`, `position`, `organization_role`, `responsibility`, `organization_relationship`, `organization_role_responsibility`, `responsibility_concept`, `organization_assignment`, `organization_assignment_criterion`, `organization_assignment_criterion_value` |
+| `charter_capability` | `capability_contract`, `capability_contract_version`, `capability_contract_input`, `capability_contract_output`, `capability_contract_outcome`, `capability_contract_business_error`, `capability_contract_precondition`, `capability_contract_postcondition`, `capability_contract_postcondition_outcome`, `capability_contract_concept` |
+| `charter_process` | `value_stream`, `business_process`, `business_process_version`, `business_process_alias`, `process_task`, `process_task_version`, `process_task_performer_kind`, `process_task_participation`, `process_task_concept`, `process_relationship`, `process_instance`, `process_instance_context`, `architecture_state`, `architecture_gap`, `architecture_gap_compared_element`, `architecture_roadmap_item`, `architecture_roadmap_item_gap`, `architecture_roadmap_item_dependency`, `outcome_measure`, `process_task_instance` |
+| `charter_binding` | `binding_feature_support`, `system_capability_binding`, `system_capability_binding_version`, `system_capability_binding_lossy_mapping`, `system_authority_binding`, `system_authority_binding_version`, `system_event_binding`, `system_event_binding_version`, `system_data_binding`, `system_binding_conformance`, `system_data_binding_version`, `system_data_binding_field_mapping`, `system_data_binding_lossy_transformation` |
+| `charter_evidence` | `evidence_record`, `evidence_record_source`, `evidence_record_transformation`, `evidence_assessment`, `evidence_assessment_score`, `evidence_fact`, `evidence_measurement`, `enterprise_object_source_evidence`, `outcome_measure_baseline_evidence` |
+| `charter_authority` | `enterprise_agent_definition`, `enterprise_agent_definition_version`, `enterprise_agent_definition_responsibility`, `enterprise_agent_definition_trigger`, `enterprise_agent_definition_required_input`, `enterprise_agent_definition_expected_outcome`, `enterprise_agent_definition_policy`, `enterprise_agent_definition_escalation_condition`, `enterprise_agent_definition_confidence_boundary`, `enterprise_agent_runtime`, `sod_constraint`, `sod_constrained_responsibility`, `sod_exception`, `enterprise_agent_definition_capability`, `authority_grant`, `authority_approval`, `authority_approval_subject`, `authority_approval_condition`, `sod_constrained_capability`, `capability_contract_sod_constraint` |
+| `charter_action` | `exception_record`, `escalation_record`, `evidence_bundle`, `evidence_bundle_evidence_record`, `evidence_bundle_exception_record`, `evidence_bundle_escalation_record`, `action_record`, `action_record_subject`, `action_record_authority_evaluation`, `action_record_approval_evaluation`, `action_record_information_evaluation`, `action_record_approval`, `action_record_evidence`, `action_record_precondition_evaluation`, `action_record_precondition_evidence`, `action_record_postcondition_evaluation`, `action_record_postcondition_evidence`, `action_record_limit_evaluation`, `evidence_measurement_action`, `evidence_bundle_action_record` |
+| `charter_mediation` | `mediation_profile`, `mediation_scope_agent`, `mediation_scope_capability`, `mediation_scope_information`, `mediation_declared_outcome`, `mediation_coverage_exclusion`, `mediation_attribute_trust`, `mediation_evidence_information`, `mediation_boundary_sod_constraint`, `mediation_boundary_policy`, `mediation_boundary_grant`, `mediation_decision`, `mediation_subject_capability`, `mediation_subject_information`, `mediation_applied_obligation`, `mediation_proposed_obligation`, `mediation_decision_attribute`, `mediation_decision_evidence` |
+
+### Seeds
+
+Each module seeds the keel `constant_header` and `constant_value` rows of the code lists it owns and the `constant_lookup` rows of its own columns. A list two modules use belongs to the lower one: `charter_evidence_category` to `charter_information`, `charter_conformance_result` to `charter_conformance`, and `charter_operation_class` to `charter_capability`. `charter_kind` stays whole in `charter_object`, so `enterprise_object.kind` admits every kind code whichever modules are installed. Every `CHAR(1)` and `CHAR(2)` column has a lookup row and a CHECK listing exactly its list's codes, and a test asserts the two agree.
+
+### Names
+
+Three names the diagrams do not show are regular. A kind table's link to `enterprise_object` is `object_<table>`. A version table's link to `enterprise_object_version` is `<table>_envelope`. A non-key foreign key has a plain index named `<foreign key>_ix`, so an index name is as unique as the foreign key name it comes from.
+
 ## Table count
 
 | Module | Tables |
@@ -2066,7 +2161,7 @@ erDiagram
 | Conformance | 4 |
 | Total | 166 |
 
-`business_partner`, `partner_user`, and `currency` are keel tables and are not counted.
+`business_partner`, `partner_user`, and `currency` are keel tables and are not counted. `sdk/schema/` defines exactly these 166 tables.
 
 ## Open points for review
 
@@ -2074,6 +2169,6 @@ erDiagram
 2. **Rules this model adds to saving.** The store refuses a change of an agent definition's identity across versions, a change of a runtime's definition, an agent action or decision whose actor is not its runtime's identity, and an instance or runtime whose version label names no stored version. The specification implies each rule. The validator checks the actor rules and none of the version labels, so it should gain the version checks for the two sources to agree.
 3. **Natural keys for unordered lists.** Feature support, assignment criteria, attribute trust, decision attributes, condition evaluations, and limit evaluations are keyed by their natural member. A document that repeats one is refused, although the JSON Schema alone would accept it.
 4. **Canonical form.** An optional empty array or object is exported as absent, and a required empty array as empty. A re-import of the original is still a replay.
-5. **Mutable kinds keep no revisions of their own.** keel's table change log keeps the history of mutable kinds. Definition versions stay immutable.
+5. **History of mutable kinds.** Updates replace their rows through named SQL, which keel's table change logger does not see, so no history of a mutable kind is kept. The store should log the replaced rows through `port.TableLogger` when one is composed. Definition versions stay immutable.
 6. **Labels that stay text.** A measurement's `processDefinitionVersion` names a version of its measure's subject, which may be a process or a task. A condition evaluation's key names a precondition or postcondition of a contract version that the action record does not pin. Both stay text because neither target is determined by the row.
 7. **Approved action in the JSON schema.** `authority_approval` and the approval evaluation store a capability reference or an action class, never an ambiguous string. The schema's `approvedAction` on Approval and on approval evaluations should split into `approvedCapabilityId` and `approvedActionClass` with exactly one present, so an import does not resolve a string to decide which it is and the separation of duties rule stops matching classes as capabilities.

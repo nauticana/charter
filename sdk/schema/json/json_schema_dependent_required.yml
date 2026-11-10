@@ -1,0 +1,18 @@
+table: json_schema_dependent_required
+comment: A property a schema node requires when another named property is present.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: json_schema_node_id
+    type: BIGINT
+  - name: property_name
+    type: VARCHAR(500)
+  - name: required_name
+    type: VARCHAR(500)
+primary_key: [partner_id, json_schema_node_id, property_name, required_name]
+foreign_keys:
+  - name: node_dependent_required
+    columns: [partner_id, json_schema_node_id]
+    references:
+      table: json_schema_node
+      columns: [partner_id, id]

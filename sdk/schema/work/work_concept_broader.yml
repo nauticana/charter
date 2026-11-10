@@ -1,0 +1,24 @@
+table: work_concept_broader
+comment: A broader concept of a work concept.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: work_concept_id
+    type: BIGINT
+  - name: broader_concept_id
+    type: BIGINT
+primary_key: [partner_id, work_concept_id, broader_concept_id]
+indexes:
+  - name: broader_narrower_ix
+    columns: [partner_id, broader_concept_id]
+foreign_keys:
+  - name: concept_broader
+    columns: [partner_id, work_concept_id]
+    references:
+      table: work_concept
+      columns: [partner_id, id]
+  - name: broader_narrower
+    columns: [partner_id, broader_concept_id]
+    references:
+      table: work_concept
+      columns: [partner_id, id]

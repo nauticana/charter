@@ -1,0 +1,57 @@
+table: evidence_fact
+comment: "A fact an evidence record states: a subject's information attribute, its value, and when it held."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_record_id
+    type: BIGINT
+  - name: subject_id
+    type: BIGINT
+  - name: information_definition_id
+    type: BIGINT
+  - name: attribute
+    type: VARCHAR(120)
+  - name: json_value_id
+    type: BIGINT
+  - name: valid_at
+    type: TIMESTAMP
+  - name: system_profile_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, evidence_record_id]
+indexes:
+  - name: evidence_fact_value_ux
+    columns: [partner_id, json_value_id]
+    unique: true
+  - name: information_facts_ix
+    columns: [partner_id, information_definition_id]
+  - name: profile_facts_ix
+    columns: [partner_id, system_profile_id]
+  - name: fact_subject_ix
+    columns: [partner_id, subject_id]
+foreign_keys:
+  - name: information_facts
+    columns: [partner_id, information_definition_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]
+  - name: fact_value
+    columns: [partner_id, json_value_id]
+    references:
+      table: json_value
+      columns: [partner_id, id]
+  - name: profile_facts
+    columns: [partner_id, system_profile_id]
+    references:
+      table: system_profile
+      columns: [partner_id, id]
+  - name: fact_subject
+    columns: [partner_id, subject_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: record_fact
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]

@@ -1,0 +1,26 @@
+table: enterprise_agent_definition_capability
+comment: A capability contract an agent definition version may use.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: agent_definition_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: capability_contract_id
+    type: BIGINT
+primary_key: [partner_id, agent_definition_id, version_no, capability_contract_id]
+indexes:
+  - name: capability_definitions_ix
+    columns: [partner_id, capability_contract_id]
+foreign_keys:
+  - name: capability_definitions
+    columns: [partner_id, capability_contract_id]
+    references:
+      table: capability_contract
+      columns: [partner_id, id]
+  - name: definition_capabilities
+    columns: [partner_id, agent_definition_id, version_no]
+    references:
+      table: enterprise_agent_definition_version
+      columns: [partner_id, agent_definition_id, version_no]

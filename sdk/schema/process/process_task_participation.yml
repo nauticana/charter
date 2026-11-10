@@ -1,0 +1,21 @@
+table: process_task_participation
+comment: A participation a task version admits.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: task_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: participation
+    type: CHAR(2)
+primary_key: [partner_id, task_id, version_no, participation]
+foreign_keys:
+  - name: task_participations
+    columns: [partner_id, task_id, version_no]
+    references:
+      table: process_task_version
+      columns: [partner_id, task_id, version_no]
+checks:
+  - name: process_task_participation_participation_ck
+    expression: "participation IN ('OB', 'RC', 'PP', 'AP', 'EX')"

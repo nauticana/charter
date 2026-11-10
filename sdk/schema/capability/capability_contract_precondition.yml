@@ -1,0 +1,40 @@
+table: capability_contract_precondition
+comment: "A precondition of a contract version, as prose or a keyed predicate."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: capability_contract_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: ordinal
+    type: SMALLINT
+  - name: precondition_key
+    type: VARCHAR(120)
+    nullable: true
+    comment: Prose form has none
+  - name: statement
+    type: VARCHAR(500)
+  - name: predicate_language
+    type: CHAR(1)
+    nullable: true
+  - name: predicate_expression
+    type: VARCHAR(2000)
+    nullable: true
+primary_key: [partner_id, capability_contract_id, version_no, ordinal]
+indexes:
+  - name: capability_contract_precondition_key_ux
+    columns: [partner_id, capability_contract_id, version_no, precondition_key]
+    unique: true
+    where: precondition_key IS NOT NULL
+foreign_keys:
+  - name: contract_preconditions
+    columns: [partner_id, capability_contract_id, version_no]
+    references:
+      table: capability_contract_version
+      columns: [partner_id, capability_contract_id, version_no]
+checks:
+  - name: capability_contract_precondition_predicate_language_ck
+    expression: "predicate_language IN ('C')"
+  - name: capability_contract_precondition_predicate_ck
+    expression: "(predicate_expression IS NULL) = (predicate_language IS NULL)"

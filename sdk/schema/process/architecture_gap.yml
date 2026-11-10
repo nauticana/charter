@@ -1,0 +1,38 @@
+table: architecture_gap
+comment: "A missing, changed, or retired difference between a baseline and a target state."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: baseline_state_id
+    type: BIGINT
+  - name: target_state_id
+    type: BIGINT
+  - name: classification
+    type: CHAR(1)
+primary_key: [partner_id, id]
+indexes:
+  - name: baseline_gaps_ix
+    columns: [partner_id, baseline_state_id]
+  - name: target_gaps_ix
+    columns: [partner_id, target_state_id]
+foreign_keys:
+  - name: object_architecture_gap
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: baseline_gaps
+    columns: [partner_id, baseline_state_id]
+    references:
+      table: architecture_state
+      columns: [partner_id, id]
+  - name: target_gaps
+    columns: [partner_id, target_state_id]
+    references:
+      table: architecture_state
+      columns: [partner_id, id]
+checks:
+  - name: architecture_gap_classification_ck
+    expression: "classification IN ('M', 'C', 'R')"

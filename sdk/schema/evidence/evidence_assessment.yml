@@ -1,0 +1,56 @@
+table: evidence_assessment
+comment: "An evaluation or feedback an evidence record carries about a subject, with its judge."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_record_id
+    type: BIGINT
+  - name: assessment_kind
+    type: CHAR(1)
+  - name: subject_id
+    type: BIGINT
+  - name: subject_digest
+    type: VARCHAR(500)
+    nullable: true
+  - name: judge_id
+    type: BIGINT
+  - name: judge_version
+    type: VARCHAR(60)
+    nullable: true
+  - name: case_set_key
+    type: VARCHAR(120)
+    nullable: true
+  - name: case_set_version
+    type: VARCHAR(60)
+    nullable: true
+  - name: rating
+    type: VARCHAR(60)
+    nullable: true
+  - name: reason
+    type: VARCHAR(500)
+    nullable: true
+primary_key: [partner_id, evidence_record_id]
+indexes:
+  - name: assessment_subject_ix
+    columns: [partner_id, subject_id]
+  - name: assessment_judge_ix
+    columns: [partner_id, judge_id]
+foreign_keys:
+  - name: assessment_subject
+    columns: [partner_id, subject_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: assessment_judge
+    columns: [partner_id, judge_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: record_assessment
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]
+checks:
+  - name: evidence_assessment_assessment_kind_ck
+    expression: "assessment_kind IN ('E', 'F')"

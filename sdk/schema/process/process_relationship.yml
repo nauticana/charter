@@ -1,0 +1,64 @@
+table: process_relationship
+comment: A typed relationship between two processes or tasks.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: relationship_type
+    type: CHAR(1)
+  - name: subject_process_id
+    type: BIGINT
+    nullable: true
+  - name: subject_task_id
+    type: BIGINT
+    nullable: true
+  - name: object_process_id
+    type: BIGINT
+    nullable: true
+  - name: object_task_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: task_subject_relationships_ix
+    columns: [partner_id, subject_task_id]
+  - name: task_object_relationships_ix
+    columns: [partner_id, object_task_id]
+  - name: process_subject_relationships_ix
+    columns: [partner_id, subject_process_id]
+  - name: process_object_relationships_ix
+    columns: [partner_id, object_process_id]
+foreign_keys:
+  - name: object_process_relationship
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: task_subject_relationships
+    columns: [partner_id, subject_task_id]
+    references:
+      table: process_task
+      columns: [partner_id, id]
+  - name: task_object_relationships
+    columns: [partner_id, object_task_id]
+    references:
+      table: process_task
+      columns: [partner_id, id]
+  - name: process_subject_relationships
+    columns: [partner_id, subject_process_id]
+    references:
+      table: business_process
+      columns: [partner_id, id]
+  - name: process_object_relationships
+    columns: [partner_id, object_process_id]
+    references:
+      table: business_process
+      columns: [partner_id, id]
+checks:
+  - name: process_relationship_relationship_type_ck
+    expression: "relationship_type IN ('C', 'P', 'D')"
+  - name: process_relationship_subject_ck
+    expression: "(CASE WHEN subject_process_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN subject_task_id IS NOT NULL THEN 1 ELSE 0 END) = 1"
+  - name: process_relationship_object_ck
+    expression: "(CASE WHEN object_process_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN object_task_id IS NOT NULL THEN 1 ELSE 0 END) = 1"

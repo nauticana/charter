@@ -1,0 +1,14 @@
+table: business_process
+comment: Identity of a business process across its versions.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_business_process
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

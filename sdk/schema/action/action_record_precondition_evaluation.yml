@@ -1,0 +1,25 @@
+table: action_record_precondition_evaluation
+comment: The observed result of one keyed precondition of an action.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: action_record_id
+    type: BIGINT
+  - name: precondition_key
+    type: VARCHAR(120)
+  - name: result
+    type: CHAR(1)
+  - name: reason
+    type: VARCHAR(500)
+  - name: observed_at
+    type: TIMESTAMP
+primary_key: [partner_id, action_record_id, precondition_key]
+foreign_keys:
+  - name: action_preconditions
+    columns: [partner_id, action_record_id]
+    references:
+      table: action_record
+      columns: [partner_id, id]
+checks:
+  - name: action_record_precondition_evaluation_result_ck
+    expression: "result IN ('S', 'V', 'U')"

@@ -1,0 +1,24 @@
+table: mediation_subject_capability
+comment: A capability contract a mediation decision concerns.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_decision_id
+    type: BIGINT
+  - name: capability_contract_id
+    type: BIGINT
+primary_key: [partner_id, mediation_decision_id, capability_contract_id]
+indexes:
+  - name: capability_decisions_ix
+    columns: [partner_id, capability_contract_id]
+foreign_keys:
+  - name: decision_capabilities
+    columns: [partner_id, mediation_decision_id]
+    references:
+      table: mediation_decision
+      columns: [partner_id, id]
+  - name: capability_decisions
+    columns: [partner_id, capability_contract_id]
+    references:
+      table: capability_contract
+      columns: [partner_id, id]

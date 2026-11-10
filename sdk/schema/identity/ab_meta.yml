@@ -1,0 +1,5 @@
+tables:
+  - human_identity
+  - agent_identity
+  - identity_lifecycle_transition
+  - human_identity_partner_user

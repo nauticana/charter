@@ -1,0 +1,44 @@
+table: business_process_version
+comment: "One immutable version of a business process: outcome, value stream, and parent process."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: business_process_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: business_outcome
+    type: VARCHAR(500)
+  - name: value_stream_id
+    type: BIGINT
+    nullable: true
+  - name: parent_process_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, business_process_id, version_no]
+indexes:
+  - name: stream_processes_ix
+    columns: [partner_id, value_stream_id]
+  - name: parent_process_children_ix
+    columns: [partner_id, parent_process_id]
+foreign_keys:
+  - name: business_process_version_envelope
+    columns: [partner_id, business_process_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: stream_processes
+    columns: [partner_id, value_stream_id]
+    references:
+      table: value_stream
+      columns: [partner_id, id]
+  - name: process_versions
+    columns: [partner_id, business_process_id]
+    references:
+      table: business_process
+      columns: [partner_id, id]
+  - name: parent_process_children
+    columns: [partner_id, parent_process_id]
+    references:
+      table: business_process
+      columns: [partner_id, id]

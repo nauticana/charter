@@ -1,6 +1,5 @@
-// Package keel adapts Charter's neutral contracts to the primitives keel exposes: the authenticated caller session,
-// RBAC permission checks, trust guards, the table change logger, the idempotency ledger, message publishing, metrics,
-// and request correlation ids. Keel never depends on Charter; this package is the optional bridge.
+// Package keel adapts Charter's neutral contracts to keel's caller session, permission checks, trust guards,
+// idempotency ledger, message publishing, metrics, and request correlation ids. Keel never depends on Charter.
 package keel
 
 import (

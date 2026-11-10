@@ -1,0 +1,21 @@
+table: conformance_verification_type
+comment: A verification type a conformance claim or binding conformance used.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: enterprise_object_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: verification_type
+    type: CHAR(1)
+primary_key: [partner_id, enterprise_object_id, version_no, verification_type]
+foreign_keys:
+  - name: version_verification_types
+    columns: [partner_id, enterprise_object_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+checks:
+  - name: conformance_verification_type_verification_type_ck
+    expression: "verification_type IN ('S', 'M', 'R')"

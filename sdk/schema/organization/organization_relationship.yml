@@ -1,0 +1,46 @@
+table: organization_relationship
+comment: "A typed relationship between two organizational objects, Charter-defined or namespaced."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: relationship_code
+    type: CHAR(1)
+    nullable: true
+    comment: Charter-defined type
+  - name: custom_relationship_type
+    type: VARCHAR(200)
+    nullable: true
+    comment: Namespaced type
+  - name: subject_id
+    type: BIGINT
+  - name: object_id
+    type: BIGINT
+primary_key: [partner_id, id]
+indexes:
+  - name: relationship_subject_ix
+    columns: [partner_id, subject_id]
+  - name: relationship_object_ix
+    columns: [partner_id, object_id]
+foreign_keys:
+  - name: object_organization_relationship
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: relationship_subject
+    columns: [partner_id, subject_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: relationship_object
+    columns: [partner_id, object_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: organization_relationship_relationship_code_ck
+    expression: "relationship_code IN ('R', 'D', 'C')"
+  - name: organization_relationship_type_ck
+    expression: "(relationship_code IS NULL) <> (custom_relationship_type IS NULL)"

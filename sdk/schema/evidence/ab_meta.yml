@@ -1,0 +1,10 @@
+tables:
+  - evidence_record
+  - evidence_record_source
+  - evidence_record_transformation
+  - evidence_assessment
+  - evidence_assessment_score
+  - evidence_fact
+  - evidence_measurement
+  - enterprise_object_source_evidence
+  - outcome_measure_baseline_evidence

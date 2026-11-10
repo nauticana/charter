@@ -1,0 +1,24 @@
+table: enterprise_agent_definition
+comment: An agent definition and the agent identity it belongs to across all its versions.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: agent_identity_id
+    type: BIGINT
+primary_key: [partner_id, id]
+indexes:
+  - name: identity_definitions_ix
+    columns: [partner_id, agent_identity_id]
+foreign_keys:
+  - name: object_enterprise_agent_definition
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: identity_definitions
+    columns: [partner_id, agent_identity_id]
+    references:
+      table: agent_identity
+      columns: [partner_id, id]

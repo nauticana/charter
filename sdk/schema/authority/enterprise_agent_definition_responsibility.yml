@@ -1,0 +1,26 @@
+table: enterprise_agent_definition_responsibility
+comment: A responsibility an agent definition version serves.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: agent_definition_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: responsibility_id
+    type: BIGINT
+primary_key: [partner_id, agent_definition_id, version_no, responsibility_id]
+indexes:
+  - name: responsibility_definitions_ix
+    columns: [partner_id, responsibility_id]
+foreign_keys:
+  - name: responsibility_definitions
+    columns: [partner_id, responsibility_id]
+    references:
+      table: responsibility
+      columns: [partner_id, id]
+  - name: definition_responsibilities
+    columns: [partner_id, agent_definition_id, version_no]
+    references:
+      table: enterprise_agent_definition_version
+      columns: [partner_id, agent_definition_id, version_no]

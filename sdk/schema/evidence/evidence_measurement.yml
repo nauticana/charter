@@ -1,0 +1,44 @@
+table: evidence_measurement
+comment: A measurement an evidence record carries for an outcome measure over a time window.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_record_id
+    type: BIGINT
+  - name: outcome_measure_id
+    type: BIGINT
+  - name: measured_amount
+    type: BIGINT
+    nullable: true
+    comment: Minor units
+  - name: measured_quantity
+    type: NUMERIC
+    nullable: true
+  - name: window_from
+    type: DATE
+  - name: window_to
+    type: DATE
+    nullable: true
+  - name: process_definition_version
+    type: VARCHAR(60)
+    nullable: true
+primary_key: [partner_id, evidence_record_id]
+indexes:
+  - name: measure_measurements_ix
+    columns: [partner_id, outcome_measure_id]
+foreign_keys:
+  - name: record_measurement
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]
+  - name: measure_measurements
+    columns: [partner_id, outcome_measure_id]
+    references:
+      table: outcome_measure
+      columns: [partner_id, id]
+checks:
+  - name: evidence_measurement_value_ck
+    expression: "(CASE WHEN measured_amount IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN measured_quantity IS NOT NULL THEN 1 ELSE 0 END) = 1"
+  - name: evidence_measurement_window_ck
+    expression: "window_to IS NULL OR window_to >= window_from"

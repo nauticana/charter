@@ -1,0 +1,16 @@
+table: position_type
+comment: A reusable kind of position and its purpose.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: purpose
+    type: VARCHAR(1000)
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_position_type
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

@@ -1,0 +1,24 @@
+table: outcome_measure_baseline_evidence
+comment: "An evidence record a measure's baseline rests on."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: outcome_measure_id
+    type: BIGINT
+  - name: evidence_record_id
+    type: BIGINT
+primary_key: [partner_id, outcome_measure_id, evidence_record_id]
+indexes:
+  - name: evidence_baselines_ix
+    columns: [partner_id, evidence_record_id]
+foreign_keys:
+  - name: baseline_evidence
+    columns: [partner_id, outcome_measure_id]
+    references:
+      table: outcome_measure
+      columns: [partner_id, id]
+  - name: evidence_baselines
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]

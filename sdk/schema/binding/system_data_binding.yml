@@ -1,0 +1,14 @@
+table: system_data_binding
+comment: Identity of a data binding across its versions.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_system_data_binding
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

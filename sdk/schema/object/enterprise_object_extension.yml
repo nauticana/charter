@@ -1,0 +1,29 @@
+table: enterprise_object_extension
+comment: "One namespaced extension property of a version, with its value as a JSON value tree."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: enterprise_object_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: extension_name
+    type: VARCHAR(500)
+  - name: json_value_id
+    type: BIGINT
+primary_key: [partner_id, enterprise_object_id, version_no, extension_name]
+indexes:
+  - name: enterprise_object_extension_value_ux
+    columns: [partner_id, json_value_id]
+    unique: true
+foreign_keys:
+  - name: version_extensions
+    columns: [partner_id, enterprise_object_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: extension_value
+    columns: [partner_id, json_value_id]
+    references:
+      table: json_value
+      columns: [partner_id, id]

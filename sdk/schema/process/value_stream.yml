@@ -1,0 +1,16 @@
+table: value_stream
+comment: A value stream and the business outcome it delivers.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: business_outcome
+    type: VARCHAR(500)
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_value_stream
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

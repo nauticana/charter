@@ -1,0 +1,24 @@
+table: work_classification
+comment: "An external classification of work, with its publisher, version, and license."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: publisher
+    type: VARCHAR(200)
+  - name: classification_version
+    type: VARCHAR(60)
+  - name: url
+    type: VARCHAR(2000)
+    nullable: true
+  - name: license
+    type: VARCHAR(500)
+    nullable: true
+primary_key: [partner_id, id]
+foreign_keys:
+  - name: object_work_classification
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

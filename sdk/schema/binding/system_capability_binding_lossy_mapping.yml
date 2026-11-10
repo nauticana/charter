@@ -1,0 +1,22 @@
+table: system_capability_binding_lossy_mapping
+comment: "A mapping of a capability binding version that loses information, with its effect."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: capability_binding_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: ordinal
+    type: SMALLINT
+  - name: mapping
+    type: VARCHAR(500)
+  - name: effect
+    type: VARCHAR(500)
+primary_key: [partner_id, capability_binding_id, version_no, ordinal]
+foreign_keys:
+  - name: binding_lossy_mappings
+    columns: [partner_id, capability_binding_id, version_no]
+    references:
+      table: system_capability_binding_version
+      columns: [partner_id, capability_binding_id, version_no]

@@ -1,0 +1,28 @@
+table: work_concept
+comment: "A concept of a work classification, with its external identifier and preferred label."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: work_classification_id
+    type: BIGINT
+  - name: external_id
+    type: VARCHAR(200)
+  - name: preferred_label
+    type: VARCHAR(200)
+primary_key: [partner_id, id]
+indexes:
+  - name: classification_concepts_ix
+    columns: [partner_id, work_classification_id]
+foreign_keys:
+  - name: object_work_concept
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: classification_concepts
+    columns: [partner_id, work_classification_id]
+    references:
+      table: work_classification
+      columns: [partner_id, id]

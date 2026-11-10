@@ -1,0 +1,16 @@
+comment: Code lists of the charter_evidence module and the columns they govern
+seeds:
+  - table: constant_header
+    columns: [id, caption]
+    rows:
+      - [charter_assessment_kind, Charter Assessment Kind]
+  - table: constant_value
+    columns: [constant_id, value, caption]
+    rows:
+      - [charter_assessment_kind, E, Evaluation]
+      - [charter_assessment_kind, F, Feedback]
+  - table: constant_lookup
+    columns: [constant_id, table_name, column_name]
+    rows:
+      - [charter_assessment_kind, evidence_assessment, assessment_kind]
+      - [charter_evidence_category, evidence_record, category]

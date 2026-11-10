@@ -1,0 +1,26 @@
+comment: Code lists of the charter_organization module and the columns they govern
+seeds:
+  - table: constant_header
+    columns: [id, caption]
+    rows:
+      - [charter_relationship_code, Charter Organization Relationship]
+      - [charter_participation, Charter Participation]
+  - table: constant_value
+    columns: [constant_id, value, caption]
+    rows:
+      - [charter_relationship_code, R, Reports to]
+      - [charter_relationship_code, D, Deputy of]
+      - [charter_relationship_code, C, Coordinates with]
+      - [charter_participation, OC, Occupies]
+      - [charter_participation, SU, Supports]
+      - [charter_participation, OB, Observes]
+      - [charter_participation, RC, Recommends]
+      - [charter_participation, PP, Prepares]
+      - [charter_participation, AP, Approves]
+      - [charter_participation, PF, Performs]
+      - [charter_participation, EX, Executes]
+  - table: constant_lookup
+    columns: [constant_id, table_name, column_name]
+    rows:
+      - [charter_participation, organization_assignment, participation]
+      - [charter_relationship_code, organization_relationship, relationship_code]

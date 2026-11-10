@@ -1,0 +1,91 @@
+table: outcome_measure
+comment: "A measure of a value stream, process, or task, with its improvement direction, target, and baseline."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: subject_value_stream_id
+    type: BIGINT
+    nullable: true
+  - name: subject_process_id
+    type: BIGINT
+    nullable: true
+  - name: subject_task_id
+    type: BIGINT
+    nullable: true
+  - name: improvement
+    type: CHAR(1)
+  - name: unit
+    type: VARCHAR(60)
+    nullable: true
+  - name: currency_code
+    type: CHAR(3)
+    nullable: true
+  - name: target_amount
+    type: BIGINT
+    nullable: true
+    comment: Minor units
+  - name: target_quantity
+    type: NUMERIC
+    nullable: true
+  - name: baseline_amount
+    type: BIGINT
+    nullable: true
+    comment: Minor units
+  - name: baseline_quantity
+    type: NUMERIC
+    nullable: true
+  - name: baseline_from
+    type: DATE
+    nullable: true
+  - name: baseline_to
+    type: DATE
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: stream_measures_ix
+    columns: [partner_id, subject_value_stream_id]
+  - name: process_measures_ix
+    columns: [partner_id, subject_process_id]
+  - name: task_measures_ix
+    columns: [partner_id, subject_task_id]
+foreign_keys:
+  - name: object_outcome_measure
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: stream_measures
+    columns: [partner_id, subject_value_stream_id]
+    references:
+      table: value_stream
+      columns: [partner_id, id]
+  - name: process_measures
+    columns: [partner_id, subject_process_id]
+    references:
+      table: business_process
+      columns: [partner_id, id]
+  - name: task_measures
+    columns: [partner_id, subject_task_id]
+    references:
+      table: process_task
+      columns: [partner_id, id]
+  - name: measure_currency
+    columns: [currency_code]
+    references:
+      table: currency
+      columns: [code]
+checks:
+  - name: outcome_measure_improvement_ck
+    expression: "improvement IN ('I', 'D')"
+  - name: outcome_measure_subject_ck
+    expression: "(CASE WHEN subject_value_stream_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN subject_process_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN subject_task_id IS NOT NULL THEN 1 ELSE 0 END) = 1"
+  - name: outcome_measure_measure_ck
+    expression: unit IS NOT NULL OR currency_code IS NOT NULL
+  - name: outcome_measure_currency_ck
+    expression: (currency_code IS NOT NULL AND target_quantity IS NULL AND baseline_quantity IS NULL) OR (currency_code IS NULL AND target_amount IS NULL AND baseline_amount IS NULL)
+  - name: outcome_measure_baseline_ck
+    expression: "((baseline_amount IS NOT NULL OR baseline_quantity IS NOT NULL) = (baseline_from IS NOT NULL)) AND ((baseline_from IS NULL) = (baseline_to IS NULL))"
+  - name: outcome_measure_baseline_window_ck
+    expression: "baseline_to IS NULL OR baseline_to >= baseline_from"

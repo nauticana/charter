@@ -1,0 +1,13 @@
+tables:
+  - enterprise
+  - organization_unit
+  - position_type
+  - position
+  - organization_role
+  - responsibility
+  - organization_relationship
+  - organization_role_responsibility
+  - responsibility_concept
+  - organization_assignment
+  - organization_assignment_criterion
+  - organization_assignment_criterion_value

@@ -1,0 +1,13 @@
+tables:
+  - information_definition
+  - information_property
+  - information_identity_property
+  - information_relationship
+  - information_fact_source
+  - information_governance_policy
+  - information_policy_scope
+  - information_policy_use
+  - information_policy_access_constraint
+  - information_retention_rule
+  - evidence_requirement
+  - information_definition_policy

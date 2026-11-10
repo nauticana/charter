@@ -1,0 +1,26 @@
+table: action_record_precondition_evidence
+comment: An evidence record supporting a precondition evaluation.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: action_record_id
+    type: BIGINT
+  - name: precondition_key
+    type: VARCHAR(120)
+  - name: evidence_record_id
+    type: BIGINT
+primary_key: [partner_id, action_record_id, precondition_key, evidence_record_id]
+indexes:
+  - name: evidence_preconditions_ix
+    columns: [partner_id, evidence_record_id]
+foreign_keys:
+  - name: precondition_evidence
+    columns: [partner_id, action_record_id, precondition_key]
+    references:
+      table: action_record_precondition_evaluation
+      columns: [partner_id, action_record_id, precondition_key]
+  - name: evidence_preconditions
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]

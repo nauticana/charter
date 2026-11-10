@@ -1,0 +1,26 @@
+table: process_task_concept
+comment: A work concept a task version cites.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: task_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: work_concept_id
+    type: BIGINT
+primary_key: [partner_id, task_id, version_no, work_concept_id]
+indexes:
+  - name: concept_tasks_ix
+    columns: [partner_id, work_concept_id]
+foreign_keys:
+  - name: task_concepts
+    columns: [partner_id, task_id, version_no]
+    references:
+      table: process_task_version
+      columns: [partner_id, task_id, version_no]
+  - name: concept_tasks
+    columns: [partner_id, work_concept_id]
+    references:
+      table: work_concept
+      columns: [partner_id, id]

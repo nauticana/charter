@@ -1,0 +1,44 @@
+table: human_identity_partner_user
+comment: The keel partner user membership a human identity is linked to for a period.
+extensions: [btree_gist]
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: human_identity_id
+    type: BIGINT
+  - name: begda
+    type: TIMESTAMP
+  - name: user_id
+    type: BIGINT
+  - name: partner_user_begda
+    type: TIMESTAMP
+  - name: endda
+    type: TIMESTAMP
+    nullable: true
+primary_key: [partner_id, human_identity_id, begda]
+indexes:
+  - name: user_human_accounts_ix
+    columns: [partner_id, user_id, partner_user_begda]
+foreign_keys:
+  - name: human_accounts
+    columns: [partner_id, human_identity_id]
+    references:
+      table: human_identity
+      columns: [partner_id, id]
+  - name: user_human_accounts
+    columns: [partner_id, user_id, partner_user_begda]
+    references:
+      table: partner_user
+      columns: [partner_id, user_id, begda]
+checks:
+  - name: human_identity_partner_user_period_ck
+    expression: "endda IS NULL OR endda > begda"
+  - name: human_identity_partner_user_membership_ck
+    expression: "begda >= partner_user_begda"
+exclusions:
+  - name: human_identity_partner_user_human_no_overlap
+    using: gist
+    expression: "partner_id WITH =, human_identity_id WITH =, tsrange(begda, endda) WITH &&"
+  - name: human_identity_partner_user_user_no_overlap
+    using: gist
+    expression: "partner_id WITH =, user_id WITH =, tsrange(begda, endda) WITH &&"

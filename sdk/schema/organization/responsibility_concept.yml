@@ -1,0 +1,24 @@
+table: responsibility_concept
+comment: A work concept a responsibility cites.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: responsibility_id
+    type: BIGINT
+  - name: work_concept_id
+    type: BIGINT
+primary_key: [partner_id, responsibility_id, work_concept_id]
+indexes:
+  - name: concept_responsibilities_ix
+    columns: [partner_id, work_concept_id]
+foreign_keys:
+  - name: concept_responsibilities
+    columns: [partner_id, work_concept_id]
+    references:
+      table: work_concept
+      columns: [partner_id, id]
+  - name: responsibility_concepts
+    columns: [partner_id, responsibility_id]
+    references:
+      table: responsibility
+      columns: [partner_id, id]

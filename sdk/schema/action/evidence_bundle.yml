@@ -1,0 +1,34 @@
+table: evidence_bundle
+comment: "A set of records about one subject under an assurance profile, with its chained integrity."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: subject_id
+    type: BIGINT
+  - name: assurance_profile
+    type: VARCHAR(120)
+  - name: integrity_method
+    type: VARCHAR(120)
+  - name: integrity_value
+    type: VARCHAR(1000)
+    nullable: true
+  - name: integrity_verified_at
+    type: TIMESTAMP
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: bundle_subject_ix
+    columns: [partner_id, subject_id]
+foreign_keys:
+  - name: object_evidence_bundle
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: bundle_subject
+    columns: [partner_id, subject_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

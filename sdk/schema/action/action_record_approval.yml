@@ -1,0 +1,24 @@
+table: action_record_approval
+comment: An approval an action relied on.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: action_record_id
+    type: BIGINT
+  - name: approval_id
+    type: BIGINT
+primary_key: [partner_id, action_record_id, approval_id]
+indexes:
+  - name: approval_actions_ix
+    columns: [partner_id, approval_id]
+foreign_keys:
+  - name: approval_actions
+    columns: [partner_id, approval_id]
+    references:
+      table: authority_approval
+      columns: [partner_id, id]
+  - name: action_approvals
+    columns: [partner_id, action_record_id]
+    references:
+      table: action_record
+      columns: [partner_id, id]

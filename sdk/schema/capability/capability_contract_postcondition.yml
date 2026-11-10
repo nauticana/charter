@@ -1,0 +1,49 @@
+table: capability_contract_postcondition
+comment: "A keyed postcondition of a contract version, with its predicate and violation error."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: capability_contract_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: postcondition_key
+    type: VARCHAR(120)
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(500)
+  - name: verification_required
+    type: BOOLEAN
+  - name: violation_business_error
+    type: VARCHAR(500)
+    nullable: true
+  - name: predicate_language
+    type: CHAR(1)
+    nullable: true
+  - name: predicate_expression
+    type: VARCHAR(2000)
+    nullable: true
+primary_key: [partner_id, capability_contract_id, version_no, postcondition_key]
+indexes:
+  - name: capability_contract_postcondition_ordinal_ux
+    columns: [partner_id, capability_contract_id, version_no, ordinal]
+    unique: true
+  - name: violation_error_ix
+    columns: [partner_id, capability_contract_id, version_no, violation_business_error]
+foreign_keys:
+  - name: contract_postconditions
+    columns: [partner_id, capability_contract_id, version_no]
+    references:
+      table: capability_contract_version
+      columns: [partner_id, capability_contract_id, version_no]
+  - name: violation_error
+    columns: [partner_id, capability_contract_id, version_no, violation_business_error]
+    references:
+      table: capability_contract_business_error
+      columns: [partner_id, capability_contract_id, version_no, business_error]
+checks:
+  - name: capability_contract_postcondition_predicate_language_ck
+    expression: "predicate_language IN ('C')"
+  - name: capability_contract_postcondition_predicate_ck
+    expression: "(predicate_expression IS NULL) = (predicate_language IS NULL)"

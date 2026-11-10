@@ -1,0 +1,24 @@
+table: evidence_bundle_exception_record
+comment: An exception record in a bundle.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_bundle_id
+    type: BIGINT
+  - name: exception_record_id
+    type: BIGINT
+primary_key: [partner_id, evidence_bundle_id, exception_record_id]
+indexes:
+  - name: exception_record_bundles_ix
+    columns: [partner_id, exception_record_id]
+foreign_keys:
+  - name: exception_record_bundles
+    columns: [partner_id, exception_record_id]
+    references:
+      table: exception_record
+      columns: [partner_id, id]
+  - name: bundle_exception_records
+    columns: [partner_id, evidence_bundle_id]
+    references:
+      table: evidence_bundle
+      columns: [partner_id, id]

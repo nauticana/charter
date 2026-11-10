@@ -1,0 +1,40 @@
+table: responsibility
+comment: An expected outcome and the position or unit accountable for it.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: expected_outcome
+    type: VARCHAR(1000)
+  - name: accountable_position_id
+    type: BIGINT
+    nullable: true
+  - name: accountable_unit_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: unit_accountabilities_ix
+    columns: [partner_id, accountable_unit_id]
+  - name: position_accountabilities_ix
+    columns: [partner_id, accountable_position_id]
+foreign_keys:
+  - name: object_responsibility
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: unit_accountabilities
+    columns: [partner_id, accountable_unit_id]
+    references:
+      table: organization_unit
+      columns: [partner_id, id]
+  - name: position_accountabilities
+    columns: [partner_id, accountable_position_id]
+    references:
+      table: position
+      columns: [partner_id, id]
+checks:
+  - name: responsibility_accountable_ck
+    expression: "(CASE WHEN accountable_position_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN accountable_unit_id IS NOT NULL THEN 1 ELSE 0 END) = 1"

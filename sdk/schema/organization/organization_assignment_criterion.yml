@@ -1,0 +1,16 @@
+table: organization_assignment_criterion
+comment: One dimension an assignment matches on.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: assignment_id
+    type: BIGINT
+  - name: dimension
+    type: VARCHAR(120)
+primary_key: [partner_id, assignment_id, dimension]
+foreign_keys:
+  - name: assignment_criteria
+    columns: [partner_id, assignment_id]
+    references:
+      table: organization_assignment
+      columns: [partner_id, id]

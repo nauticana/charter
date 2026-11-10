@@ -1,0 +1,6 @@
+tables:
+  - work_classification
+  - work_concept
+  - work_concept_label
+  - work_concept_broader
+  - work_concept_related

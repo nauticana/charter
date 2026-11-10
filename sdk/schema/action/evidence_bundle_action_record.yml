@@ -1,0 +1,24 @@
+table: evidence_bundle_action_record
+comment: An action record in a bundle.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_bundle_id
+    type: BIGINT
+  - name: action_record_id
+    type: BIGINT
+primary_key: [partner_id, evidence_bundle_id, action_record_id]
+indexes:
+  - name: action_record_bundles_ix
+    columns: [partner_id, action_record_id]
+foreign_keys:
+  - name: bundle_action_records
+    columns: [partner_id, evidence_bundle_id]
+    references:
+      table: evidence_bundle
+      columns: [partner_id, id]
+  - name: action_record_bundles
+    columns: [partner_id, action_record_id]
+    references:
+      table: action_record
+      columns: [partner_id, id]

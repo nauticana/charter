@@ -1,0 +1,37 @@
+table: exception_record
+comment: "A recorded deviation from an expectation, its disposition, and its escalation target."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: violated_expectation
+    type: VARCHAR(500)
+  - name: affected_id
+    type: BIGINT
+  - name: disposition
+    type: VARCHAR(120)
+  - name: escalation_target_id
+    type: BIGINT
+primary_key: [partner_id, id]
+indexes:
+  - name: exception_affected_ix
+    columns: [partner_id, affected_id]
+  - name: exception_escalation_target_ix
+    columns: [partner_id, escalation_target_id]
+foreign_keys:
+  - name: object_exception_record
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: exception_affected
+    columns: [partner_id, affected_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: exception_escalation_target
+    columns: [partner_id, escalation_target_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]

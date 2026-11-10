@@ -1,0 +1,25 @@
+table: mediation_decision_attribute
+comment: "An attribute a mediation decision used, with its provenance and effect."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: mediation_decision_id
+    type: BIGINT
+  - name: attribute
+    type: VARCHAR(200)
+  - name: provenance
+    type: CHAR(1)
+  - name: effect
+    type: CHAR(1)
+primary_key: [partner_id, mediation_decision_id, attribute]
+foreign_keys:
+  - name: decision_attributes
+    columns: [partner_id, mediation_decision_id]
+    references:
+      table: mediation_decision
+      columns: [partner_id, id]
+checks:
+  - name: mediation_decision_attribute_provenance_ck
+    expression: "provenance IN ('A', 'S')"
+  - name: mediation_decision_attribute_effect_ck
+    expression: "effect IN ('T', 'R', 'N')"

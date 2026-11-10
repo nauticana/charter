@@ -1,0 +1,54 @@
+table: enterprise_object_version
+comment: "Envelope of one document version: definition version label, specification version, name, description, lifecycle state, and validity."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: enterprise_object_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: definition_version
+    type: VARCHAR(60)
+    nullable: true
+    comment: Versioned kinds only
+  - name: spec_version
+    type: VARCHAR(30)
+  - name: name
+    type: VARCHAR(200)
+    nullable: true
+  - name: description
+    type: VARCHAR(2000)
+    nullable: true
+  - name: lifecycle_state
+    type: CHAR(1)
+    nullable: true
+  - name: valid_from
+    type: DATE
+    nullable: true
+  - name: valid_to
+    type: DATE
+    nullable: true
+  - name: created_at
+    type: TIMESTAMP
+    default: CURRENT_TIMESTAMP
+primary_key: [partner_id, enterprise_object_id, version_no]
+indexes:
+  - name: enterprise_object_version_definition_version_ux
+    columns: [partner_id, enterprise_object_id, definition_version]
+    unique: true
+    where: definition_version IS NOT NULL
+foreign_keys:
+  - name: object_versions
+    columns: [partner_id, enterprise_object_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: enterprise_object_version_lifecycle_state_ck
+    expression: "lifecycle_state IN ('P', 'L', 'A', 'S', 'R')"
+  - name: enterprise_object_version_version_no_ck
+    expression: "version_no > 0"
+  - name: enterprise_object_version_validity_ck
+    expression: "valid_to IS NULL OR valid_from IS NULL OR valid_to >= valid_from"
+  - name: enterprise_object_version_validity_from_ck
+    expression: valid_to IS NULL OR valid_from IS NOT NULL

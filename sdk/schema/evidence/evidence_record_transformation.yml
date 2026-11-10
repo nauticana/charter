@@ -1,0 +1,18 @@
+table: evidence_record_transformation
+comment: "A transformation applied to an evidence record's content, in order."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_record_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: statement
+    type: VARCHAR(1000)
+primary_key: [partner_id, evidence_record_id, ordinal]
+foreign_keys:
+  - name: record_transformations
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]

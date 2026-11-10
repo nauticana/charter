@@ -1,0 +1,25 @@
+table: information_retention_rule
+comment: Retention and deletion rules a governance policy sets for one kind of artifact.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: information_governance_policy_id
+    type: BIGINT
+  - name: ordinal
+    type: SMALLINT
+  - name: artifact_kind
+    type: CHAR(1)
+  - name: retention_rule
+    type: VARCHAR(500)
+  - name: deletion_rule
+    type: VARCHAR(500)
+primary_key: [partner_id, information_governance_policy_id, ordinal]
+foreign_keys:
+  - name: policy_retention_rules
+    columns: [partner_id, information_governance_policy_id]
+    references:
+      table: information_governance_policy
+      columns: [partner_id, id]
+checks:
+  - name: information_retention_rule_artifact_kind_ck
+    expression: "artifact_kind IN ('S', 'A', 'P', 'I', 'C', 'E')"

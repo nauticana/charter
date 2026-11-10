@@ -1,0 +1,24 @@
+table: evidence_measurement_action
+comment: An action record a measurement counts.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: evidence_record_id
+    type: BIGINT
+  - name: action_record_id
+    type: BIGINT
+primary_key: [partner_id, evidence_record_id, action_record_id]
+indexes:
+  - name: action_measurements_ix
+    columns: [partner_id, action_record_id]
+foreign_keys:
+  - name: measurement_actions
+    columns: [partner_id, evidence_record_id]
+    references:
+      table: evidence_measurement
+      columns: [partner_id, evidence_record_id]
+  - name: action_measurements
+    columns: [partner_id, action_record_id]
+    references:
+      table: action_record
+      columns: [partner_id, id]

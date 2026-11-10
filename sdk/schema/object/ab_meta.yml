@@ -1,0 +1,6 @@
+tables:
+  - enterprise_object
+  - enterprise_object_version
+  - enterprise_object_provenance
+  - enterprise_object_extension
+  - enterprise_object_limit

@@ -1,0 +1,88 @@
+table: capability_contract_version
+comment: "One immutable version of a capability contract: operation class, authority, schemas, and retry semantics."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: capability_contract_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: purpose
+    type: VARCHAR(500)
+  - name: operation_class
+    type: CHAR(1)
+  - name: required_authority
+    type: VARCHAR(500)
+  - name: input_information_id
+    type: BIGINT
+    nullable: true
+  - name: input_schema_id
+    type: BIGINT
+    nullable: true
+  - name: output_information_id
+    type: BIGINT
+    nullable: true
+  - name: output_schema_id
+    type: BIGINT
+    nullable: true
+  - name: approval_required
+    type: BOOLEAN
+  - name: mutating
+    type: BOOLEAN
+  - name: retry_semantics
+    type: VARCHAR(500)
+  - name: retry_when_effect_absent
+    type: BOOLEAN
+    nullable: true
+primary_key: [partner_id, capability_contract_id, version_no]
+indexes:
+  - name: capability_contract_version_input_schema_ux
+    columns: [partner_id, input_schema_id]
+    unique: true
+    where: input_schema_id IS NOT NULL
+  - name: capability_contract_version_output_schema_ux
+    columns: [partner_id, output_schema_id]
+    unique: true
+    where: output_schema_id IS NOT NULL
+  - name: input_information_ix
+    columns: [partner_id, input_information_id]
+  - name: output_information_ix
+    columns: [partner_id, output_information_id]
+foreign_keys:
+  - name: capability_contract_version_envelope
+    columns: [partner_id, capability_contract_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: contract_versions
+    columns: [partner_id, capability_contract_id]
+    references:
+      table: capability_contract
+      columns: [partner_id, id]
+  - name: input_information
+    columns: [partner_id, input_information_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]
+  - name: output_information
+    columns: [partner_id, output_information_id]
+    references:
+      table: information_definition
+      columns: [partner_id, id]
+  - name: input_schema
+    columns: [partner_id, input_schema_id]
+    references:
+      table: json_schema_node
+      columns: [partner_id, id]
+  - name: output_schema
+    columns: [partner_id, output_schema_id]
+    references:
+      table: json_schema_node
+      columns: [partner_id, id]
+checks:
+  - name: capability_contract_version_operation_class_ck
+    expression: "operation_class IN ('R', 'P', 'A', 'E')"
+  - name: capability_contract_version_input_ck
+    expression: "(CASE WHEN input_information_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN input_schema_id IS NOT NULL THEN 1 ELSE 0 END) <= 1"
+  - name: capability_contract_version_output_ck
+    expression: "(CASE WHEN output_information_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN output_schema_id IS NOT NULL THEN 1 ELSE 0 END) <= 1"

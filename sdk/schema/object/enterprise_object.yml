@@ -1,0 +1,56 @@
+table: enterprise_object
+comment: "Identity of every document and external object: its namespace, identifier, kind, and enterprise."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: namespace
+    type: VARCHAR(200)
+  - name: identifier
+    type: VARCHAR(120)
+  - name: kind
+    type: CHAR(2)
+    comment: Kind code
+  - name: enterprise_id
+    type: BIGINT
+    nullable: true
+    comment: Null for kinds outside an enterprise
+  - name: external_kind
+    type: VARCHAR(60)
+    nullable: true
+    comment: Kind XO only
+  - name: created_at
+    type: TIMESTAMP
+    default: CURRENT_TIMESTAMP
+primary_key: [partner_id, id]
+sequence:
+  name: enterprise_object_seq
+  column: id
+indexes:
+  - name: enterprise_object_document_ux
+    columns: [partner_id, namespace, identifier]
+    unique: true
+    where: "kind <> 'XO'"
+  - name: enterprise_object_external_ux
+    columns: [partner_id, namespace, external_kind, identifier]
+    unique: true
+    where: "kind = 'XO'"
+  - name: enterprise_members_ix
+    columns: [partner_id, enterprise_id]
+foreign_keys:
+  - name: partner_objects
+    columns: [partner_id]
+    references:
+      table: business_partner
+      columns: [id]
+  - name: enterprise_members
+    columns: [partner_id, enterprise_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: enterprise_object_kind_ck
+    expression: "kind IN ('EN', 'OU', 'PT', 'PO', 'RL', 'RS', 'OR', 'AS', 'HI', 'AI', 'AD', 'AR', 'AG', 'AP', 'SC', 'SX', 'VS', 'BP', 'TK', 'PR', 'PI', 'TI', 'CC', 'AT', 'GP', 'RM', 'OM', 'ES', 'SP', 'CB', 'DB', 'AB', 'EB', 'BC', 'ID', 'IG', 'MP', 'MD', 'ER', 'AC', 'XR', 'EL', 'BU', 'WC', 'WK', 'CL', 'XO')"
+  - name: enterprise_object_external_kind_ck
+    expression: "(kind = 'XO') = (external_kind IS NOT NULL)"

@@ -1,0 +1,98 @@
+table: authority_grant
+comment: "Authority a human or agent holds over a capability, scope, and context, with delegation and certification."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: actor_human_id
+    type: BIGINT
+    nullable: true
+  - name: actor_agent_id
+    type: BIGINT
+    nullable: true
+  - name: capability_contract_id
+    type: BIGINT
+  - name: resource_scope
+    type: VARCHAR(500)
+  - name: organizational_context
+    type: VARCHAR(200)
+  - name: delegator_id
+    type: BIGINT
+    nullable: true
+  - name: max_redelegation_depth
+    type: INT
+    nullable: true
+  - name: certification_interval_days
+    type: INT
+    nullable: true
+  - name: certified_at
+    type: TIMESTAMP
+    nullable: true
+  - name: certified_by_id
+    type: BIGINT
+    nullable: true
+  - name: certification_evidence_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: capability_grants_ix
+    columns: [partner_id, capability_contract_id]
+  - name: grant_certification_evidence_ix
+    columns: [partner_id, certification_evidence_id]
+  - name: agent_grants_ix
+    columns: [partner_id, actor_agent_id]
+  - name: grant_delegator_ix
+    columns: [partner_id, delegator_id]
+  - name: human_grants_ix
+    columns: [partner_id, actor_human_id]
+  - name: grant_certifier_ix
+    columns: [partner_id, certified_by_id]
+foreign_keys:
+  - name: object_authority_grant
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: capability_grants
+    columns: [partner_id, capability_contract_id]
+    references:
+      table: capability_contract
+      columns: [partner_id, id]
+  - name: grant_certification_evidence
+    columns: [partner_id, certification_evidence_id]
+    references:
+      table: evidence_record
+      columns: [partner_id, id]
+  - name: agent_grants
+    columns: [partner_id, actor_agent_id]
+    references:
+      table: agent_identity
+      columns: [partner_id, id]
+  - name: grant_delegator
+    columns: [partner_id, delegator_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: human_grants
+    columns: [partner_id, actor_human_id]
+    references:
+      table: human_identity
+      columns: [partner_id, id]
+  - name: grant_certifier
+    columns: [partner_id, certified_by_id]
+    references:
+      table: human_identity
+      columns: [partner_id, id]
+checks:
+  - name: authority_grant_actor_ck
+    expression: "(CASE WHEN actor_human_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN actor_agent_id IS NOT NULL THEN 1 ELSE 0 END) = 1"
+  - name: authority_grant_delegation_ck
+    expression: "(max_redelegation_depth IS NULL) = (delegator_id IS NULL)"
+  - name: authority_grant_redelegation_depth_ck
+    expression: "max_redelegation_depth IS NULL OR max_redelegation_depth >= 0"
+  - name: authority_grant_certification_ck
+    expression: "(certified_at IS NULL) = (certification_interval_days IS NULL) AND (certified_by_id IS NULL) = (certification_interval_days IS NULL) AND (certification_evidence_id IS NULL) = (certification_interval_days IS NULL)"
+  - name: authority_grant_certification_interval_ck
+    expression: "certification_interval_days IS NULL OR certification_interval_days > 0"

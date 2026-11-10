@@ -1,0 +1,29 @@
+table: architecture_roadmap_item
+comment: "Planned work that closes gaps, with its owner and status."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: owner_id
+    type: BIGINT
+  - name: status
+    type: CHAR(1)
+primary_key: [partner_id, id]
+indexes:
+  - name: roadmap_owner_ix
+    columns: [partner_id, owner_id]
+foreign_keys:
+  - name: object_architecture_roadmap_item
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: roadmap_owner
+    columns: [partner_id, owner_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+checks:
+  - name: architecture_roadmap_item_status_ck
+    expression: "status IN ('P', 'A', 'I', 'V', 'C', 'X')"

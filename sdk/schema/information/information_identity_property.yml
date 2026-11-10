@@ -1,0 +1,22 @@
+table: information_identity_property
+comment: A property that identifies an instance of an information definition.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: information_definition_id
+    type: BIGINT
+  - name: property_name
+    type: VARCHAR(120)
+  - name: ordinal
+    type: SMALLINT
+primary_key: [partner_id, information_definition_id, property_name]
+indexes:
+  - name: information_identity_property_ordinal_ux
+    columns: [partner_id, information_definition_id, ordinal]
+    unique: true
+foreign_keys:
+  - name: identity_member
+    columns: [partner_id, information_definition_id, property_name]
+    references:
+      table: information_property
+      columns: [partner_id, information_definition_id, property_name]

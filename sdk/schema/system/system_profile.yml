@@ -1,0 +1,29 @@
+table: system_profile
+comment: "A version of an enterprise system, with its authentication method."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: enterprise_system_id
+    type: BIGINT
+  - name: system_version
+    type: VARCHAR(60)
+  - name: authentication_method
+    type: VARCHAR(200)
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: system_profiles_ix
+    columns: [partner_id, enterprise_system_id]
+foreign_keys:
+  - name: object_system_profile
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: system_profiles
+    columns: [partner_id, enterprise_system_id]
+    references:
+      table: enterprise_system
+      columns: [partner_id, id]

@@ -1,0 +1,27 @@
+table: json_schema_annotation
+comment: "One keyword outside the 2020-12 vocabularies, such as an x-charter annotation, with its value."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: json_schema_node_id
+    type: BIGINT
+  - name: keyword
+    type: VARCHAR(200)
+  - name: json_value_id
+    type: BIGINT
+primary_key: [partner_id, json_schema_node_id, keyword]
+indexes:
+  - name: json_schema_annotation_value_ux
+    columns: [partner_id, json_value_id]
+    unique: true
+foreign_keys:
+  - name: annotation_value
+    columns: [partner_id, json_value_id]
+    references:
+      table: json_value
+      columns: [partner_id, id]
+  - name: node_annotations
+    columns: [partner_id, json_schema_node_id]
+    references:
+      table: json_schema_node
+      columns: [partner_id, id]

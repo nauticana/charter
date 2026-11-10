@@ -1,0 +1,34 @@
+table: position
+comment: "A position in an organization unit, optionally of a position type."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: organization_unit_id
+    type: BIGINT
+  - name: position_type_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, id]
+indexes:
+  - name: unit_positions_ix
+    columns: [partner_id, organization_unit_id]
+  - name: type_positions_ix
+    columns: [partner_id, position_type_id]
+foreign_keys:
+  - name: object_position
+    columns: [partner_id, id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: unit_positions
+    columns: [partner_id, organization_unit_id]
+    references:
+      table: organization_unit
+      columns: [partner_id, id]
+  - name: type_positions
+    columns: [partner_id, position_type_id]
+    references:
+      table: position_type
+      columns: [partner_id, id]

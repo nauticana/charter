@@ -1,0 +1,16 @@
+table: json_schema_required
+comment: One required property name of a schema node.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: json_schema_node_id
+    type: BIGINT
+  - name: property_name
+    type: VARCHAR(500)
+primary_key: [partner_id, json_schema_node_id, property_name]
+foreign_keys:
+  - name: node_required
+    columns: [partner_id, json_schema_node_id]
+    references:
+      table: json_schema_node
+      columns: [partner_id, id]

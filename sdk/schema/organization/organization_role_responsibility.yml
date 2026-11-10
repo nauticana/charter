@@ -1,0 +1,24 @@
+table: organization_role_responsibility
+comment: A responsibility a role carries.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: role_id
+    type: BIGINT
+  - name: responsibility_id
+    type: BIGINT
+primary_key: [partner_id, role_id, responsibility_id]
+indexes:
+  - name: responsibility_roles_ix
+    columns: [partner_id, responsibility_id]
+foreign_keys:
+  - name: role_responsibilities
+    columns: [partner_id, role_id]
+    references:
+      table: organization_role
+      columns: [partner_id, id]
+  - name: responsibility_roles
+    columns: [partner_id, responsibility_id]
+    references:
+      table: responsibility
+      columns: [partner_id, id]

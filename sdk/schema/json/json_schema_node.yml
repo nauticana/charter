@@ -1,0 +1,183 @@
+table: json_schema_node
+comment: "One subschema of an embedded JSON Schema, with the applicator that holds it and a column per assertion keyword."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: id
+    type: BIGINT
+  - name: parent_id
+    type: BIGINT
+    nullable: true
+    comment: Null for a root
+  - name: applicator
+    type: CHAR(2)
+    nullable: true
+    comment: Null for a root
+  - name: applicator_key
+    type: VARCHAR(500)
+    nullable: true
+    comment: Keyed applicators
+  - name: applicator_index
+    type: INT
+    nullable: true
+    comment: Indexed applicators
+  - name: boolean_schema
+    type: BOOLEAN
+    nullable: true
+    comment: True or false schema
+  - name: dialect
+    type: VARCHAR(2000)
+    nullable: true
+    comment: $schema
+  - name: schema_uri
+    type: VARCHAR(2000)
+    nullable: true
+    comment: $id
+  - name: anchor
+    type: VARCHAR(200)
+    nullable: true
+  - name: dynamic_anchor
+    type: VARCHAR(200)
+    nullable: true
+  - name: ref
+    type: VARCHAR(2000)
+    nullable: true
+    comment: $ref
+  - name: dynamic_ref
+    type: VARCHAR(2000)
+    nullable: true
+  - name: title
+    type: VARCHAR(500)
+    nullable: true
+  - name: description
+    type: TEXT
+    nullable: true
+  - name: comment
+    type: TEXT
+    nullable: true
+  - name: format
+    type: VARCHAR(120)
+    nullable: true
+  - name: pattern
+    type: VARCHAR(2000)
+    nullable: true
+  - name: min_length
+    type: INT
+    nullable: true
+  - name: max_length
+    type: INT
+    nullable: true
+  - name: minimum
+    type: NUMERIC
+    nullable: true
+  - name: maximum
+    type: NUMERIC
+    nullable: true
+  - name: exclusive_minimum
+    type: NUMERIC
+    nullable: true
+  - name: exclusive_maximum
+    type: NUMERIC
+    nullable: true
+  - name: multiple_of
+    type: NUMERIC
+    nullable: true
+  - name: min_items
+    type: INT
+    nullable: true
+  - name: max_items
+    type: INT
+    nullable: true
+  - name: unique_items
+    type: BOOLEAN
+    nullable: true
+  - name: min_contains
+    type: INT
+    nullable: true
+  - name: max_contains
+    type: INT
+    nullable: true
+  - name: min_properties
+    type: INT
+    nullable: true
+  - name: max_properties
+    type: INT
+    nullable: true
+  - name: const_value_id
+    type: BIGINT
+    nullable: true
+  - name: default_value_id
+    type: BIGINT
+    nullable: true
+  - name: read_only
+    type: BOOLEAN
+    nullable: true
+  - name: write_only
+    type: BOOLEAN
+    nullable: true
+  - name: deprecated
+    type: BOOLEAN
+    nullable: true
+  - name: content_media_type
+    type: VARCHAR(120)
+    nullable: true
+  - name: content_encoding
+    type: VARCHAR(60)
+    nullable: true
+primary_key: [partner_id, id]
+sequence:
+  name: json_schema_node_seq
+  column: id
+indexes:
+  - name: json_schema_node_const_ux
+    columns: [partner_id, const_value_id]
+    unique: true
+    where: const_value_id IS NOT NULL
+  - name: json_schema_node_default_ux
+    columns: [partner_id, default_value_id]
+    unique: true
+    where: default_value_id IS NOT NULL
+  - name: json_schema_node_keyed_ux
+    columns: [partner_id, parent_id, applicator, applicator_key]
+    unique: true
+    where: applicator_key IS NOT NULL
+  - name: json_schema_node_indexed_ux
+    columns: [partner_id, parent_id, applicator, applicator_index]
+    unique: true
+    where: applicator_index IS NOT NULL
+  - name: json_schema_node_single_ux
+    columns: [partner_id, parent_id, applicator]
+    unique: true
+    where: applicator_key IS NULL AND applicator_index IS NULL AND applicator IS NOT NULL
+foreign_keys:
+  - name: const_value
+    columns: [partner_id, const_value_id]
+    references:
+      table: json_value
+      columns: [partner_id, id]
+  - name: default_value
+    columns: [partner_id, default_value_id]
+    references:
+      table: json_value
+      columns: [partner_id, id]
+  - name: node_subschemas
+    columns: [partner_id, parent_id]
+    references:
+      table: json_schema_node
+      columns: [partner_id, id]
+  - name: partner_json_schema_nodes
+    columns: [partner_id]
+    references:
+      table: business_partner
+      columns: [id]
+checks:
+  - name: json_schema_node_applicator_ck
+    expression: "applicator IN ('PR', 'PP', 'AP', 'PN', 'DS', 'UP', 'IT', 'PI', 'CT', 'UI', 'AL', 'AN', 'OO', 'NT', 'IF', 'TH', 'EL', 'DF', 'CS')"
+  - name: json_schema_node_root_ck
+    expression: "(parent_id IS NULL) = (applicator IS NULL)"
+  - name: json_schema_node_keyed_ck
+    expression: "(applicator IN ('PR', 'PP', 'DS', 'DF')) = (applicator_key IS NOT NULL)"
+  - name: json_schema_node_indexed_ck
+    expression: "(applicator IN ('PI', 'AL', 'AN', 'OO')) = (applicator_index IS NOT NULL)"
+  - name: json_schema_node_applicator_index_ck
+    expression: "applicator_index IS NULL OR applicator_index >= 0"

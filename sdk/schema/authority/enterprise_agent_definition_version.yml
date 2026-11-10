@@ -1,0 +1,47 @@
+table: enterprise_agent_definition_version
+comment: "One immutable version of an agent definition: purpose and accountable position or unit."
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: agent_definition_id
+    type: BIGINT
+  - name: version_no
+    type: INT
+  - name: purpose
+    type: VARCHAR(500)
+  - name: accountable_position_id
+    type: BIGINT
+    nullable: true
+  - name: accountable_unit_id
+    type: BIGINT
+    nullable: true
+primary_key: [partner_id, agent_definition_id, version_no]
+indexes:
+  - name: unit_accountable_definitions_ix
+    columns: [partner_id, accountable_unit_id]
+  - name: position_accountable_definitions_ix
+    columns: [partner_id, accountable_position_id]
+foreign_keys:
+  - name: enterprise_agent_definition_version_envelope
+    columns: [partner_id, agent_definition_id, version_no]
+    references:
+      table: enterprise_object_version
+      columns: [partner_id, enterprise_object_id, version_no]
+  - name: unit_accountable_definitions
+    columns: [partner_id, accountable_unit_id]
+    references:
+      table: organization_unit
+      columns: [partner_id, id]
+  - name: position_accountable_definitions
+    columns: [partner_id, accountable_position_id]
+    references:
+      table: position
+      columns: [partner_id, id]
+  - name: definition_versions
+    columns: [partner_id, agent_definition_id]
+    references:
+      table: enterprise_agent_definition
+      columns: [partner_id, id]
+checks:
+  - name: enterprise_agent_definition_version_accountable_ck
+    expression: "(CASE WHEN accountable_position_id IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN accountable_unit_id IS NOT NULL THEN 1 ELSE 0 END) = 1"

@@ -1,0 +1,24 @@
+table: process_instance_context
+comment: An object that forms the context of a process instance.
+columns:
+  - name: partner_id
+    type: BIGINT
+  - name: process_instance_id
+    type: BIGINT
+  - name: context_id
+    type: BIGINT
+primary_key: [partner_id, process_instance_id, context_id]
+indexes:
+  - name: context_instances_ix
+    columns: [partner_id, context_id]
+foreign_keys:
+  - name: context_instances
+    columns: [partner_id, context_id]
+    references:
+      table: enterprise_object
+      columns: [partner_id, id]
+  - name: instance_contexts
+    columns: [partner_id, process_instance_id]
+    references:
+      table: process_instance
+      columns: [partner_id, id]
