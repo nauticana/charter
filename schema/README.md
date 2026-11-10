@@ -39,6 +39,10 @@ Every property typed as `idRef` carries `x-charter-ref-kinds`, the document kind
 
 Structural validation alone cannot establish graph acyclicity, reference existence or kind, date ordering, authority effectiveness, or runtime behavior. Those constraints require active semantic or behavioral conformance rules.
 
+## Relational model
+
+[database.md](database.md) is the target relational model for storing these documents in PostgreSQL: one table per kind and per array property, in BCNF, with every reference a declared foreign key. It is a design under review and is not implemented.
+
 ## Interchange
 
 `context.jsonld` is the JSON-LD context a document set is exchanged under (CHR-CONF-016). It is generated from the schemas by `charter context`: every property name is a term under the vocabulary `https://nauticana.github.io/charter/vocab#`, `idRef` properties are typed `@id`, and date and date-time properties are typed `xsd:date` and `xsd:dateTime`. A document's IRI is `urn:charter:<namespace>:<id>` with the namespace percent-encoded, an external object's `urn:charter:external:<kind>:<namespace>:<id>`, and the properties and relationships of an information shape are exported as `rdf:Property` nodes of the definition's IRI, so a semantic layer can state facts in Charter's vocabulary. `charter export` and `charter import` carry a document set across; an import refuses what Charter cannot represent unless the loss is accepted.
