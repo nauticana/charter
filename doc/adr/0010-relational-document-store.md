@@ -17,6 +17,7 @@ The keel adapter kept each document as a JSON revision in `charter_document_revi
 - Facts the model derives instead of storing are checked on write: a runtime's identity is its definition's, an agent acting through a runtime is that runtime's identity, a stated currency exponent is keel's, and a pinned version label names a stored version.
 - `approvedAction` is stored as a capability contract when the string names one stored in the document's namespace, and as an action class otherwise, until the schema separates the two.
 - A reference to an object outside the document set registers that object once, so it has a key like any document.
+- A downstream table references a stored document by its `enterprise_object` id. `DocumentStore.ObjectIDs` and `ObjectRefs` translate between ids and references in one query for any number of documents, checking each kind, so no downstream queries `enterprise_object` or copies the adapter's SQL. A downstream column that holds one kind still names that kind's table in its foreign key.
 - The store's tests run the generated SQL against an in-memory database that enforces the modules' keys, unique indexes, foreign keys, NOT NULL columns, widths, and code-list checks.
 
 ## Consequences

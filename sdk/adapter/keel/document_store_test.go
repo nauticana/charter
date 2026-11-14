@@ -242,3 +242,45 @@ func TestDocumentStoreWriteReadsOnlyReferencedDocuments(t *testing.T) {
 		t.Fatalf("an unreadable reference must fail the write as an error, not a finding: %v", err)
 	}
 }
+
+func TestDocumentStoreResolvesObjectIDs(t *testing.T) {
+	ctx := context.Background()
+	store, db := newDocumentStore(t)
+	refs := []model.ObjectRef{{Kind: model.KindAgentIdentity, Namespace: ns, ID: agent}, {Kind: model.KindEnterprise, Namespace: ns, ID: "ENT-HARBOR"}}
+	ids, err := store.ObjectIDs(ctx, partner, refs...)
+	if err != nil || len(ids) != 2 || ids[0] <= 0 || ids[0] == ids[1] || db.calls[qObjectsByName] != 1 {
+		t.Fatalf("object ids = %v, %v, %d queries", ids, err, db.calls[qObjectsByName])
+	}
+	if back, err := store.ObjectRefs(ctx, partner, ids[1], ids[0]); err != nil || back[0] != refs[1] || back[1] != refs[0] {
+		t.Fatalf("refs of %v = %v, %v", ids, back, err)
+	}
+	if none, err := store.ObjectIDs(ctx, partner); err != nil || none != nil {
+		t.Errorf("no references: %v %v", none, err)
+	}
+	i := slices.IndexFunc(db.state.rows["enterprise_object"], func(row map[string]any) bool { return row["kind"] == externalKindCode })
+	if i < 0 {
+		t.Fatal("Harbor stores no external object")
+	}
+	external := db.state.rows["enterprise_object"][i]["id"].(int64)
+	lookup := func(partnerID int64, ref model.ObjectRef) error {
+		_, err := store.ObjectIDs(ctx, partnerID, refs[1], ref)
+		return err
+	}
+	reverse := func(partnerID, id int64) error { _, err := store.ObjectRefs(ctx, partnerID, ids[1], id); return err }
+	for name, tc := range map[string]struct{ err, want error }{
+		"unknown document":  {lookup(partner, model.ObjectRef{Kind: model.KindAgentIdentity, Namespace: ns, ID: "NONE"}), corpus.ErrNotFound},
+		"other kind":        {lookup(partner, model.ObjectRef{Kind: model.KindHumanIdentity, Namespace: ns, ID: agent}), corpus.ErrNotFound},
+		"no namespace":      {lookup(partner, model.ObjectRef{Kind: model.KindAgentIdentity, ID: agent}), corpus.ErrNotFound},
+		"crossed pair":      {lookup(partner, model.ObjectRef{Kind: model.KindAgentIdentity, Namespace: "other.example", ID: agent}), corpus.ErrNotFound},
+		"other tenant":      {lookup(partner+1, refs[0]), corpus.ErrNotFound},
+		"no tenant":         {lookup(0, refs[0]), ErrNoTenant},
+		"unknown id":        {reverse(partner, ids[0]+100000), corpus.ErrNotFound},
+		"external object":   {reverse(partner, external), corpus.ErrNotFound},
+		"other tenant's id": {reverse(partner+1, ids[0]), corpus.ErrNotFound},
+		"no tenant for id":  {reverse(0, ids[0]), ErrNoTenant},
+	} {
+		if !errors.Is(tc.err, tc.want) {
+			t.Errorf("%s: %v, want %v", name, tc.err, tc.want)
+		}
+	}
+}

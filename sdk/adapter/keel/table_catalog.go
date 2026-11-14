@@ -180,6 +180,7 @@ func readYAML(modules fs.FS, name string, into any) error {
 // Query names derive from the table and the operation, so each is generated once from the catalog.
 const (
 	qObjectByName  = "charter.enterprise_object.by.name"
+	qObjectsByName = "charter.enterprise_object.by.names"
 	qObjectsOfKind = "charter.enterprise_object.of.kind"
 	qCurrencies    = "charter.currency.by.code"
 )
@@ -224,7 +225,9 @@ func lookupColumns(t *tableDef) []string {
 // column.
 func (c *tableCatalog) queries(installed map[string]bool) map[string]string {
 	q := map[string]string{
-		qObjectByName:  "SELECT " + selectList(c.tables["enterprise_object"]) + " FROM enterprise_object WHERE partner_id = ? AND namespace = ? AND identifier = ?",
+		qObjectByName: "SELECT " + selectList(c.tables["enterprise_object"]) + " FROM enterprise_object WHERE partner_id = ? AND namespace = ? AND identifier = ?",
+		// A superset of the named pairs; the caller keeps the exact ones.
+		qObjectsByName: "SELECT " + selectList(c.tables["enterprise_object"]) + " FROM enterprise_object WHERE partner_id = ? AND namespace = ANY(?) AND identifier = ANY(?)",
 		qObjectsOfKind: "SELECT " + selectList(c.tables["enterprise_object"]) + " FROM enterprise_object WHERE partner_id = ? AND kind = ?",
 		qCurrencies:    "SELECT code, exponent FROM currency WHERE code = ANY(?)",
 	}

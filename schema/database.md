@@ -12,7 +12,7 @@ Every table carries `partner_id`, a foreign key path to keel `business_partner`.
 
 ### Platform tables
 
-These tables are the governance record the specification defines. A platform that runs agents keeps its own tables for releases, runs, approval work items, delegation bounds, and its audit log. It references a Charter row by its `enterprise_object` id or through `enterprise_object_external_identifier`, and never copies a Charter document into its own rows. This model holds nothing about turns, runs, releases, tools, knowledge, or models.
+These tables are the governance record the specification defines. A platform that runs agents keeps its own tables for releases, runs, approval work items, delegation bounds, and its audit log. It references a Charter row by its `enterprise_object` id, which the keel adapter's `DocumentStore.ObjectIDs` and `ObjectRefs` translate to and from the document's kind, namespace, and identifier, or through `enterprise_object_external_identifier`, and never copies a Charter document into its own rows. This model holds nothing about turns, runs, releases, tools, knowledge, or models.
 
 ### Identity
 

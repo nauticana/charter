@@ -89,6 +89,61 @@ func (s *DocumentStore) Source(partnerID int64) corpus.Source {
 	return tenantStore{store: s, partnerID: partnerID}
 }
 
+// ObjectIDs returns, in order, the enterprise_object ids of a tenant's stored documents, the keys downstream foreign
+// keys name, in one query. Each reference names its kind and namespace; one not stored as that kind is
+// corpus.ErrNotFound.
+func (s *DocumentStore) ObjectIDs(ctx context.Context, partnerID int64, refs ...model.ObjectRef) ([]int64, error) {
+	r, err := tenantStore{store: s, partnerID: partnerID}.reader()
+	if err != nil || len(refs) == 0 {
+		return nil, err
+	}
+	namespaces, identifiers := make([]string, len(refs)), make([]string, len(refs))
+	for i, ref := range refs {
+		namespaces[i], identifiers[i] = ref.Namespace, ref.ID
+	}
+	objs, err := r.objectRows(ctx, qObjectsByName, namespaces, identifiers)
+	if err != nil {
+		return nil, fmt.Errorf("charter documents: %w", err)
+	}
+	stored := make(map[model.ObjectRef]int64, len(objs))
+	for _, o := range objs {
+		if o.code != externalKindCode {
+			stored[model.ObjectRef{Kind: model.Kind(kindCodes.words[o.code]), Namespace: o.key.NS, ID: o.key.ID}] = o.id
+		}
+	}
+	out := make([]int64, len(refs))
+	for i, ref := range refs {
+		id, found := stored[model.ObjectRef{Kind: ref.Kind, Namespace: ref.Namespace, ID: ref.ID}]
+		if !found {
+			return nil, fmt.Errorf("%w: %s %s:%s", corpus.ErrNotFound, ref.Kind, ref.Namespace, ref.ID)
+		}
+		out[i] = id
+	}
+	return out, nil
+}
+
+// ObjectRefs returns, in order, the documents enterprise_object ids store, each with its kind and namespace; an
+// external object or an unknown id is corpus.ErrNotFound.
+func (s *DocumentStore) ObjectRefs(ctx context.Context, partnerID int64, ids ...int64) ([]model.ObjectRef, error) {
+	r, err := tenantStore{store: s, partnerID: partnerID}.reader()
+	if err != nil {
+		return nil, err
+	}
+	objs, err := r.objectsByID(ctx, ids)
+	if err != nil {
+		return nil, fmt.Errorf("charter objects: %w", err)
+	}
+	out := make([]model.ObjectRef, len(ids))
+	for i, id := range ids {
+		o, found := objs[id]
+		if !found || o.code == externalKindCode {
+			return nil, fmt.Errorf("%w: object %d", corpus.ErrNotFound, id)
+		}
+		out[i] = model.ObjectRef{Kind: model.Kind(kindCodes.words[o.code]), Namespace: o.key.NS, ID: o.key.ID}
+	}
+	return out, nil
+}
+
 // Evidence returns one tenant's append-only evidence store.
 func (s *DocumentStore) Evidence(partnerID int64) evidence.Store {
 	return tenantStore{store: s, partnerID: partnerID}

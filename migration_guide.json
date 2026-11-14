@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.8.2",
+      "title": "Object ids of stored documents",
+      "tags": [
+        "additive"
+      ],
+      "summary": "The keel adapter's DocumentStore resolves documents to the enterprise_object ids downstream foreign keys name, and back, checking each kind. Specification 1.8.0; keel v1.3.3.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`schema/catalog.json` `specVersion`) | 1.8.0 |\n| Go module `github.com/nauticana/charter` | v1.8.2 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.3.3 |\n\n## Go SDK\n\n- `DocumentStore.ObjectIDs(ctx, partnerID, refs ...model.ObjectRef) ([]int64, error)` returns, in order and in one query, the `enterprise_object` ids of a tenant's stored documents; each reference names kind, namespace, and identifier.\n- `DocumentStore.ObjectRefs(ctx, partnerID, ids ...int64) ([]model.ObjectRef, error)` returns the documents ids store.\n- A document not stored as the named kind, an external object, or another tenant's id is `corpus.ErrNotFound`; no tenant is `ErrNoTenant`.\n\n## Adoption\n\n`go get github.com/nauticana/charter@v1.8.2`, then replace direct `enterprise_object` lookups with these methods.\n"
+    },
+    {
       "version": "1.8.1",
       "title": "Relational document store",
       "tags": [
