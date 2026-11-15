@@ -11,7 +11,7 @@ func init() {
 	register(versioned(model.KindBusinessProcess, "processDefinitionVersion", tbl("business_process", "id"),
 		tbl("business_process_version", processOwner...).
 			with(text("businessOutcome", "business_outcome"), ref("valueStreamId", "value_stream_id"), ref("parentProcessId", "parent_process_id")).
-			sub(statements("aliases", "business_process_alias", processOwner, "alias"), sourceEvidence())))
+			sub(statements("aliases", "business_process_alias", processOwner, "alias"), sourceEvidence())).under("parent_process_id"))
 	taskOwner := []string{"task_id", "version_no"}
 	register(versioned(model.KindTask, "taskDefinitionVersion", tbl("process_task", "id"),
 		tbl("process_task_version", taskOwner...).
@@ -21,7 +21,7 @@ func init() {
 				codeSet("permittedParticipation", "process_task_participation", taskOwner, "participation", taskParticipationCodes),
 				evidenceRequirements(),
 				scalars("conceptIds", tbl("process_task_concept", taskOwner...).keyed("work_concept_id"), ref("", "work_concept_id")),
-				sourceEvidence())))
+				sourceEvidence())).under("business_process_id"))
 	processOrTask := func(processCol, taskCol string) []arc {
 		return []arc{on(model.KindBusinessProcess, processCol), on(model.KindTask, taskCol)}
 	}
@@ -133,7 +133,7 @@ func init() {
 			sub(featureSupport("featureSupport"))))
 	register(mutable(model.KindBindingConformance, tbl("system_binding_conformance", "id").
 		with(refArcOf("bindingId", on(model.KindCapabilityBinding, "capability_binding_id"), on(model.KindDataBinding, "data_binding_id"),
-			on(model.KindAuthorityBinding, "authority_binding_id"), on(model.KindEventBinding, "event_binding_id")),
+			on(model.KindAuthorityBinding, "authority_binding_id"), on(model.KindEventBinding, "event_binding_id")).pinned("bindingVersion", "binding_version_no"),
 			text("conformanceProfile", "conformance_profile"), text("implementationVersion", "implementation_version"),
 			code("result", "result", conformanceResultCodes), day("resultDate", "result_date")).
 		sub(featureSupport("evaluatedFeatures"), testedRules(), verificationTypes())))

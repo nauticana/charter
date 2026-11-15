@@ -165,3 +165,19 @@ func TestSourceCodec(t *testing.T) {
 		}
 	}
 }
+
+func TestDocumentMarshalsItself(t *testing.T) {
+	raw := `{"charterSpecVersion":"1.8.0","kind":"Enterprise","namespace":"n.example","id":"ENT-1","name":"Harbor"}`
+	d, err := (corpus.Parser{}).Parse([]byte(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := json.Marshal(map[string]any{"pointer": d, "value": *d})
+	if want := `{"pointer":` + raw + `,"value":` + raw + `}`; err != nil || string(got) != want {
+		t.Fatalf("marshal = %s, %v", got, err)
+	}
+	got, err = json.Marshal(model.Document{Value: map[string]any{"id": "ENT-2"}})
+	if err != nil || string(got) != `{"id":"ENT-2"}` {
+		t.Fatalf("value form = %s, %v", got, err)
+	}
+}

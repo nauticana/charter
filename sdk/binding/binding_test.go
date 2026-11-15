@@ -65,8 +65,8 @@ func TestHarborBinding(t *testing.T) {
 	if got := Compare(doc.FeatureSupport, nil); got != model.ResultPartial {
 		t.Errorf("compare unevaluated: %s", got)
 	}
-	conf := Conformance(doc.Envelope, doc.FeatureSupport, evaluated, model.ConformanceEnvelope{ConformanceProfile: "system-adapter", ImplementationVersion: "0.1", TestedRuleIDs: []string{"CHR-RULE-BIND-001"}, VerificationTypes: []string{model.VerificationBehavioral}, ResultDate: "2026-06-18"})
-	if conf.Result != model.ResultConforming || conf.BindingID.ID != doc.ID || conf.Kind != model.KindBindingConformance {
+	conf := Conformance(doc.Envelope, doc.BindingVersion, doc.FeatureSupport, evaluated, model.ConformanceEnvelope{ConformanceProfile: "system-adapter", ImplementationVersion: "0.1", TestedRuleIDs: []string{"CHR-RULE-BIND-001"}, VerificationTypes: []string{model.VerificationBehavioral}, ResultDate: "2026-06-18"})
+	if conf.Result != model.ResultConforming || conf.BindingID.ID != doc.ID || conf.BindingVersion != doc.BindingVersion || conf.Kind != model.KindBindingConformance {
 		t.Errorf("conformance document: %+v", conf)
 	}
 

@@ -280,7 +280,7 @@ func noneLeft(m map[string]any) error {
 }
 
 func (dc decomposer) field(f field, item map[string]any, row lrow) error {
-	if f.kind == fPin {
+	if f.verCol != "" {
 		id, idOK := takePath(item, f.path)
 		label, labelOK := takePath(item, f.label)
 		if !idOK && !labelOK {
@@ -294,7 +294,7 @@ func (dc decomposer) field(f field, item map[string]any, row lrow) error {
 		if !labelOK || !ok || s == "" {
 			return fmt.Errorf("%w: %s names no version", ErrUnrepresentable, f.path)
 		}
-		row[f.col], row[f.verCol] = key, versionLabel{Object: key, Label: s}
+		row[f.keyCol()], row[f.verCol] = key, versionLabel{Object: key, Label: s}
 		return nil
 	}
 	v, ok := takePath(item, f.path)

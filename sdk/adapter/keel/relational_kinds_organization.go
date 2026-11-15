@@ -26,6 +26,8 @@ func (k *kindSpec) needs(paths ...string) *kindSpec {
 	return k
 }
 
+func (k *kindSpec) under(col string) *kindSpec { k.parent = col; return k }
+
 var (
 	positionOrUnit = []arc{on(model.KindPosition, "accountable_position_id"), on(model.KindOrganizationUnit, "accountable_unit_id")}
 	humanOrAgent   = func(human, agent string) []arc {
@@ -38,13 +40,13 @@ func init() {
 	register(mutable(model.KindEnterprise, tbl("enterprise", "id").sub(sourceEvidence())))
 	register(mutable(model.KindOrganizationUnit, tbl("organization_unit", "id").
 		with(ref("parentUnitId", "parent_unit_id")).
-		sub(externalIdentifiers(), sourceEvidence())))
+		sub(externalIdentifiers(), sourceEvidence())).under("parent_unit_id"))
 	register(mutable(model.KindPositionType, tbl("position_type", "id").
 		with(text("purpose", "purpose")).
 		sub(externalIdentifiers(), sourceEvidence())))
 	register(mutable(model.KindPosition, tbl("position", "id").
 		with(ref("organizationUnitId", "organization_unit_id"), ref("positionTypeId", "position_type_id")).
-		sub(externalIdentifiers(), sourceEvidence())))
+		sub(externalIdentifiers(), sourceEvidence())).under("organization_unit_id"))
 	register(mutable(model.KindRole, tbl("organization_role", "id").
 		sub(refSet("responsibilityIds", "organization_role_responsibility", "role_id", "responsibility_id"),
 			externalIdentifiers(), sourceEvidence())))

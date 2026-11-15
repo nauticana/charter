@@ -10,7 +10,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	charterschema "github.com/nauticana/charter/sdk/schema"
+	"github.com/nauticana/charter/sdk/schema"
 )
 
 // tableColumn, tableForeignKey, and tableDef read the parts of a keel table YAML file the stores need.
@@ -93,7 +93,7 @@ var (
 
 // relationalCatalog parses the embedded modules once.
 func relationalCatalog() (*tableCatalog, error) {
-	catalogOnce.Do(func() { catalogShared, catalogErr = parseCatalog(charterschema.Modules) })
+	catalogOnce.Do(func() { catalogShared, catalogErr = parseCatalog(schema.Modules) })
 	return catalogShared, catalogErr
 }
 
@@ -183,7 +183,11 @@ const (
 	qObjectsByName = "charter.enterprise_object.by.names"
 	qObjectsOfKind = "charter.enterprise_object.of.kind"
 	qCurrencies    = "charter.currency.by.code"
+	qPage          = "charter.enterprise_object.page"
+	qMeasurements  = "charter.evidence_measurement.within"
 )
+
+func qPageUnder(kindCode string) string { return qPage + ".under." + kindCode }
 
 func qInsert(table string) string           { return "charter." + table + ".insert" }
 func qUpdate(table string) string           { return "charter." + table + ".update" }
@@ -230,6 +234,10 @@ func (c *tableCatalog) queries(installed map[string]bool) map[string]string {
 		qObjectsByName: "SELECT " + selectList(c.tables["enterprise_object"]) + " FROM enterprise_object WHERE partner_id = ? AND namespace = ANY(?) AND identifier = ANY(?)",
 		qObjectsOfKind: "SELECT " + selectList(c.tables["enterprise_object"]) + " FROM enterprise_object WHERE partner_id = ? AND kind = ?",
 		qCurrencies:    "SELECT code, exponent FROM currency WHERE code = ANY(?)",
+		qPage:          c.pageSQL(nil),
+	}
+	if installed["evidence_measurement"] {
+		q[qMeasurements] = "SELECT evidence_record_id FROM evidence_measurement WHERE partner_id = ? AND outcome_measure_id = ANY(?) AND window_from >= ? AND window_to <= ?"
 	}
 	for _, name := range c.order {
 		if !installed[name] {
@@ -266,6 +274,29 @@ func (c *tableCatalog) queries(installed map[string]bool) map[string]string {
 		}
 	}
 	return q
+}
+
+// pageSQL selects one page of a kind's documents whose current version is effective on a day and whose identifier or
+// name starts with a LIKE pattern, after a namespace and identifier; under a kind, only those its parent column names.
+func (c *tableCatalog) pageSQL(under *kindSpec) string {
+	cols := make([]string, 0, len(c.tables["enterprise_object"].Columns))
+	for _, col := range c.tables["enterprise_object"].Columns {
+		cols = append(cols, "o."+col.Name)
+	}
+	sql := "SELECT " + strings.Join(cols, ", ") + " FROM enterprise_object o JOIN enterprise_object_version v" +
+		" ON v.partner_id = o.partner_id AND v.enterprise_object_id = o.id AND v.version_no = (SELECT MAX(m.version_no)" +
+		" FROM enterprise_object_version m WHERE m.partner_id = o.partner_id AND m.enterprise_object_id = o.id)"
+	where := ""
+	if under != nil {
+		sql += " JOIN " + under.root.name + " p ON p.partner_id = o.partner_id AND p." + under.root.owner[0] + " = o.id"
+		if under.versioned() {
+			sql += " AND p.version_no = v.version_no"
+		}
+		where = " AND p." + under.parent + " = ?"
+	}
+	return sql + " WHERE o.partner_id = ? AND o.kind = ? AND (v.valid_from IS NULL OR v.valid_from <= ?)" +
+		" AND (v.valid_to IS NULL OR v.valid_to >= ?) AND (LOWER(o.identifier) LIKE ? OR LOWER(v.name) LIKE ?)" +
+		" AND (o.namespace, o.identifier) > (?, ?)" + where + " ORDER BY o.namespace, o.identifier LIMIT ?"
 }
 
 // updatedColumns are the columns qUpdate sets, in order; its key arguments follow them.

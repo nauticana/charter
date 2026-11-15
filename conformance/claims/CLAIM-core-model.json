@@ -1,11 +1,11 @@
 {
-  "charterSpecVersion": "1.8.0",
+  "charterSpecVersion": "1.9.0",
   "namespace": "nauticana.charter",
   "id": "CLAIM-core-model",
   "kind": "ConformanceClaim",
   "name": "Reference SDK core-model claim",
   "conformanceProfile": "core-model",
-  "implementationVersion": "1.8.0",
+  "implementationVersion": "1.9.0",
   "testedRuleIds": [
     "CHR-RULE-AGENT-001",
     "CHR-RULE-AGENT-002",

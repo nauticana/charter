@@ -1298,10 +1298,10 @@ erDiagram
     system_profile ||--o{ system_data_binding_version : profile_data_bindings
     system_data_binding_version ||--o{ system_data_binding_field_mapping : binding_field_mappings
     system_data_binding_version ||--o{ system_data_binding_lossy_transformation : binding_lossy_transformations
-    system_capability_binding |o--o{ system_binding_conformance : capability_binding_conformance
-    system_data_binding |o--o{ system_binding_conformance : data_binding_conformance
-    system_authority_binding |o--o{ system_binding_conformance : authority_binding_conformance
-    system_event_binding |o--o{ system_binding_conformance : event_binding_conformance
+    system_capability_binding_version |o--o{ system_binding_conformance : capability_binding_conformance
+    system_data_binding_version |o--o{ system_binding_conformance : data_binding_conformance
+    system_authority_binding_version |o--o{ system_binding_conformance : authority_binding_conformance
+    system_event_binding_version |o--o{ system_binding_conformance : event_binding_conformance
 
     system_data_binding {
         bigint id PK
@@ -1335,6 +1335,7 @@ erDiagram
         bigint data_binding_id FK "null"
         bigint authority_binding_id FK "null"
         bigint event_binding_id FK "null"
+        int binding_version_no FK
         varchar(120) conformance_profile
         varchar(120) implementation_version
         char(1) result
@@ -1348,9 +1349,9 @@ erDiagram
 | `system_data_binding_version` | One immutable mapping of an information definition to a system profile's representation. |
 | `system_data_binding_field_mapping` | A field mapping of a data binding version, from Charter path to external path. |
 | `system_data_binding_lossy_transformation` | A lossy transformation of a data binding version and its effects on validation, decisions, and evidence. |
-| `system_binding_conformance` | Evaluation of one binding against its declared features, with its result. |
+| `system_binding_conformance` | Evaluation of one binding version against its declared features, with its result. |
 
-- A binding conformance evaluates exactly one binding. A CHECK enforces this.
+- A binding conformance evaluates exactly one binding version: a CHECK admits one binding column, and its foreign key with `binding_version_no` names the version row.
 - Feature support of every binding version, and the evaluated features of a binding conformance, are rows of `binding_feature_support`.
 - A binding conformance's tested rules and verification types are rows of the conformance tables.
 - `unpreservableConstraintBehavior` is always fail-closed and is written on export.
@@ -2130,7 +2131,7 @@ A table belongs to the module of the table it references, not of its owner, when
 | `charter_organization` | `enterprise`, `organization_unit`, `position_type`, `position`, `organization_role`, `responsibility`, `organization_relationship`, `organization_role_responsibility`, `responsibility_concept`, `organization_assignment`, `organization_assignment_criterion`, `organization_assignment_criterion_value` |
 | `charter_capability` | `capability_contract`, `capability_contract_version`, `capability_contract_input`, `capability_contract_output`, `capability_contract_outcome`, `capability_contract_business_error`, `capability_contract_precondition`, `capability_contract_postcondition`, `capability_contract_postcondition_outcome`, `capability_contract_concept` |
 | `charter_process` | `value_stream`, `business_process`, `business_process_version`, `business_process_alias`, `process_task`, `process_task_version`, `process_task_performer_kind`, `process_task_participation`, `process_task_concept`, `process_relationship`, `process_instance`, `process_instance_context`, `architecture_state`, `architecture_gap`, `architecture_gap_compared_element`, `architecture_roadmap_item`, `architecture_roadmap_item_gap`, `architecture_roadmap_item_dependency`, `outcome_measure`, `process_task_instance` |
-| `charter_binding` | `binding_feature_support`, `system_capability_binding`, `system_capability_binding_version`, `system_capability_binding_lossy_mapping`, `system_authority_binding`, `system_authority_binding_version`, `system_event_binding`, `system_event_binding_version`, `system_data_binding`, `system_binding_conformance`, `system_data_binding_version`, `system_data_binding_field_mapping`, `system_data_binding_lossy_transformation` |
+| `charter_binding` | `binding_feature_support`, `system_capability_binding`, `system_capability_binding_version`, `system_capability_binding_lossy_mapping`, `system_authority_binding`, `system_authority_binding_version`, `system_event_binding`, `system_event_binding_version`, `system_data_binding`, `system_data_binding_version`, `system_data_binding_field_mapping`, `system_data_binding_lossy_transformation`, `system_binding_conformance` |
 | `charter_evidence` | `evidence_record`, `evidence_record_source`, `evidence_record_transformation`, `evidence_assessment`, `evidence_assessment_score`, `evidence_fact`, `evidence_measurement`, `enterprise_object_source_evidence`, `outcome_measure_baseline_evidence` |
 | `charter_authority` | `enterprise_agent_definition`, `enterprise_agent_definition_version`, `enterprise_agent_definition_responsibility`, `enterprise_agent_definition_trigger`, `enterprise_agent_definition_required_input`, `enterprise_agent_definition_expected_outcome`, `enterprise_agent_definition_policy`, `enterprise_agent_definition_escalation_condition`, `enterprise_agent_definition_confidence_boundary`, `enterprise_agent_runtime`, `sod_constraint`, `sod_constrained_responsibility`, `sod_exception`, `enterprise_agent_definition_capability`, `authority_grant`, `authority_approval`, `authority_approval_subject`, `authority_approval_condition`, `sod_constrained_capability`, `capability_contract_sod_constraint` |
 | `charter_action` | `exception_record`, `escalation_record`, `evidence_bundle`, `evidence_bundle_evidence_record`, `evidence_bundle_exception_record`, `evidence_bundle_escalation_record`, `action_record`, `action_record_subject`, `action_record_authority_evaluation`, `action_record_approval_evaluation`, `action_record_information_evaluation`, `action_record_approval`, `action_record_evidence`, `action_record_precondition_evaluation`, `action_record_precondition_evidence`, `action_record_postcondition_evaluation`, `action_record_postcondition_evidence`, `action_record_limit_evaluation`, `evidence_measurement_action`, `evidence_bundle_action_record` |

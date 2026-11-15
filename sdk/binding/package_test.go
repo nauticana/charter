@@ -48,7 +48,7 @@ func TestPackageManifestMaterializesCustomerBindings(t *testing.T) {
 		t.Fatal(err)
 	}
 	profile := model.SystemProfile{CharterSpecVersion: "1.2.0", Namespace: "customer.example", ID: "PROFILE-SAP", Kind: model.KindSystemProfile}
-	docs, err := Materialize(manifest, profile, map[string]any{"operation": "POST /reservations"})
+	docs, err := Materialize(manifest, profile, map[string]any{"operation": "POST /reservations"}, Installation{})
 	if err != nil || len(docs) != 1 {
 		t.Fatalf("materialize = %d documents, %v", len(docs), err)
 	}
@@ -65,21 +65,44 @@ func TestPackageManifestMaterializesCustomerBindings(t *testing.T) {
 	}
 }
 
+func TestMaterializeForAdoptedContract(t *testing.T) {
+	manifest, err := ParsePackageManifest(packageJSON())
+	if err != nil {
+		t.Fatal(err)
+	}
+	profile := model.SystemProfile{CharterSpecVersion: "1.2.0", Namespace: "customer.example", ID: "PROFILE-SAP", Kind: model.KindSystemProfile}
+	adopted := model.Ref{ID: "CAP-RESERVE-ADOPTED"}
+	docs, err := Materialize(manifest, profile, map[string]any{"operation": "x"}, Installation{ContractID: adopted, IDSuffix: "-SAP"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	binding, err := corpus.Decode[model.CapabilityBinding](docs[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if binding.ID != "BIND-RESERVATION-SAP" || binding.CapabilityID != adopted {
+		t.Fatalf("binding = %s for %+v", binding.ID, binding.CapabilityID)
+	}
+	if _, err := Materialize(manifest, profile, map[string]any{"operation": "x"}, Installation{IDSuffix: " bad"}); !errors.Is(err, ErrPackageManifest) {
+		t.Fatalf("invalid suffixed id: %v", err)
+	}
+}
+
 func TestPackageManifestFailsClosed(t *testing.T) {
 	manifest, err := ParsePackageManifest(packageJSON())
 	if err != nil {
 		t.Fatal(err)
 	}
 	profile := model.SystemProfile{CharterSpecVersion: "1.2.0", Namespace: "customer.example", ID: "PROFILE-SAP", Kind: model.KindSystemProfile}
-	if _, err := Materialize(manifest, profile, nil); !errors.Is(err, ErrPackageManifest) {
+	if _, err := Materialize(manifest, profile, nil, Installation{}); !errors.Is(err, ErrPackageManifest) {
 		t.Fatalf("missing parameter: %v", err)
 	}
-	if _, err := Materialize(manifest, profile, map[string]any{"operation": 4}); !errors.Is(err, ErrPackageManifest) {
+	if _, err := Materialize(manifest, profile, map[string]any{"operation": 4}, Installation{}); !errors.Is(err, ErrPackageManifest) {
 		t.Fatalf("wrong parameter type: %v", err)
 	}
 
 	manifest.BindingTemplates[0].Parameters = map[string]string{"/capabilityId": "operation"}
-	if _, err := Materialize(manifest, profile, map[string]any{"operation": "x"}); !errors.Is(err, ErrPackageManifest) {
+	if _, err := Materialize(manifest, profile, map[string]any{"operation": "x"}, Installation{}); !errors.Is(err, ErrPackageManifest) {
 		t.Fatalf("protected package field: %v", err)
 	}
 	manifest, err = ParsePackageManifest(packageJSON())
@@ -88,7 +111,7 @@ func TestPackageManifestFailsClosed(t *testing.T) {
 	}
 	manifest.BindingTemplates[0].Parameters["/mappings"] = "operation"
 	manifest.BindingTemplates[0].Parameters["/mappings/inputs"] = "operation"
-	if _, err := Materialize(manifest, profile, map[string]any{"operation": "x"}); !errors.Is(err, ErrPackageManifest) {
+	if _, err := Materialize(manifest, profile, map[string]any{"operation": "x"}, Installation{}); !errors.Is(err, ErrPackageManifest) {
 		t.Fatalf("overlapping parameter paths: %v", err)
 	}
 

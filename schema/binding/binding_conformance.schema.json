@@ -5,6 +5,7 @@
   "description": "Evaluation of a binding against its declared features; partial support is reported as partial.",
   "x-charter-requirements": [
     "CHR-BIND-009",
+    "CHR-BIND-010",
     "CHR-CONF-005",
     "CHR-CONF-009",
     "CHR-CONF-011"
@@ -40,6 +41,12 @@
         "EventBinding"
       ]
     },
+    "bindingVersion": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Version of the binding evaluated; the conformance holds for it only (CHR-BIND-010)."
+    },
     "evaluatedFeatures": {
       "$ref": "../common.schema.json#/$defs/featureSupport"
     }
@@ -47,6 +54,7 @@
   "required": [
     "kind",
     "bindingId",
+    "bindingVersion",
     "evaluatedFeatures"
   ],
   "unevaluatedProperties": false

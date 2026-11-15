@@ -21,10 +21,10 @@ import (
 type tableIO struct {
 	spec     *tableSpec
 	def      *tableDef
-	refs     map[string]bool   // columns holding an object id
-	pins     map[string]string // version column to the column holding its definition
-	trees    map[string]byte   // 'j' json_value, 's' json_schema_node
-	refArcs  map[string]string // column to the pseudo column of its restricted idRef
+	refs     map[string]bool     // columns holding an object id
+	pins     map[string][]string // version column to the columns that may hold its definition
+	trees    map[string]byte     // 'j' json_value, 's' json_schema_node
+	refArcs  map[string]string   // column to the pseudo column of its restricted idRef
 	approved bool
 	measured bool
 	split    *splitIO
@@ -55,7 +55,13 @@ func (m *relationalModel) install(modules []string) (*installation, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &installation{relationalModel: m, tables: tables, queries: m.cat.queries(tables)}, nil
+	in := &installation{relationalModel: m, tables: tables, queries: m.cat.queries(tables)}
+	for _, spec := range kindSpecs {
+		if spec.parent != "" && tables[spec.root.name] {
+			in.queries[qPageUnder(spec.code)] = m.cat.pageSQL(spec)
+		}
+	}
+	return in, nil
 }
 
 // kind returns the mapping of an installed kind.
@@ -134,7 +140,7 @@ func buildRelational() (*relationalModel, error) {
 				problems = append(problems, "no table "+t.name)
 				return
 			}
-			io := &tableIO{spec: t, def: def, refs: map[string]bool{}, pins: map[string]string{}, trees: map[string]byte{}, refArcs: map[string]string{}}
+			io := &tableIO{spec: t, def: def, refs: map[string]bool{}, pins: map[string][]string{}, trees: map[string]byte{}, refArcs: map[string]string{}}
 			for _, f := range t.fields {
 				switch f.kind {
 				case fRef, fObject, fActor:
@@ -146,9 +152,12 @@ func buildRelational() (*relationalModel, error) {
 				case fRefArc:
 					for _, a := range f.arcs {
 						io.refs[a.col], io.refArcs[a.col] = true, "#"+f.path
+						if f.verCol != "" {
+							io.pins[f.verCol] = append(io.pins[f.verCol], a.col)
+						}
 					}
 				case fPin:
-					io.refs[f.col], io.pins[f.verCol] = true, f.col
+					io.refs[f.col], io.pins[f.verCol] = true, []string{f.col}
 				case fJSON:
 					io.trees[f.col] = 'j'
 				case fSchema:
@@ -384,7 +393,8 @@ func (r *relationalReader) versions(ctx context.Context, ids []int64) (map[int64
 	return out, nil
 }
 
-// current sets each object's version to its highest; an object without versions is incomplete.
+// current sets the version of each object not already pinned to one to its highest; an object without versions is
+// incomplete.
 func (r *relationalReader) current(ctx context.Context, objs []storedObject) error {
 	ids := make([]int64, len(objs))
 	for i, o := range objs {
@@ -395,6 +405,9 @@ func (r *relationalReader) current(ctx context.Context, objs []storedObject) err
 		return err
 	}
 	for i := range objs {
+		if objs[i].version != 0 {
+			continue
+		}
 		for no := range versions[objs[i].id] {
 			objs[i].version = max(objs[i].version, no)
 		}
@@ -488,8 +501,14 @@ func (r *relationalReader) logical(io *tableIO, row map[string]any) (lrow, strin
 			lr[c.Name] = selfID{}
 		case c.Name == "version_no" && slices.Contains(io.spec.owner, "version_no"):
 			lr[c.Name] = selfVersion{}
-		case io.pins[c.Name] != "":
-			lr[c.Name] = pendingPin{object: row[io.pins[c.Name]].(int64), version: v.(int64)}
+		case io.pins[c.Name] != nil:
+			pin := pendingPin{version: v.(int64)}
+			for _, col := range io.pins[c.Name] {
+				if id, ok := row[col].(int64); ok {
+					pin.object = id
+				}
+			}
+			lr[c.Name] = pin
 		case io.refArcs[c.Name] != "":
 			lr[io.refArcs[c.Name]] = pendingRef(v.(int64))
 		case io.refs[c.Name]:

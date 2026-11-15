@@ -18,7 +18,7 @@ const (
 	fRef                           // idRef
 	fObject                        // objectRef of any kind, or of an object outside the document set
 	fArc                           // objectRef restricted to kinds, one column per kind
-	fRefArc                        // idRef restricted to kinds, one column per kind resolved when written
+	fRefArc                        // idRef restricted to kinds, one column per kind resolved when written, optionally pinned
 	fPin                           // idRef and the version label it names, stored as the version key
 	fJSON                          // any JSON value, stored as a json_value tree
 	fSchema                        // an embedded JSON Schema, stored as a json_schema_node tree
@@ -56,9 +56,12 @@ type field struct {
 func (f field) columns() []string {
 	switch f.kind {
 	case fArc, fRefArc:
-		out := make([]string, 0, len(f.arcs))
+		out := make([]string, 0, len(f.arcs)+1)
 		for _, a := range f.arcs {
 			out = append(out, a.col)
+		}
+		if f.verCol != "" {
+			out = append(out, f.verCol)
 		}
 		return out
 	case fPin:
@@ -123,6 +126,7 @@ type kindSpec struct {
 	evidence bool
 	once     bool
 	objects  []string
+	parent   string // root column naming the document this one sits under
 	// actorRuntime names the agent actor and runtime columns of a record whose agent must be its runtime's identity.
 	actorRuntime [2]string
 }
@@ -195,6 +199,17 @@ func money(path, amountCol, quantityCol string) field {
 func actor(path, humanCol string) field { return field{kind: fActor, path: path, col: humanCol} }
 
 func (f field) once() field { f.fixed = true; return f }
+
+// pinned makes a restricted idRef name the version its label property declares, stored in verCol.
+func (f field) pinned(label, verCol string) field { f.label, f.verCol = label, verCol; return f }
+
+// keyCol is the logical column holding a pinned field's object.
+func (f field) keyCol() string {
+	if f.kind == fRefArc {
+		return "#" + f.path
+	}
+	return f.col
+}
 
 // Table and list constructors.
 

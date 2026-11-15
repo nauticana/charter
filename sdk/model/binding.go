@@ -87,5 +87,6 @@ type BindingConformance struct {
 	Envelope
 	ConformanceEnvelope
 	BindingID         Ref              `json:"bindingId"`
+	BindingVersion    string           `json:"bindingVersion"`
 	EvaluatedFeatures []FeatureSupport `json:"evaluatedFeatures"`
 }

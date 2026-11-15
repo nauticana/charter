@@ -1,5 +1,5 @@
 table: system_binding_conformance
-comment: "Evaluation of one binding against its declared features, with its result."
+comment: "Evaluation of one binding version against its declared features, with its result."
 columns:
   - name: partner_id
     type: BIGINT
@@ -17,6 +17,8 @@ columns:
   - name: event_binding_id
     type: BIGINT
     nullable: true
+  - name: binding_version_no
+    type: INT
   - name: conformance_profile
     type: VARCHAR(120)
   - name: implementation_version
@@ -28,13 +30,13 @@ columns:
 primary_key: [partner_id, id]
 indexes:
   - name: capability_binding_conformance_ix
-    columns: [partner_id, capability_binding_id]
+    columns: [partner_id, capability_binding_id, binding_version_no]
   - name: data_binding_conformance_ix
-    columns: [partner_id, data_binding_id]
+    columns: [partner_id, data_binding_id, binding_version_no]
   - name: authority_binding_conformance_ix
-    columns: [partner_id, authority_binding_id]
+    columns: [partner_id, authority_binding_id, binding_version_no]
   - name: event_binding_conformance_ix
-    columns: [partner_id, event_binding_id]
+    columns: [partner_id, event_binding_id, binding_version_no]
 foreign_keys:
   - name: object_system_binding_conformance
     columns: [partner_id, id]
@@ -42,25 +44,25 @@ foreign_keys:
       table: enterprise_object
       columns: [partner_id, id]
   - name: capability_binding_conformance
-    columns: [partner_id, capability_binding_id]
+    columns: [partner_id, capability_binding_id, binding_version_no]
     references:
-      table: system_capability_binding
-      columns: [partner_id, id]
+      table: system_capability_binding_version
+      columns: [partner_id, capability_binding_id, version_no]
   - name: data_binding_conformance
-    columns: [partner_id, data_binding_id]
+    columns: [partner_id, data_binding_id, binding_version_no]
     references:
-      table: system_data_binding
-      columns: [partner_id, id]
+      table: system_data_binding_version
+      columns: [partner_id, data_binding_id, version_no]
   - name: authority_binding_conformance
-    columns: [partner_id, authority_binding_id]
+    columns: [partner_id, authority_binding_id, binding_version_no]
     references:
-      table: system_authority_binding
-      columns: [partner_id, id]
+      table: system_authority_binding_version
+      columns: [partner_id, authority_binding_id, version_no]
   - name: event_binding_conformance
-    columns: [partner_id, event_binding_id]
+    columns: [partner_id, event_binding_id, binding_version_no]
     references:
-      table: system_event_binding
-      columns: [partner_id, id]
+      table: system_event_binding_version
+      columns: [partner_id, event_binding_id, version_no]
 checks:
   - name: system_binding_conformance_result_ck
     expression: "result IN ('C', 'P', 'N')"

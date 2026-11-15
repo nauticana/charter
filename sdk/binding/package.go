@@ -60,9 +60,16 @@ func ParsePackageManifest(raw []byte) (PackageManifest, error) {
 	return manifest, nil
 }
 
+// Installation adapts a package to one customer: the contract the customer adopted in place of the manifest's, and a
+// suffix appended to every template id so the installation's ids are its own. The zero value keeps both.
+type Installation struct {
+	ContractID model.Ref
+	IDSuffix   string
+}
+
 // Materialize resolves parameters and pins every template to the supplied customer system profile. Charter owns the
 // resulting documents; downstream composition resolves AdapterRef and ObserverRef to executable implementations.
-func Materialize(manifest PackageManifest, profile model.SystemProfile, params map[string]any) ([]*model.Document, error) {
+func Materialize(manifest PackageManifest, profile model.SystemProfile, params map[string]any, in Installation) ([]*model.Document, error) {
 	manifestJSON, err := json.Marshal(manifest)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrPackageManifest, err)
@@ -87,6 +94,10 @@ func Materialize(manifest PackageManifest, profile model.SystemProfile, params m
 		return nil, fmt.Errorf("%w: parameters: %v", ErrPackageManifest, err)
 	}
 
+	contract := manifest.CapabilityID
+	if in.ContractID.ID != "" {
+		contract = in.ContractID
+	}
 	out := make([]*model.Document, 0, len(manifest.BindingTemplates))
 	for index, template := range manifest.BindingTemplates {
 		var value map[string]any
@@ -122,8 +133,12 @@ func Materialize(manifest PackageManifest, profile model.SystemProfile, params m
 		value["charterSpecVersion"] = profile.CharterSpecVersion
 		value["namespace"] = profile.Namespace
 		value["systemProfileId"] = profile.ID
+		if in.IDSuffix != "" {
+			id, _ := value["id"].(string)
+			value["id"] = id + in.IDSuffix
+		}
 		if kind == string(model.KindCapabilityBinding) || kind == string(model.KindAuthorityBinding) {
-			value["capabilityId"] = refValue(manifest.CapabilityID)
+			value["capabilityId"] = refValue(contract)
 		}
 		raw, err := json.Marshal(value)
 		if err != nil {

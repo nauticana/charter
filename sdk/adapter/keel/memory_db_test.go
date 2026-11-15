@@ -19,6 +19,7 @@ import (
 	"github.com/nauticana/keel/port"
 	"gopkg.in/yaml.v3"
 
+	"github.com/nauticana/charter/sdk/model"
 	charterschema "github.com/nauticana/charter/sdk/schema"
 )
 
@@ -219,6 +220,9 @@ func (q *memoryQueries) Query(_ context.Context, name string, args ...any) (*kmo
 	if h, ok := humanAccountHandlers[name]; ok {
 		return h(q, args)
 	}
+	if strings.HasPrefix(name, qPage) {
+		return q.page(name, args)
+	}
 	sql, ok := q.sql[name]
 	if !ok {
 		return nil, fmt.Errorf("unknown query %s", name)
@@ -270,7 +274,7 @@ var (
 	deleteStmt = regexp.MustCompile(`^DELETE FROM (\w+) WHERE (.*)$`)
 	castColumn = regexp.MustCompile(`^CAST\((\w+) AS TEXT\)$`)
 	nextval    = regexp.MustCompile(`^nextval\('(\w+)'\)$`)
-	condition  = regexp.MustCompile(`^(\w+) (=|<>) (\?|ANY\(\?\)|'[^']*')$`)
+	condition  = regexp.MustCompile(`^(\w+) (=|<>|>=|<=) (\?|ANY\(\?\)|'[^']*')$`)
 )
 
 // splitTop splits on sep outside parentheses.
@@ -440,6 +444,14 @@ func (ex *memExec) where(t *memTable, clause string) (func(map[string]any) bool,
 			v, err := ex.arg()
 			if err != nil {
 				return nil, err
+			}
+			if op == ">=" || op == "<=" {
+				bound := v.(time.Time)
+				tests = append(tests, func(r map[string]any) bool {
+					at, ok := r[col].(time.Time)
+					return ok && (op == ">=" && !at.Before(bound) || op == "<=" && !at.After(bound))
+				})
+				continue
 			}
 			want := rowKey(normalizeArg(v))
 			tests = append(tests, func(r map[string]any) bool { return r[col] != nil && rowKey(r[col]) == want })
@@ -726,6 +738,60 @@ var humanAccountHandlers = map[string]func(q *memoryQueries, args []any) (*kmode
 			return []any{a["user_id"]}, o["namespace"] == args[1] && o["identifier"] == args[2] && o["kind"] == humanKindCode
 		})
 	},
+}
+
+// page answers qPage and qPageUnder as their SQL does.
+func (q *memoryQueries) page(name string, args []any) (*kmodel.QueryResult, error) {
+	if _, ok := q.sql[name]; !ok {
+		return nil, fmt.Errorf("unknown query %s", name)
+	}
+	day, after := args[2].(time.Time), args[6].(string)+"\x00"+args[7].(string)
+	prefix := strings.NewReplacer(`\%`, "%", `\_`, "_", `\\`, `\`).Replace(strings.TrimSuffix(args[4].(string), "%"))
+	var under *kindSpec
+	if name != qPage {
+		under = kindSpecs[model.Kind(kindCodes.words[args[1].(string)])]
+	}
+	type found struct {
+		key string
+		row []any
+	}
+	var page []found
+	for _, o := range q.state.rows["enterprise_object"] {
+		if o["partner_id"] != args[0] || o["kind"] != args[1] {
+			continue
+		}
+		var v map[string]any
+		for _, r := range q.state.rows["enterprise_object_version"] {
+			if r["partner_id"] == o["partner_id"] && r["enterprise_object_id"] == o["id"] && (v == nil || r["version_no"].(int64) > v["version_no"].(int64)) {
+				v = r
+			}
+		}
+		from, hasFrom := v["valid_from"].(time.Time)
+		to, hasTo := v["valid_to"].(time.Time)
+		title, _ := v["name"].(string)
+		key := o["namespace"].(string) + "\x00" + o["identifier"].(string)
+		if hasFrom && from.After(day) || hasTo && to.Before(day) || key <= after ||
+			!strings.HasPrefix(strings.ToLower(o["identifier"].(string)), prefix) && !strings.HasPrefix(strings.ToLower(title), prefix) {
+			continue
+		}
+		if under != nil && !slices.ContainsFunc(q.state.rows[under.root.name], func(p map[string]any) bool {
+			return p["partner_id"] == o["partner_id"] && p[under.root.owner[0]] == o["id"] && p[under.parent] == args[8] &&
+				(!under.versioned() || p["version_no"] == v["version_no"])
+		}) {
+			continue
+		}
+		row := make([]any, 0, len(o))
+		for _, c := range q.db.tables["enterprise_object"].def.Columns {
+			row = append(row, o[c.Name])
+		}
+		page = append(page, found{key, row})
+	}
+	slices.SortFunc(page, func(a, b found) int { return strings.Compare(a.key, b.key) })
+	res := &kmodel.QueryResult{}
+	for _, f := range page[:min(len(page), args[len(args)-1].(int))] {
+		res.Rows = append(res.Rows, f.row)
+	}
+	return res, nil
 }
 
 func effectiveLinks(q *memoryQueries, partnerID int64, at time.Time, pick func(a, o map[string]any) ([]any, bool)) (*kmodel.QueryResult, error) {

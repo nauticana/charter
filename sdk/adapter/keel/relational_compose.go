@@ -163,8 +163,8 @@ func asInt(v any) int64 {
 }
 
 func (c *composer) field(f field, row lrow, item map[string]any) error {
-	if f.kind == fPin {
-		key, ok := row[f.col].(objKey)
+	if f.verCol != "" {
+		key, ok := row[f.keyCol()].(objKey)
 		if !ok {
 			return nil
 		}

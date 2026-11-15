@@ -22,5 +22,6 @@ Bindings connect stable Charter capability and authority semantics to a specific
 - **CHR-BIND-007:** Lossy data mappings MUST be declared and MUST identify their effect on validation, decisions, and evidence.
 - **CHR-BIND-008:** Adapter authentication, retry, transaction, and monitoring behavior MUST be documented without becoming normative vendor behavior in the Charter core.
 - **CHR-BIND-009:** Binding conformance MUST be evaluated against declared features rather than inferred from successful connectivity.
+- **CHR-BIND-010:** A binding conformance MUST name the binding version it evaluated, and it holds for that version only; a later version of the binding is not covered until it is evaluated.
 
 Vendor profiles, mappings, adapters, and proprietary accelerator content belong downstream unless adopted as non-normative examples.

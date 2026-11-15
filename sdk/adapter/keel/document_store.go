@@ -1,14 +1,18 @@
 package keel
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"sort"
 	"strings"
+	"time"
 
+	"github.com/nauticana/keel/common"
 	"github.com/nauticana/keel/port"
 
 	"github.com/nauticana/charter/sdk/corpus"
@@ -25,6 +29,7 @@ var (
 	ErrEnterpriseChanged = errors.New("a stored document keeps its enterprise")
 	ErrPublishedVersion  = errors.New("a stored definition version cannot change")
 	ErrInvalidDocument   = errors.New("invalid documents")
+	ErrInvalidQuery      = errors.New("invalid document query")
 )
 
 // InvalidDocumentsError carries the findings that kept a write from being committed.
@@ -141,6 +146,198 @@ func (s *DocumentStore) ObjectRefs(ctx context.Context, partnerID int64, ids ...
 		}
 		out[i] = model.ObjectRef{Kind: model.Kind(kindCodes.words[o.code]), Namespace: o.key.NS, ID: o.key.ID}
 	}
+	return out, nil
+}
+
+// KindTable returns the table holding a kind's documents, the identity table of a versioned kind, the table keel's
+// TABLE grants name; ok is false for a kind the installed modules do not hold.
+func (s *DocumentStore) KindTable(kind model.Kind) (string, bool) {
+	spec, err := s.model.kind(kind)
+	if err != nil {
+		return "", false
+	}
+	if spec.versioned() {
+		return spec.identity.name, true
+	}
+	return spec.root.name, true
+}
+
+// VersionInfo is one stored version of a document: its number, the label a versioned definition declares, and when it
+// was stored. A document updated in place keeps one version.
+type VersionInfo struct {
+	No      int64
+	Label   string
+	Created time.Time
+}
+
+// Versions lists a stored document's versions, oldest first.
+func (s *DocumentStore) Versions(ctx context.Context, partnerID int64, key corpus.DocumentKey) ([]VersionInfo, error) {
+	r, o, err := s.stored(ctx, partnerID, key)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.rowsBy(ctx, "enterprise_object_version", "enterprise_object_id", []int64{o.id})
+	if err != nil {
+		return nil, fmt.Errorf("charter versions %s: %w", key, err)
+	}
+	out := make([]VersionInfo, len(rows))
+	for i, row := range rows {
+		out[i].No, _ = row["version_no"].(int64)
+		out[i].Label, _ = row["definition_version"].(string)
+		out[i].Created, _ = row["created_at"].(time.Time)
+	}
+	slices.SortFunc(out, func(a, b VersionInfo) int { return cmp.Compare(a.No, b.No) })
+	return out, nil
+}
+
+// FetchVersion returns the version of a stored definition its label names; an unknown label is corpus.ErrNotFound.
+func (s *DocumentStore) FetchVersion(ctx context.Context, partnerID int64, key corpus.DocumentKey, label string) (*model.Document, error) {
+	r, o, err := s.stored(ctx, partnerID, key)
+	if err != nil {
+		return nil, err
+	}
+	versions, err := r.versions(ctx, []int64{o.id})
+	if err != nil {
+		return nil, fmt.Errorf("charter versions %s: %w", key, err)
+	}
+	for no, l := range versions[o.id] {
+		if label != "" && l == label {
+			o.version = no
+		}
+	}
+	if o.version == 0 {
+		return nil, fmt.Errorf("%w: %w: %s %q", corpus.ErrNotFound, ErrUnknownVersion, key, label)
+	}
+	docs, err := tenantStore{store: s, partnerID: partnerID}.documents(ctx, r, []storedObject{o})
+	if err != nil {
+		return nil, fmt.Errorf("charter document %s %q: %w", key, label, err)
+	}
+	return docs[0], nil
+}
+
+// stored finds a tenant's stored document.
+func (s *DocumentStore) stored(ctx context.Context, partnerID int64, key corpus.DocumentKey) (*relationalReader, storedObject, error) {
+	r, err := tenantStore{store: s, partnerID: partnerID}.reader()
+	if err != nil {
+		return nil, storedObject{}, err
+	}
+	o, found, err := r.document(ctx, key.Namespace, key.ID)
+	if err != nil {
+		return nil, storedObject{}, fmt.Errorf("charter document %s: %w", key, err)
+	}
+	if !found {
+		return nil, storedObject{}, fmt.Errorf("%w: %s", corpus.ErrNotFound, key)
+	}
+	return r, o, nil
+}
+
+// DocumentQuery selects one page of a kind's current documents, ordered by namespace and identifier.
+type DocumentQuery struct {
+	Kind model.Kind
+	// At is the day the current version's validity must contain; a document without validity is always effective.
+	At time.Time
+	// Parent keeps the documents directly under it: a unit's parent unit, a position's unit, a process's parent
+	// process, or a task's process.
+	Parent *model.ObjectRef
+	// Prefix keeps the documents whose identifier or name starts with it, ignoring case.
+	Prefix string
+	// After is the last document of the previous page.
+	After corpus.DocumentKey
+	Limit int
+}
+
+// Page answers a document query in the store's own queries, so only the page is read.
+func (s *DocumentStore) Page(ctx context.Context, partnerID int64, q DocumentQuery) ([]*model.Document, error) {
+	t := tenantStore{store: s, partnerID: partnerID}
+	r, err := t.reader()
+	if err != nil {
+		return nil, err
+	}
+	if q.Limit <= 0 || q.At.IsZero() {
+		return nil, fmt.Errorf("%w: a positive limit and an effective time are required", ErrInvalidQuery)
+	}
+	spec, err := s.model.kind(q.Kind)
+	if err != nil {
+		return nil, err
+	}
+	day := time.Date(q.At.Year(), q.At.Month(), q.At.Day(), 0, 0, 0, 0, time.UTC)
+	pattern := strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`).Replace(strings.ToLower(q.Prefix)) + "%"
+	name, args := qPage, []any{spec.code, day, day, pattern, pattern, q.After.Namespace, q.After.ID}
+	if q.Parent != nil {
+		if spec.parent == "" {
+			return nil, fmt.Errorf("%w: %s has no parent", ErrInvalidQuery, q.Kind)
+		}
+		ids, err := s.ObjectIDs(ctx, partnerID, *q.Parent)
+		if err != nil {
+			return nil, err
+		}
+		name, args = qPageUnder(spec.code), append(args, ids[0])
+	}
+	objs, err := r.objectRows(ctx, name, append(args, q.Limit)...)
+	if err != nil {
+		return nil, fmt.Errorf("charter documents %s: %w", q.Kind, err)
+	}
+	docs, err := t.documents(ctx, r, objs)
+	if err != nil {
+		return nil, fmt.Errorf("charter documents %s: %w", q.Kind, err)
+	}
+	return docs, nil
+}
+
+// Measurements returns, in window order, the tenant's evidence records measuring any of the outcome measures over a
+// window within a closed period (CHR-PROC-011), selected by one query over the measurements.
+func (s *DocumentStore) Measurements(ctx context.Context, partnerID int64, period model.Validity, measures ...corpus.DocumentKey) ([]model.EvidenceRecord, error) {
+	t := tenantStore{store: s, partnerID: partnerID}
+	r, err := t.reader()
+	if err != nil || len(measures) == 0 {
+		return nil, err
+	}
+	from, fromErr := time.Parse(dateLayout, string(period.From))
+	to, toErr := time.Parse(dateLayout, string(period.To))
+	if fromErr != nil || toErr != nil || to.Before(from) {
+		return nil, fmt.Errorf("%w: a closed period is required", ErrInvalidQuery)
+	}
+	if _, err := s.model.kind(model.KindEvidenceRecord); err != nil {
+		return nil, err
+	}
+	refs := make([]model.ObjectRef, len(measures))
+	for i, m := range measures {
+		refs[i] = model.ObjectRef{Kind: model.KindOutcomeMeasure, Namespace: m.Namespace, ID: m.ID}
+	}
+	ids, err := s.ObjectIDs(ctx, partnerID, refs...)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.query(ctx, qMeasurements, partnerID, ids, from, to)
+	if err != nil {
+		return nil, fmt.Errorf("charter measurements: %w", err)
+	}
+	recordIDs := make([]int64, 0, len(rows))
+	for _, row := range rows {
+		id, ok := common.AsInt64OK(row[0])
+		if !ok {
+			return nil, fmt.Errorf("%w: measurement record %T", ErrDocumentIncomplete, row[0])
+		}
+		recordIDs = append(recordIDs, id)
+	}
+	byID, err := r.objectsByID(ctx, recordIDs)
+	if err != nil {
+		return nil, fmt.Errorf("charter measurements: %w", err)
+	}
+	docs, err := t.documents(ctx, r, slices.Collect(maps.Values(byID)))
+	if err != nil {
+		return nil, fmt.Errorf("charter measurements: %w", err)
+	}
+	out := make([]model.EvidenceRecord, len(docs))
+	for i, d := range docs {
+		if out[i], err = corpus.Decode[model.EvidenceRecord](d); err != nil {
+			return nil, err
+		}
+	}
+	slices.SortFunc(out, func(a, b model.EvidenceRecord) int {
+		return cmp.Or(strings.Compare(string(a.Measurement.Window.From), string(b.Measurement.Window.From)),
+			strings.Compare(a.Namespace, b.Namespace), strings.Compare(a.ID, b.ID))
+	})
 	return out, nil
 }
 

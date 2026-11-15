@@ -8,7 +8,7 @@ tables:
   - system_event_binding
   - system_event_binding_version
   - system_data_binding
-  - system_binding_conformance
   - system_data_binding_version
   - system_data_binding_field_mapping
   - system_data_binding_lossy_transformation
+  - system_binding_conformance
