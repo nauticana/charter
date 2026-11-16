@@ -44,6 +44,43 @@ func NewSchemaMeta() (*SchemaMeta, error) {
 	return m, nil
 }
 
+// WalkRefs visits every idRef and objectRef property value below v, skipping namespaced extensions and a derivation;
+// item is the reference value itself, a string or an object the caller may change in place.
+func (m *SchemaMeta) WalkRefs(v any, onID func(key string, ref model.Ref, item any), onObject func(key string, ref model.ObjectRef, item any)) {
+	switch n := v.(type) {
+	case map[string]any:
+		for k, x := range n {
+			// A derivation source lives in another document set and is never resolved here (CHR-CONF-015).
+			if k == "extensions" || k == "derivedFrom" {
+				continue
+			}
+			items := []any{x}
+			if list, ok := x.([]any); ok {
+				items = list
+			}
+			if m.ObjectRefKeys[k] && onObject != nil {
+				for _, item := range items {
+					if ref, ok := objectRef(item); ok {
+						onObject(k, ref, item)
+					}
+				}
+			}
+			if m.IDRefKeys[k] && onID != nil {
+				for _, item := range items {
+					if ref, ok := idRef(item); ok {
+						onID(k, ref, item)
+					}
+				}
+			}
+			m.WalkRefs(x, onID, onObject)
+		}
+	case []any:
+		for _, x := range n {
+			m.WalkRefs(x, onID, onObject)
+		}
+	}
+}
+
 func (m *SchemaMeta) isIDRef(v any) bool {
 	return schemaContainsRef(v, "/idRef")
 }

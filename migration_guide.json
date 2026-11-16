@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.9.3",
+      "title": "Document derivation",
+      "tags": [
+        "additive"
+      ],
+      "summary": "`derivation.Deriver` adopts documents of one document set into another, recording each copy's source, version, and content digest (CHR-CONF-015); a new version of a published versioned definition may record its own derivation. Specification 1.9.0; keel v1.3.8.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`schema/catalog.json` `specVersion`) | 1.9.0 |\n| Go module `github.com/nauticana/charter` | v1.9.3 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.3.8 |\n\n## Compatibility impact\n\nAdditive. Documents, schemas, and Charter tables are unchanged. `validate.Additions` now accepts a new version of a published versioned definition whose derivation differs from the stored version's.\n\n## Go SDK\n\n- New package `derivation`: `NewDeriver()`, `Deriver.Derive(ctx, source corpus.VersionSource, target corpus.Source, roots []Root, opts Options)` returns the copies to save. `Root{ID, Version}`; `Options{SourceNamespace, TargetNamespace, Enterprise, SourceVersion, Upgrade}`. Errors: `ErrInvalidRequest`, `ErrForeignDocument`, `ErrDerivationFixed`, `ErrTailored`, `ErrNotDerivable`, `ErrNoSourceVersion`, `ErrNoEnterprise`.\n- `corpus.VersionSource` adds `FetchVersion(ctx, key, label)` to `Source`; `Corpus` implements it.\n- `corpus.ContentDigest(d)` returns the `sha256` digest of a document's RFC 8785 canonical JSON; `corpus.Published(d)` reports whether a document is past drafting.\n- `validate.SchemaMeta.WalkRefs(v, onID, onObject)` visits every idRef and objectRef below a document value, passing the reference value for rewriting.\n- The keel adapter's `DocumentStore.Source(partnerID)` returns a `corpus.VersionSource`. The adapter requires keel v1.3.8.\n\n## Adoption\n\n`go get github.com/nauticana/charter@v1.9.3` and keel v1.3.8, adopting keel's own guidance for v1.3.7 and v1.3.8 first. Replace hand-written document copying with `Deriver.Derive` and save the returned copies; recompute recorded digests with `corpus.ContentDigest` to verify a derivation.\n"
+    },
+    {
       "version": "1.9.2",
       "title": "Work concepts paged by any label",
       "tags": [

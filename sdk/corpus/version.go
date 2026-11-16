@@ -25,3 +25,9 @@ func DefinitionVersion(d *model.Document) (version string, versioned bool) {
 	version, _ = value[property].(string)
 	return version, true
 }
+
+// Published reports whether a document is past drafting, in a lifecycle state other than proposed or planned; its
+// recorded derivation is then fixed (CHR-CONF-015).
+func Published(d *model.Document) bool {
+	return d.LifecycleState != model.LifecycleProposed && d.LifecycleState != model.LifecyclePlanned
+}

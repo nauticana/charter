@@ -151,6 +151,13 @@ func TestAdditionsKeepThePublishedDerivation(t *testing.T) {
 	if f := check(t, a, base, rewrite("", other)); len(f) != 1 || f[0].RuleID != "CHR-RULE-CONF-003" {
 		t.Fatalf("changed derivation of a published document: %+v", f)
 	}
+	next, err := (corpus.Parser{}).Parse([]byte(strings.Replace(string(rewrite("", other).Raw), `"definitionVersion": "1"`, `"definitionVersion": "2"`, 1)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if f := check(t, a, base, next); len(f) != 0 {
+		t.Fatalf("a new version records its own derivation: %+v", f)
+	}
 	draft := corpus.New()
 	if err := draft.Add(rewrite("proposed", stored.DerivedFrom.Digest)); err != nil {
 		t.Fatal(err)

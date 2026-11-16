@@ -14,12 +14,31 @@ type Source interface {
 	List(ctx context.Context, kind model.Kind) ([]*model.Document, error)
 }
 
-var _ Source = (*Corpus)(nil)
+// VersionSource also reads a stored version of a document by the label its versioned kind declares; an empty label
+// reads the current version, and a label nothing stores is ErrNotFound.
+type VersionSource interface {
+	Source
+	FetchVersion(ctx context.Context, key DocumentKey, label string) (*model.Document, error)
+}
+
+var _ VersionSource = (*Corpus)(nil)
 
 func (c *Corpus) Fetch(_ context.Context, key DocumentKey) (*model.Document, error) {
 	d, ok := c.docs[key]
 	if !ok {
 		return nil, fmt.Errorf("%w: %s", ErrNotFound, key)
+	}
+	return d, nil
+}
+
+// FetchVersion returns the document when the label is empty or the one it declares; a corpus holds one version of each.
+func (c *Corpus) FetchVersion(ctx context.Context, key DocumentKey, label string) (*model.Document, error) {
+	d, err := c.Fetch(ctx, key)
+	if err != nil || label == "" {
+		return d, err
+	}
+	if version, _ := DefinitionVersion(d); version != label {
+		return nil, fmt.Errorf("%w: %s version %q", ErrNotFound, key, label)
 	}
 	return d, nil
 }

@@ -32,6 +32,12 @@ func TestDocumentStoreReadsEveryVersion(t *testing.T) {
 	if current, err := store.Source(partner).Fetch(ctx, key); err != nil || current.Name != "Detect faster" {
 		t.Fatalf("current = %+v, %v", current, err)
 	}
+	if pinned, err := store.Source(partner).FetchVersion(ctx, key, "1"); err != nil || pinned.Name != original {
+		t.Fatalf("source version 1 = %+v, %v", pinned, err)
+	}
+	if current, err := store.Source(partner).FetchVersion(ctx, key, ""); err != nil || current.Name != "Detect faster" {
+		t.Fatalf("source current = %+v, %v", current, err)
+	}
 	for name, err := range map[string]error{
 		"unknown label": func() error { _, err := store.FetchVersion(ctx, partner, key, "9"); return err }(),
 		"unknown document": func() error {

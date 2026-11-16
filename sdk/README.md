@@ -12,6 +12,7 @@ Packages:
 - `authority`, `capability`, `binding`, `predicate`: governed decision and invocation contracts: grant and approval evaluation, the `BaseInvoker` pipeline, binding package materialization, feature support, fail-closed execution, and CEL evaluation of contract predicates
 - `evidence`, `information`: append-only evidence with supersession, integrity, and fact standing; information shapes and governance decisions
 - `validate`: structural/semantic validation, fixture execution, and conformance claims
+- `derivation`: adoption of documents of one document set into another, each copy recording its source, version, and content digest
 - `interchange`: JSON-LD export and import of document sets under the published context, with stable document IRIs and refusal of unaccepted loss
 - `adapter/keel`: the optional bridge to keel's principal and tenant context, RBAC permission checks, trust guards, message publishing, metrics, and request ids, plus a tenant-scoped document and evidence store and human account links over the tables in `schema/`; only this package imports keel
 - `schema`: the keel schema modules of the relational model in [`schema/database.md`](../schema/database.md), fifteen modules that depend only on lower ones, each a directory of YAML table files with its code lists in `seed/<module>.yml`; keel's `schemagen` generates the DDL of the modules a downstream selects

@@ -90,7 +90,15 @@ func (a *Additions) Validate(ctx context.Context, source corpus.Source, docs ...
 	return out, nil
 }
 
-// fixedDerivations refuses a write that changes the recorded derivation of a published stored document (CHR-CONF-015).
+// sameVersion reports whether a write replaces the stored version rather than adding one; a new version of a versioned
+// definition records its own derivation (CHR-AGENT-010).
+func sameVersion(stored, written *model.Document) bool {
+	label, versioned := corpus.DefinitionVersion(written)
+	storedLabel, _ := corpus.DefinitionVersion(stored)
+	return !versioned || label == storedLabel
+}
+
+// fixedDerivations refuses a write that changes the recorded derivation of a published stored version (CHR-CONF-015).
 func (a *Additions) fixedDerivations(ctx context.Context, source corpus.Source, written *corpus.Corpus) ([]Finding, error) {
 	if source == nil {
 		return nil, nil
@@ -104,7 +112,7 @@ func (a *Additions) fixedDerivations(ctx context.Context, source corpus.Source, 
 		if err != nil {
 			return nil, fmt.Errorf("stored %s:%s: %w", d.Namespace, d.ID, err)
 		}
-		if published(stored) && !reflect.DeepEqual(stored.DerivedFrom, d.DerivedFrom) {
+		if corpus.Published(stored) && sameVersion(stored, d) && !reflect.DeepEqual(stored.DerivedFrom, d.DerivedFrom) {
 			out = append(out, Finding{RuleID: "CHR-RULE-CONF-003", Requirements: []string{"CHR-CONF-015", "CHR-AGENT-010"}, Class: ClassSemantic,
 				Namespace: d.Namespace, DocumentID: d.ID, Message: "the derivation of a published document cannot change"})
 		}
@@ -121,9 +129,9 @@ func (a *Additions) withTargets(ctx context.Context, source corpus.Source, writt
 		if err := scope.Add(d); err != nil {
 			return nil, err
 		}
-		walkRefs(a.meta, body(d), func(_ string, ref model.Ref) {
+		a.meta.WalkRefs(body(d), func(_ string, ref model.Ref, _ any) {
 			targets[corpus.KeyOf(d.Namespace, ref)] = true
-		}, func(_ string, ref model.ObjectRef) {
+		}, func(_ string, ref model.ObjectRef, _ any) {
 			if a.meta.Kinds[string(ref.Kind)] && !ref.External {
 				targets[corpus.ObjectKeyOf(d.Namespace, ref)] = true
 			}

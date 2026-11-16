@@ -89,8 +89,9 @@ func NewDocumentStore(ctx context.Context, db port.DatabaseRepository, modules .
 	return &DocumentStore{db: db, queries: queries, model: m, additions: additions}, nil
 }
 
-// Source returns one tenant's current documents, evidence included, for Charter providers.
-func (s *DocumentStore) Source(partnerID int64) corpus.Source {
+// Source returns one tenant's current documents, evidence included, for Charter providers, and the stored versions
+// of its definitions.
+func (s *DocumentStore) Source(partnerID int64) corpus.VersionSource {
 	return tenantStore{store: s, partnerID: partnerID}
 }
 
@@ -431,7 +432,10 @@ type tenantStore struct {
 	partnerID int64
 }
 
-var _ evidence.Store = tenantStore{}
+var (
+	_ evidence.Store       = tenantStore{}
+	_ corpus.VersionSource = tenantStore{}
+)
 
 func (t tenantStore) reader() (*relationalReader, error) {
 	if t.store == nil {
@@ -482,6 +486,14 @@ func (t tenantStore) Fetch(ctx context.Context, key corpus.DocumentKey) (*model.
 		return nil, fmt.Errorf("charter document %s: %w", key, err)
 	}
 	return docs[0], nil
+}
+
+// FetchVersion reads the current document for an empty label, otherwise the stored version the label names.
+func (t tenantStore) FetchVersion(ctx context.Context, key corpus.DocumentKey, label string) (*model.Document, error) {
+	if label == "" {
+		return t.Fetch(ctx, key)
+	}
+	return t.store.FetchVersion(ctx, t.partnerID, key, label)
 }
 
 func (t tenantStore) List(ctx context.Context, kind model.Kind) ([]*model.Document, error) {

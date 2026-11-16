@@ -35,11 +35,11 @@ var (
 func (r ReferencesResolveRule) Validate(c *corpus.Corpus) []Finding {
 	var out []Finding
 	for _, d := range c.Documents() {
-		walkRefs(r.Meta, body(d), func(key string, ref model.Ref) {
+		r.Meta.WalkRefs(body(d), func(key string, ref model.Ref, _ any) {
 			if _, found := c.Resolve(d.Namespace, ref); !found {
 				out = append(out, r.finding(d.Namespace, d.ID, fmt.Sprintf("%s %s not found", key, ref.ID)))
 			}
-		}, func(_ string, ref model.ObjectRef) {
+		}, func(_ string, ref model.ObjectRef, _ any) {
 			out = append(out, r.validateObjectRef(c, d.Namespace, d.ID, ref)...)
 		})
 	}
@@ -66,7 +66,7 @@ func (r ReferencesResolveRule) validateObjectRef(c *corpus.Corpus, ownerNamespac
 func (r ReferenceKindsRule) Validate(c *corpus.Corpus) []Finding {
 	var out []Finding
 	for _, d := range c.Documents() {
-		walkRefs(r.Meta, body(d), func(key string, ref model.Ref) {
+		r.Meta.WalkRefs(body(d), func(key string, ref model.Ref, _ any) {
 			target, found := c.Resolve(d.Namespace, ref)
 			if !found {
 				return
@@ -96,11 +96,11 @@ func (r EnterpriseBoundaryRule) Validate(c *corpus.Corpus) []Finding {
 				out = append(out, r.finding(d.Namespace, d.ID, fmt.Sprintf("%s %s belongs to enterprise %s, not %s", key, id, target.EnterpriseID.ID, owner.ID)))
 			}
 		}
-		walkRefs(r.Meta, body(d), func(key string, ref model.Ref) {
+		r.Meta.WalkRefs(body(d), func(key string, ref model.Ref, _ any) {
 			if target, found := c.Resolve(d.Namespace, ref); found && key != "enterpriseId" {
 				check(key, ref.ID, target)
 			}
-		}, func(key string, ref model.ObjectRef) {
+		}, func(key string, ref model.ObjectRef, _ any) {
 			if target, found := c.ResolveObject(d.Namespace, ref); found && !ref.External {
 				check(key, ref.ID, target)
 			}
@@ -119,42 +119,6 @@ func body(d *model.Document) map[string]any {
 		}
 	}
 	return inner
-}
-
-// walkRefs visits every idRef and objectRef property below v, skipping namespaced extensions.
-func walkRefs(meta *SchemaMeta, v any, onID func(key string, ref model.Ref), onObject func(key string, ref model.ObjectRef)) {
-	switch n := v.(type) {
-	case map[string]any:
-		for k, x := range n {
-			// A derivation source lives in another document set and is never resolved here (CHR-CONF-015).
-			if k == "extensions" || k == "derivedFrom" {
-				continue
-			}
-			items := []any{x}
-			if list, ok := x.([]any); ok {
-				items = list
-			}
-			if meta.ObjectRefKeys[k] && onObject != nil {
-				for _, item := range items {
-					if ref, ok := objectRef(item); ok {
-						onObject(k, ref)
-					}
-				}
-			}
-			if meta.IDRefKeys[k] && onID != nil {
-				for _, item := range items {
-					if ref, ok := idRef(item); ok {
-						onID(k, ref)
-					}
-				}
-			}
-			walkRefs(meta, x, onID, onObject)
-		}
-	case []any:
-		for _, x := range n {
-			walkRefs(meta, x, onID, onObject)
-		}
-	}
 }
 
 func idRef(v any) (model.Ref, bool) {

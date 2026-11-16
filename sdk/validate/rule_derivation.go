@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/nauticana/charter/sdk/corpus"
-	"github.com/nauticana/charter/sdk/model"
 )
 
 // DerivationRule checks that a document derives from a document of its own kind other than itself, or from a source
@@ -33,9 +32,4 @@ func (r DerivationRule) Validate(c *corpus.Corpus) []Finding {
 		}
 	}
 	return out
-}
-
-// published reports whether a document is past drafting, after which its derivation is fixed (CHR-CONF-015).
-func published(d *model.Document) bool {
-	return d.LifecycleState != model.LifecycleProposed && d.LifecycleState != model.LifecyclePlanned
 }
