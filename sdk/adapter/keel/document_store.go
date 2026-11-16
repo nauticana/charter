@@ -239,7 +239,8 @@ type DocumentQuery struct {
 	// Parent keeps the documents directly under it: a unit's parent unit, a position's unit, a process's parent
 	// process, or a task's process.
 	Parent *model.ObjectRef
-	// Prefix keeps the documents whose identifier or name starts with it, ignoring case.
+	// Prefix keeps the documents whose identifier or name starts with it, ignoring case; for a work concept, also its
+	// preferred label, any of its labels, or its external id.
 	Prefix string
 	// After is the last document of the previous page.
 	After corpus.DocumentKey
@@ -262,7 +263,11 @@ func (s *DocumentStore) Page(ctx context.Context, partnerID int64, q DocumentQue
 	}
 	day := time.Date(q.At.Year(), q.At.Month(), q.At.Day(), 0, 0, 0, 0, time.UTC)
 	pattern := strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`).Replace(strings.ToLower(q.Prefix)) + "%"
-	name, args := qPage, []any{spec.code, day, day, pattern, pattern, q.After.Namespace, q.After.ID}
+	args := []any{spec.code, day, day}
+	for range 2 + len(spec.terms) {
+		args = append(args, pattern)
+	}
+	args = append(args, q.After.Namespace, q.After.ID)
 	if q.Parent != nil {
 		if spec.parent == "" {
 			return nil, fmt.Errorf("%w: %s has no parent", ErrInvalidQuery, q.Kind)
@@ -271,9 +276,9 @@ func (s *DocumentStore) Page(ctx context.Context, partnerID int64, q DocumentQue
 		if err != nil {
 			return nil, err
 		}
-		name, args = qPageUnder(spec.code), append(args, ids[0])
+		args = append(args, ids[0])
 	}
-	objs, err := r.objectRows(ctx, name, append(args, q.Limit)...)
+	objs, err := r.objectRows(ctx, qPageOf(spec, q.Parent != nil), append(args, q.Limit)...)
 	if err != nil {
 		return nil, fmt.Errorf("charter documents %s: %w", q.Kind, err)
 	}

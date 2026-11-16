@@ -28,6 +28,8 @@ func (k *kindSpec) needs(paths ...string) *kindSpec {
 
 func (k *kindSpec) under(col string) *kindSpec { k.parent = col; return k }
 
+func (k *kindSpec) searches(terms ...string) *kindSpec { k.terms = terms; return k }
+
 var (
 	positionOrUnit = []arc{on(model.KindPosition, "accountable_position_id"), on(model.KindOrganizationUnit, "accountable_unit_id")}
 	humanOrAgent   = func(human, agent string) []arc {
@@ -130,5 +132,6 @@ func init() {
 		sub(objects("labels", tbl("work_concept_label", "work_concept_id").keyed("language", "label").
 			with(text("language", "language"), text("label", "label"))),
 			refSet("broaderConceptIds", "work_concept_broader", "work_concept_id", "broader_concept_id"),
-			refSet("relatedConceptIds", "work_concept_related", "work_concept_id", "related_concept_id"))))
+			refSet("relatedConceptIds", "work_concept_related", "work_concept_id", "related_concept_id"))).
+		searches("work_concept.preferred_label", "work_concept.external_id", "work_concept_label.label"))
 }

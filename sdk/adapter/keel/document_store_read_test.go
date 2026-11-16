@@ -3,6 +3,7 @@ package keel
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -123,6 +124,49 @@ func TestDocumentStorePagesAKind(t *testing.T) {
 	} {
 		if _, err := store.Page(ctx, partner, tc.q); !errors.Is(err, tc.want) {
 			t.Errorf("%s: %v, want %v", name, err, tc.want)
+		}
+	}
+}
+
+func TestDocumentStorePagesConceptsByAnyLabel(t *testing.T) {
+	ctx := context.Background()
+	store, db := newDocumentStore(t)
+	concept := parseDocument(t, `{"charterSpecVersion":"1.9.0","namespace":"harbor.example","kind":"WorkConcept","id":"WC-CREDIT-CONTROL",
+		"name":"Credit Control","classificationId":"WORKCLASS-ONET-SOC-2019","externalId":"13-2041.01","preferredLabel":"Credit Controller",
+		"labels":[{"language":"de","label":"Kreditsachbearbeiter"}]}`)
+	if err := store.Save(ctx, partner, concept); err != nil {
+		t.Fatal(err)
+	}
+	for prefix, want := range map[string]string{"kredit": "WC-CREDIT-CONTROL", "credit contr": "WC-CREDIT-CONTROL", "13-2041.01": "WC-CREDIT-CONTROL", "43-4151": "WC-ONET-ORDER-CLERKS"} {
+		docs, err := store.Page(ctx, partner, DocumentQuery{Kind: model.KindWorkConcept, At: at, Prefix: prefix, Limit: 10})
+		if err != nil || len(docs) != 1 || docs[0].ID != want {
+			t.Errorf("prefix %q = %v, %v, want %s", prefix, docs, err, want)
+		}
+	}
+	if docs, err := store.Page(ctx, partner+1, DocumentQuery{Kind: model.KindWorkConcept, At: at, Prefix: "kredit", Limit: 10}); err != nil || len(docs) != 0 {
+		t.Errorf("another tenant's concepts = %v, %v", docs, err)
+	}
+	if db.calls[qPageOf(kindSpecs[model.KindWorkConcept], false)] == 0 || qPageOf(kindSpecs[model.KindWorkConcept], false) == qPage {
+		t.Error("concepts were not paged by their own query")
+	}
+}
+
+func TestPageQueriesBindEveryArgument(t *testing.T) {
+	m, err := relational()
+	if err != nil {
+		t.Fatal(err)
+	}
+	in, err := m.install(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for kind, spec := range kindSpecs {
+		args := 9 + len(spec.terms)
+		if got := strings.Count(in.queries[qPageOf(spec, false)], "?"); got != args {
+			t.Errorf("%s page binds %d arguments, Page passes %d", kind, got, args)
+		}
+		if got := strings.Count(in.queries[qPageOf(spec, true)], "?"); spec.parent != "" && got != args+1 {
+			t.Errorf("%s page under a parent binds %d arguments, Page passes %d", kind, got, args+1)
 		}
 	}
 }

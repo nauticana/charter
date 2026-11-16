@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.9.2",
+      "title": "Work concepts paged by any label",
+      "tags": [
+        "additive"
+      ],
+      "summary": "`DocumentStore.Page` matches a work concept's prefix against its preferred label, any of its labels, and its external id as well as its identifier and name. Specification 1.9.0; keel v1.3.6.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`schema/catalog.json` `specVersion`) | 1.9.0 |\n| Go module `github.com/nauticana/charter` | v1.9.2 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.3.6 |\n\n## Compatibility impact\n\nAdditive. Documents, schemas, and Go signatures are unchanged.\n\n## Go SDK\n\n- `DocumentQuery.Prefix` on `KindWorkConcept` also matches, ignoring case, the concept's `preferredLabel`, any of its `labels` in any language, and its `externalId`; other kinds still match identifier or name.\n- The keel adapter requires keel v1.3.6.\n"
+    },
+    {
       "version": "1.9.1",
       "title": "Version-pinned binding conformance, adopted-contract packages, and store reads",
       "tags": [

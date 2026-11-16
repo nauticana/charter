@@ -57,8 +57,14 @@ func (m *relationalModel) install(modules []string) (*installation, error) {
 	}
 	in := &installation{relationalModel: m, tables: tables, queries: m.cat.queries(tables)}
 	for _, spec := range kindSpecs {
-		if spec.parent != "" && tables[spec.root.name] {
-			in.queries[qPageUnder(spec.code)] = m.cat.pageSQL(spec)
+		if !tables[spec.root.name] {
+			continue
+		}
+		if len(spec.terms) > 0 {
+			in.queries[qPageOf(spec, false)] = m.cat.pageSQL(spec, false)
+		}
+		if spec.parent != "" {
+			in.queries[qPageOf(spec, true)] = m.cat.pageSQL(spec, true)
 		}
 	}
 	return in, nil
@@ -181,6 +187,14 @@ func buildRelational() (*relationalModel, error) {
 			}
 			m.io[t.name] = io
 		})
+		for _, term := range spec.terms {
+			table, col, _ := strings.Cut(term, ".")
+			if def := cat.tables[table]; def == nil || spec.table(table) == nil {
+				problems = append(problems, term)
+			} else if _, ok := def.column(col); !ok {
+				problems = append(problems, term)
+			}
+		}
 		if len(problems) > 0 {
 			return nil, fmt.Errorf("%s mapping names columns the schema modules lack: %v", spec.kind, problems)
 		}

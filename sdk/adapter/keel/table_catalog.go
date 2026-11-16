@@ -187,7 +187,16 @@ const (
 	qMeasurements  = "charter.evidence_measurement.within"
 )
 
-func qPageUnder(kindCode string) string { return qPage + ".under." + kindCode }
+// qPageOf names a kind's page query: the shared one unless the kind matches more terms or the page is under a parent.
+func qPageOf(spec *kindSpec, under bool) string {
+	switch {
+	case under:
+		return qPage + ".under." + spec.code
+	case len(spec.terms) > 0:
+		return qPage + "." + spec.code
+	}
+	return qPage
+}
 
 func qInsert(table string) string           { return "charter." + table + ".insert" }
 func qUpdate(table string) string           { return "charter." + table + ".update" }
@@ -234,7 +243,7 @@ func (c *tableCatalog) queries(installed map[string]bool) map[string]string {
 		qObjectsByName: "SELECT " + selectList(c.tables["enterprise_object"]) + " FROM enterprise_object WHERE partner_id = ? AND namespace = ANY(?) AND identifier = ANY(?)",
 		qObjectsOfKind: "SELECT " + selectList(c.tables["enterprise_object"]) + " FROM enterprise_object WHERE partner_id = ? AND kind = ?",
 		qCurrencies:    "SELECT code, exponent FROM currency WHERE code = ANY(?)",
-		qPage:          c.pageSQL(nil),
+		qPage:          c.pageSQL(nil, false),
 	}
 	if installed["evidence_measurement"] {
 		q[qMeasurements] = "SELECT evidence_record_id FROM evidence_measurement WHERE partner_id = ? AND outcome_measure_id = ANY(?) AND window_from >= ? AND window_to <= ?"
@@ -276,9 +285,10 @@ func (c *tableCatalog) queries(installed map[string]bool) map[string]string {
 	return q
 }
 
-// pageSQL selects one page of a kind's documents whose current version is effective on a day and whose identifier or
-// name starts with a LIKE pattern, after a namespace and identifier; under a kind, only those its parent column names.
-func (c *tableCatalog) pageSQL(under *kindSpec) string {
+// pageSQL selects one page of a kind's documents whose current version is effective on a day and whose identifier,
+// name, or a term of the kind starts with a LIKE pattern, after a namespace and identifier; under, only those its parent
+// column names.
+func (c *tableCatalog) pageSQL(spec *kindSpec, under bool) string {
 	cols := make([]string, 0, len(c.tables["enterprise_object"].Columns))
 	for _, col := range c.tables["enterprise_object"].Columns {
 		cols = append(cols, "o."+col.Name)
@@ -287,15 +297,27 @@ func (c *tableCatalog) pageSQL(under *kindSpec) string {
 		" ON v.partner_id = o.partner_id AND v.enterprise_object_id = o.id AND v.version_no = (SELECT MAX(m.version_no)" +
 		" FROM enterprise_object_version m WHERE m.partner_id = o.partner_id AND m.enterprise_object_id = o.id)"
 	where := ""
-	if under != nil {
-		sql += " JOIN " + under.root.name + " p ON p.partner_id = o.partner_id AND p." + under.root.owner[0] + " = o.id"
-		if under.versioned() {
+	if under {
+		sql += " JOIN " + spec.root.name + " p ON p.partner_id = o.partner_id AND p." + spec.root.owner[0] + " = o.id"
+		if spec.versioned() {
 			sql += " AND p.version_no = v.version_no"
 		}
-		where = " AND p." + under.parent + " = ?"
+		where = " AND p." + spec.parent + " = ?"
+	}
+	match := "LOWER(o.identifier) LIKE ? OR LOWER(v.name) LIKE ?"
+	if spec != nil {
+		for _, term := range spec.terms {
+			table, col, _ := strings.Cut(term, ".")
+			owner := spec.table(table).owner[0]
+			match += " OR EXISTS (SELECT 1 FROM " + table + " s WHERE s.partner_id = o.partner_id AND s." + owner + " = o.id"
+			if _, versioned := c.tables[table].column("version_no"); versioned {
+				match += " AND s.version_no = v.version_no"
+			}
+			match += " AND LOWER(s." + col + ") LIKE ?)"
+		}
 	}
 	return sql + " WHERE o.partner_id = ? AND o.kind = ? AND (v.valid_from IS NULL OR v.valid_from <= ?)" +
-		" AND (v.valid_to IS NULL OR v.valid_to >= ?) AND (LOWER(o.identifier) LIKE ? OR LOWER(v.name) LIKE ?)" +
+		" AND (v.valid_to IS NULL OR v.valid_to >= ?) AND (" + match + ")" +
 		" AND (o.namespace, o.identifier) > (?, ?)" + where + " ORDER BY o.namespace, o.identifier LIMIT ?"
 }
 

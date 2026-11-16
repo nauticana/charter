@@ -740,16 +740,30 @@ var humanAccountHandlers = map[string]func(q *memoryQueries, args []any) (*kmode
 	},
 }
 
-// page answers qPage and qPageUnder as their SQL does.
+// page answers the page queries as their SQL does.
 func (q *memoryQueries) page(name string, args []any) (*kmodel.QueryResult, error) {
 	if _, ok := q.sql[name]; !ok {
 		return nil, fmt.Errorf("unknown query %s", name)
 	}
-	day, after := args[2].(time.Time), args[6].(string)+"\x00"+args[7].(string)
+	spec := kindSpecs[model.Kind(kindCodes.words[args[1].(string)])]
+	n := 2 + len(spec.terms)
+	day, after := args[2].(time.Time), args[4+n].(string)+"\x00"+args[5+n].(string)
 	prefix := strings.NewReplacer(`\%`, "%", `\_`, "_", `\\`, `\`).Replace(strings.TrimSuffix(args[4].(string), "%"))
-	var under *kindSpec
-	if name != qPage {
-		under = kindSpecs[model.Kind(kindCodes.words[args[1].(string)])]
+	under := strings.Contains(name, ".under.")
+	matches := func(o map[string]any, title string) bool {
+		if strings.HasPrefix(strings.ToLower(o["identifier"].(string)), prefix) || strings.HasPrefix(strings.ToLower(title), prefix) {
+			return true
+		}
+		for _, term := range spec.terms {
+			table, col, _ := strings.Cut(term, ".")
+			owner := spec.table(table).owner[0]
+			if slices.ContainsFunc(q.state.rows[table], func(r map[string]any) bool {
+				return r["partner_id"] == o["partner_id"] && r[owner] == o["id"] && strings.HasPrefix(strings.ToLower(r[col].(string)), prefix)
+			}) {
+				return true
+			}
+		}
+		return false
 	}
 	type found struct {
 		key string
@@ -770,13 +784,12 @@ func (q *memoryQueries) page(name string, args []any) (*kmodel.QueryResult, erro
 		to, hasTo := v["valid_to"].(time.Time)
 		title, _ := v["name"].(string)
 		key := o["namespace"].(string) + "\x00" + o["identifier"].(string)
-		if hasFrom && from.After(day) || hasTo && to.Before(day) || key <= after ||
-			!strings.HasPrefix(strings.ToLower(o["identifier"].(string)), prefix) && !strings.HasPrefix(strings.ToLower(title), prefix) {
+		if hasFrom && from.After(day) || hasTo && to.Before(day) || key <= after || !matches(o, title) {
 			continue
 		}
-		if under != nil && !slices.ContainsFunc(q.state.rows[under.root.name], func(p map[string]any) bool {
-			return p["partner_id"] == o["partner_id"] && p[under.root.owner[0]] == o["id"] && p[under.parent] == args[8] &&
-				(!under.versioned() || p["version_no"] == v["version_no"])
+		if under && !slices.ContainsFunc(q.state.rows[spec.root.name], func(p map[string]any) bool {
+			return p["partner_id"] == o["partner_id"] && p[spec.root.owner[0]] == o["id"] && p[spec.parent] == args[6+n] &&
+				(!spec.versioned() || p["version_no"] == v["version_no"])
 		}) {
 			continue
 		}

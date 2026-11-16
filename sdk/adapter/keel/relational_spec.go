@@ -126,12 +126,23 @@ type kindSpec struct {
 	evidence bool
 	once     bool
 	objects  []string
-	parent   string // root column naming the document this one sits under
+	parent   string   // root column naming the document this one sits under
+	terms    []string // table.column values a page prefix matches besides identifier and name
 	// actorRuntime names the agent actor and runtime columns of a record whose agent must be its runtime's identity.
 	actorRuntime [2]string
 }
 
 func (k *kindSpec) versioned() bool { return k.identity != nil }
+
+// table returns the kind's table spec of a name.
+func (k *kindSpec) table(name string) (found *tableSpec) {
+	k.tables(func(t *tableSpec, _ *listSpec) {
+		if t.name == name {
+			found = t
+		}
+	})
+	return found
+}
 
 // tables visits every table spec of the kind, parents first.
 func (k *kindSpec) tables(visit func(t *tableSpec, split *listSpec)) {
