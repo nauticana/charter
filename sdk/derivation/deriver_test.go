@@ -96,7 +96,7 @@ func tenant(t *testing.T, source *corpus.Corpus) *corpus.Corpus {
 	return with(t, corpus.New(), edited(t, ent, func(v map[string]any) { v["namespace"], v["id"] = dst, "ENT-TENANT" }))
 }
 
-func derive(t *testing.T, source corpus.VersionSource, target corpus.Source, opts Options, roots ...Root) []*model.Document {
+func derive(t *testing.T, source, target corpus.Source, opts Options, roots ...Root) []*model.Document {
 	t.Helper()
 	out, err := deriver(t).Derive(context.Background(), source, target, roots, opts)
 	if err != nil {
@@ -211,15 +211,19 @@ func TestDeriveReusesACopyAndUpgradesANewVersion(t *testing.T) {
 		t.Fatalf("an unchanged derivation is written again: %d", len(again))
 	}
 	task, _ := source.Get(src, "TASK-OE-DETECT")
-	next := with(t, source, edited(t, task, func(v map[string]any) { v["taskDefinitionVersion"], v["name"] = "2", "Detect faster" }))
+	next := with(t, source, edited(t, task, func(v map[string]any) {
+		v["taskDefinitionVersion"], v["name"], v["accountableResponsibilityId"] = "2", "Detect faster", "RESP-INVESTIGATE-ORDER-EXCEPTION"
+	}))
 	if kept := derive(t, next, target, options(), Root{ID: "TASK-OE-DETECT", Version: "2"}); len(kept) != 0 {
-		t.Fatalf("a copy is replaced without upgrade: %d", len(kept))
+		t.Fatalf("a kept copy is replaced or its newer references followed: %v", ids(kept))
 	}
 	upgrade := options()
 	upgrade.Upgrade = true
 	out := derive(t, next, target, upgrade, Root{ID: "TASK-OE-DETECT", Version: "2"})
-	if len(out) != 1 || out[0].ID != "TASK-OE-DETECT" || out[0].DerivedFrom.Version != "2" || out[0].Name != "Detect faster" {
-		t.Fatalf("upgrade: %+v", out)
+	upgraded := ids(out)
+	if c := upgraded["TASK-OE-DETECT"]; c == nil || c.DerivedFrom.Version != "2" || c.Name != "Detect faster" ||
+		upgraded["RESP-INVESTIGATE-ORDER-EXCEPTION"] == nil || upgraded["RESP-COORDINATE-ORDER-EXCEPTION"] != nil {
+		t.Fatalf("upgrade: %v", upgraded)
 	}
 	a, err := validate.NewAdditions()
 	if err != nil {
@@ -272,6 +276,7 @@ func TestDeriveRefusesWhatItCannotDerive(t *testing.T) {
 	target := tenant(t, source)
 	noVersion, noEnterprise := options(), options()
 	noVersion.SourceVersion, noEnterprise.Enterprise = "", model.Ref{}
+	person, runtime := source.OfKind(model.KindHumanIdentity)[0].ID, source.OfKind(model.KindAgentRuntime)[0].ID
 	canceled, cancel := context.WithCancel(context.Background())
 	cancel()
 	for name, tc := range map[string]struct {
@@ -282,6 +287,8 @@ func TestDeriveRefusesWhatItCannotDerive(t *testing.T) {
 		want  error
 	}{
 		"record":            {roots: []Root{{ID: "PROCINST-OE-2026-0042"}}, opts: options(), want: ErrNotDerivable},
+		"person":            {roots: []Root{{ID: person}}, opts: options(), want: ErrNotDerivable},
+		"runtime":           {roots: []Root{{ID: runtime}}, opts: options(), want: ErrNotDerivable},
 		"enterprise":        {roots: []Root{{ID: "ENT-HARBOR"}}, opts: options(), want: ErrNotDerivable},
 		"no source version": {roots: []Root{{ID: "RESP-COORDINATE-ORDER-EXCEPTION"}}, opts: noVersion, want: ErrNoSourceVersion},
 		"no enterprise":     {roots: []Root{{ID: "TASK-OE-DETECT"}}, opts: noEnterprise, want: ErrNoEnterprise},

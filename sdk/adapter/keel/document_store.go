@@ -15,6 +15,7 @@ import (
 	"github.com/nauticana/keel/common"
 	"github.com/nauticana/keel/port"
 
+	"github.com/nauticana/charter/sdk/authority"
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/evidence"
 	"github.com/nauticana/charter/sdk/model"
@@ -89,10 +90,76 @@ func NewDocumentStore(ctx context.Context, db port.DatabaseRepository, modules .
 	return &DocumentStore{db: db, queries: queries, model: m, additions: additions}, nil
 }
 
-// Source returns one tenant's current documents, evidence included, for Charter providers, and the stored versions
-// of its definitions.
-func (s *DocumentStore) Source(partnerID int64) corpus.VersionSource {
+// Source returns one tenant's documents, evidence included, for Charter providers: the current ones and, by label,
+// the stored versions of its definitions.
+func (s *DocumentStore) Source(partnerID int64) corpus.Source {
 	return tenantStore{store: s, partnerID: partnerID}
+}
+
+// Grants serves one tenant's grants to an authority evaluator, reading only the requesting actor's.
+func (s *DocumentStore) Grants(partnerID int64) authority.GrantSource {
+	return tenantStore{store: s, partnerID: partnerID}
+}
+
+// ActorGrants lists the grants of an actor, named with its namespace, in force at a time (authority.Lapse), ordered
+// by namespace and identifier.
+func (s *DocumentStore) ActorGrants(ctx context.Context, partnerID int64, actor model.ObjectRef, at time.Time) ([]model.AuthorityGrant, error) {
+	if actor.Namespace == "" || actor.ID == "" || at.IsZero() {
+		return nil, fmt.Errorf("%w: an actor with its namespace and a time are required", ErrInvalidQuery)
+	}
+	grants, err := tenantStore{store: s, partnerID: partnerID}.actorGrants(ctx, actor)
+	if err != nil {
+		return nil, err
+	}
+	return slices.DeleteFunc(grants, func(g model.AuthorityGrant) bool { return authority.Lapse(g, at) != "" }), nil
+}
+
+// Referrer is a document referencing another and the property holding the reference.
+type Referrer struct {
+	Document model.ObjectRef
+	Property string
+}
+
+// Referencing lists, in one query, the tenant's documents effective at a time whose current version references a
+// stored document, ordered by namespace, identifier, and property, at most limit of them.
+func (s *DocumentStore) Referencing(ctx context.Context, partnerID int64, ref model.ObjectRef, at time.Time, limit int) ([]Referrer, error) {
+	r, err := tenantStore{store: s, partnerID: partnerID}.reader()
+	if err != nil {
+		return nil, err
+	}
+	if limit <= 0 || at.IsZero() {
+		return nil, fmt.Errorf("%w: a positive limit and an effective time are required", ErrInvalidQuery)
+	}
+	ids, err := s.ObjectIDs(ctx, partnerID, ref)
+	if err != nil {
+		return nil, err
+	}
+	args := make([]any, 0, 2*len(s.model.refs)+3)
+	for range s.model.refs {
+		args = append(args, partnerID, ids[0])
+	}
+	day := time.Date(at.Year(), at.Month(), at.Day(), 0, 0, 0, 0, time.UTC)
+	rows, err := r.query(ctx, qReferencing, append(args, partnerID, day, day, limit)...)
+	if err != nil {
+		return nil, fmt.Errorf("charter references to %s: %w", ref.ID, err)
+	}
+	cols := r.m.cat.tables["enterprise_object"].Columns
+	out := make([]Referrer, 0, len(rows))
+	for _, row := range rows {
+		if len(row) != len(cols)+1 {
+			return nil, fmt.Errorf("%w: referencing returned %d columns", ErrDocumentIncomplete, len(row))
+		}
+		m := make(map[string]any, len(cols))
+		for i, c := range cols {
+			if m[c.Name], err = normalize(c, row[i]); err != nil {
+				return nil, err
+			}
+		}
+		o := objectOf(m)
+		property, _ := row[len(cols)].(string)
+		out = append(out, Referrer{Document: model.ObjectRef{Kind: model.Kind(kindCodes.words[o.code]), Namespace: o.key.NS, ID: o.key.ID}, Property: property})
+	}
+	return out, nil
 }
 
 // ObjectIDs returns, in order, the enterprise_object ids of a tenant's stored documents, the keys downstream foreign
@@ -189,31 +256,6 @@ func (s *DocumentStore) Versions(ctx context.Context, partnerID int64, key corpu
 	}
 	slices.SortFunc(out, func(a, b VersionInfo) int { return cmp.Compare(a.No, b.No) })
 	return out, nil
-}
-
-// FetchVersion returns the version of a stored definition its label names; an unknown label is corpus.ErrNotFound.
-func (s *DocumentStore) FetchVersion(ctx context.Context, partnerID int64, key corpus.DocumentKey, label string) (*model.Document, error) {
-	r, o, err := s.stored(ctx, partnerID, key)
-	if err != nil {
-		return nil, err
-	}
-	versions, err := r.versions(ctx, []int64{o.id})
-	if err != nil {
-		return nil, fmt.Errorf("charter versions %s: %w", key, err)
-	}
-	for no, l := range versions[o.id] {
-		if label != "" && l == label {
-			o.version = no
-		}
-	}
-	if o.version == 0 {
-		return nil, fmt.Errorf("%w: %w: %s %q", corpus.ErrNotFound, ErrUnknownVersion, key, label)
-	}
-	docs, err := tenantStore{store: s, partnerID: partnerID}.documents(ctx, r, []storedObject{o})
-	if err != nil {
-		return nil, fmt.Errorf("charter document %s %q: %w", key, label, err)
-	}
-	return docs[0], nil
 }
 
 // stored finds a tenant's stored document.
@@ -433,8 +475,9 @@ type tenantStore struct {
 }
 
 var (
-	_ evidence.Store       = tenantStore{}
-	_ corpus.VersionSource = tenantStore{}
+	_ evidence.Store        = tenantStore{}
+	_ corpus.Source         = tenantStore{}
+	_ authority.GrantSource = tenantStore{}
 )
 
 func (t tenantStore) reader() (*relationalReader, error) {
@@ -488,12 +531,95 @@ func (t tenantStore) Fetch(ctx context.Context, key corpus.DocumentKey) (*model.
 	return docs[0], nil
 }
 
-// FetchVersion reads the current document for an empty label, otherwise the stored version the label names.
+// FetchVersion reads the current document for an empty label, otherwise the stored version the label names; an
+// unknown label is corpus.ErrNotFound and ErrUnknownVersion.
 func (t tenantStore) FetchVersion(ctx context.Context, key corpus.DocumentKey, label string) (*model.Document, error) {
 	if label == "" {
 		return t.Fetch(ctx, key)
 	}
-	return t.store.FetchVersion(ctx, t.partnerID, key, label)
+	r, o, err := t.store.stored(ctx, t.partnerID, key)
+	if err != nil {
+		return nil, err
+	}
+	versions, err := r.versions(ctx, []int64{o.id})
+	if err != nil {
+		return nil, fmt.Errorf("charter versions %s: %w", key, err)
+	}
+	for no, l := range versions[o.id] {
+		if l == label {
+			o.version = no
+		}
+	}
+	if o.version == 0 {
+		return nil, fmt.Errorf("%w: %w: %s %q", corpus.ErrNotFound, ErrUnknownVersion, key, label)
+	}
+	docs, err := t.documents(ctx, r, []storedObject{o})
+	if err != nil {
+		return nil, fmt.Errorf("charter document %s %q: %w", key, label, err)
+	}
+	return docs[0], nil
+}
+
+func (t tenantStore) Grants(ctx context.Context, req authority.Request) ([]model.AuthorityGrant, error) {
+	actor := req.Actor
+	actor.Namespace = cmp.Or(actor.Namespace, req.Namespace)
+	grants, err := t.actorGrants(ctx, actor)
+	if err != nil {
+		return nil, err
+	}
+	return (&authority.BaseGrantSource{Items: grants}).Grants(ctx, req)
+}
+
+// actorGrants reads the grants held by a stored human or agent; an actor not stored holds none.
+func (t tenantStore) actorGrants(ctx context.Context, actor model.ObjectRef) ([]model.AuthorityGrant, error) {
+	r, err := t.reader()
+	if err != nil {
+		return nil, err
+	}
+	if _, err := t.store.model.kind(model.KindAuthorityGrant); err != nil {
+		return nil, err
+	}
+	name := qHumanGrants
+	if actor.Kind == model.KindAgentIdentity {
+		name = qAgentGrants
+	}
+	ids, err := t.store.ObjectIDs(ctx, t.partnerID, actor)
+	if errors.Is(err, corpus.ErrNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.query(ctx, name, t.partnerID, ids[0])
+	if err != nil {
+		return nil, fmt.Errorf("charter grants of %s: %w", actor.ID, err)
+	}
+	grantIDs := make([]int64, 0, len(rows))
+	for _, row := range rows {
+		id, ok := common.AsInt64OK(row[0])
+		if !ok {
+			return nil, fmt.Errorf("%w: grant %T", ErrDocumentIncomplete, row[0])
+		}
+		grantIDs = append(grantIDs, id)
+	}
+	byID, err := r.objectsByID(ctx, grantIDs)
+	if err != nil {
+		return nil, fmt.Errorf("charter grants of %s: %w", actor.ID, err)
+	}
+	objs := slices.SortedFunc(maps.Values(byID), func(a, b storedObject) int {
+		return cmp.Or(strings.Compare(a.key.NS, b.key.NS), strings.Compare(a.key.ID, b.key.ID))
+	})
+	docs, err := t.documents(ctx, r, objs)
+	if err != nil {
+		return nil, fmt.Errorf("charter grants of %s: %w", actor.ID, err)
+	}
+	out := make([]model.AuthorityGrant, len(docs))
+	for i, d := range docs {
+		if out[i], err = corpus.Decode[model.AuthorityGrant](d); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
 }
 
 func (t tenantStore) List(ctx context.Context, kind model.Kind) ([]*model.Document, error) {

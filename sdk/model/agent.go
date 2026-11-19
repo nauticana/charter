@@ -70,6 +70,8 @@ type AuthorityGrant struct {
 	Limits                []Limit        `json:"limits"`
 	Delegation            *Delegation    `json:"delegation,omitempty"`
 	Certification         *Certification `json:"certification,omitempty"`
+	// RevokedAt ends the grant at an instant; it is not in force from then on (CHR-AUTH-005).
+	RevokedAt *time.Time `json:"revokedAt,omitempty"`
 }
 
 // Certification is the last recertification of a grant; the grant is suspended once IntervalDays have passed (CHR-AUTH-011).

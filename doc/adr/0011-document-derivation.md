@@ -11,10 +11,10 @@ CHR-CONF-015 requires a document derived from another document set to record the
 
 - `derivation.Deriver` returns the copies to save and writes nothing; a store validates them as any other write.
 - The content digest is the `sha256` digest of the document's JSON canonicalized as RFC 8785 specifies (`corpus.ContentDigest`), so it does not depend on how the document was stored or serialized.
-- A root is read at its version label through `corpus.VersionSource`, an optional extension of `corpus.Source`; documents reached through references are read at their current version. A source whose kind declares no version records the version the caller names, such as the source set's release.
+- A root is read at its version label through `corpus.Source.FetchVersion`, which every source implements; documents reached through references are read at their current version. A source whose kind declares no version records the version the caller names, such as the source set's release.
 - References follow the schema's idRef and objectRef properties (`validate.SchemaMeta.WalkRefs`). A reference to the source namespace names the target, where its copy lives; the enterprise is the target's; evidence and external identifiers of the source set are dropped.
-- Enterprises and records of what happened are never copied: a record of the source set is not a record of the target's.
-- A copy already derived from the same version and content is reused; another is replaced only on request, never when tailored or when its derivation is fixed.
+- Enterprises, human identities, agent runtimes, and records of what happened are never copied: the people, runtimes, and records of the source set are not the target's.
+- A copy already derived from the same version and content is reused; another is kept, the references of the newer source not followed, and replaced only on request, never when tailored or when its derivation is fixed.
 - A derivation is fixed per version: a new version of a versioned definition records its own derivation, as CHR-AGENT-010 states, and `validate.Additions` compares the derivation of a published document only when the write replaces that version.
 
 ## Consequences

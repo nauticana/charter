@@ -8,6 +8,7 @@
     "CHR-AUTH-002",
     "CHR-AUTH-003",
     "CHR-AUTH-004",
+    "CHR-AUTH-005",
     "CHR-AUTH-011"
   ],
   "type": "object",
@@ -136,6 +137,11 @@
         "evidenceRecordId"
       ],
       "additionalProperties": false
+    },
+    "revokedAt": {
+      "description": "The instant the grant was revoked; it is not in force from then on (CHR-AUTH-005).",
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [

@@ -81,6 +81,7 @@ func (f field) columns() []string {
 // tableSpec maps an object, or the items of an array, to the rows of one table.
 type tableSpec struct {
 	name   string
+	at     string   // document path of the list the rows hold, empty for a document's own table
 	owner  []string // columns holding the parent's key, the owning document's id first
 	order  string   // ordinal column of a sequence
 	key    []string // natural key of a set, or of a sequence whose items children reference
@@ -232,7 +233,28 @@ func (t *tableSpec) with(fields ...field) *tableSpec {
 	t.fields = append(t.fields, fields...)
 	return t
 }
-func (t *tableSpec) sub(lists ...listSpec) *tableSpec { t.lists = append(t.lists, lists...); return t }
+func (t *tableSpec) sub(lists ...listSpec) *tableSpec {
+	for _, l := range lists {
+		l.table.under(l.path)
+	}
+	t.lists = append(t.lists, lists...)
+	return t
+}
+
+// under places a table, and the tables below it, beneath a document path.
+func (t *tableSpec) under(path string) {
+	t.at = joinPath(path, t.at)
+	for _, l := range t.lists {
+		l.table.under(path)
+	}
+}
+
+func joinPath(parent, child string) string {
+	if parent == "" || child == "" {
+		return parent + child
+	}
+	return parent + "." + child
+}
 func (t *tableSpec) proseOr(prose, form string) *tableSpec {
 	t.prose, t.form = prose, form
 	return t

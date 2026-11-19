@@ -36,6 +36,12 @@ func (s *BaseMemoryStore) Fetch(ctx context.Context, key corpus.DocumentKey) (*m
 	return s.corpus.Fetch(ctx, key)
 }
 
+func (s *BaseMemoryStore) FetchVersion(ctx context.Context, key corpus.DocumentKey, label string) (*model.Document, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.corpus.FetchVersion(ctx, key, label)
+}
+
 func (s *BaseMemoryStore) List(ctx context.Context, kind model.Kind) ([]*model.Document, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

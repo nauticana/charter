@@ -3,10 +3,12 @@ package keel
 import (
 	"context"
 	"errors"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/nauticana/charter/sdk/authority"
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/model"
 )
@@ -25,7 +27,7 @@ func TestDocumentStoreReadsEveryVersion(t *testing.T) {
 	if err != nil || len(versions) != 2 || versions[0].No != 1 || versions[0].Label != "1" || versions[1].Label != "2" {
 		t.Fatalf("versions = %+v, %v", versions, err)
 	}
-	first, err := store.FetchVersion(ctx, partner, key, "1")
+	first, err := store.Source(partner).FetchVersion(ctx, key, "1")
 	if err != nil || first.Name != original {
 		t.Fatalf("version 1 = %+v, %v", first, err)
 	}
@@ -39,12 +41,12 @@ func TestDocumentStoreReadsEveryVersion(t *testing.T) {
 		t.Fatalf("source current = %+v, %v", current, err)
 	}
 	for name, err := range map[string]error{
-		"unknown label": func() error { _, err := store.FetchVersion(ctx, partner, key, "9"); return err }(),
+		"unknown label": func() error { _, err := store.Source(partner).FetchVersion(ctx, key, "9"); return err }(),
 		"unknown document": func() error {
 			_, err := store.Versions(ctx, partner, corpus.DocumentKey{Namespace: ns, ID: "NONE"})
 			return err
 		}(),
-		"other tenant": func() error { _, err := store.FetchVersion(ctx, partner+1, key, "1"); return err }(),
+		"other tenant": func() error { _, err := store.Source(partner+1).FetchVersion(ctx, key, "1"); return err }(),
 	} {
 		if !errors.Is(err, corpus.ErrNotFound) {
 			t.Errorf("%s: %v", name, err)
@@ -238,5 +240,121 @@ func TestBindingConformancePinsTheBindingVersion(t *testing.T) {
 	}
 	if err := store.Save(ctx, partner, evaluated("BC-OU", "OU-FINANCE", "1")); !errors.Is(err, ErrInvalidDocument) {
 		t.Errorf("a conformance of a document that is not a binding: %v", err)
+	}
+}
+
+func TestDocumentStoreKeepsEachVersionsDerivation(t *testing.T) {
+	ctx := context.Background()
+	store, _ := newDocumentStore(t)
+	key := corpus.DocumentKey{Namespace: ns, ID: "TASK-OE-DETECT"}
+	derived := func(label, digit string) *model.Document {
+		d := edited(t, store, key.ID, "taskDefinitionVersion", label)
+		d.Value.(map[string]any)["derivedFrom"] = map[string]any{
+			"source":  map[string]any{"kind": "Task", "namespace": "reference.example", "id": key.ID},
+			"version": label, "digest": "sha256:" + strings.Repeat(digit, 64), "adoption": "adopted",
+		}
+		return d
+	}
+	for _, label := range []string{"2", "3"} {
+		if err := store.Save(ctx, partner, derived(label, label)); err != nil {
+			t.Fatalf("version %s: %v", label, err)
+		}
+	}
+	for _, label := range []string{"2", "3"} {
+		d, err := store.Source(partner).FetchVersion(ctx, key, label)
+		if err != nil || d.DerivedFrom == nil || d.DerivedFrom.Version != label || d.DerivedFrom.Digest != "sha256:"+strings.Repeat(label, 64) {
+			t.Fatalf("version %s = %+v, %v", label, d, err)
+		}
+	}
+	if err := store.Save(ctx, partner, derived("3", "4")); err == nil {
+		t.Fatal("a stored version's derivation changed")
+	}
+}
+
+func TestDocumentStoreReadsAnActorsGrants(t *testing.T) {
+	ctx := context.Background()
+	store, db := newDocumentStore(t)
+	actor := model.ObjectRef{Kind: model.KindAgentIdentity, Namespace: ns, ID: "AGENT-ORDER-EXCEPTION-COORDINATOR"}
+	at := time.Date(2026, 6, 18, 9, 0, 0, 0, time.UTC)
+	grants, err := store.ActorGrants(ctx, partner, actor, at)
+	if err != nil || len(grants) != 1 || grants[0].ID != "AUTH-OEC-STOCK-RESERVATION-2026" {
+		t.Fatalf("grants in force = %+v, %v", grants, err)
+	}
+	g := grants[0]
+	req := authority.Request{Namespace: ns, EnterpriseID: *g.EnterpriseID, Actor: model.ObjectRef{Kind: actor.Kind, ID: actor.ID},
+		CapabilityID: g.CapabilityID, At: at}
+	before := db.calls[qObjectsOfKind]
+	if got, err := store.Grants(partner).Grants(ctx, req); err != nil || len(got) != 1 || db.calls[qObjectsOfKind] != before {
+		t.Fatalf("grant source = %+v, %v; listed a kind %d times", got, err, db.calls[qObjectsOfKind]-before)
+	}
+	req.CapabilityID = model.Ref{ID: "CAP-OTHER"}
+	if got, err := store.Grants(partner).Grants(ctx, req); err != nil || len(got) != 0 {
+		t.Errorf("other capability = %+v, %v", got, err)
+	}
+	if got, err := store.ActorGrants(ctx, partner, model.ObjectRef{Kind: model.KindHumanIdentity, Namespace: ns, ID: "NONE"}, at); err != nil || len(got) != 0 {
+		t.Errorf("unknown actor = %+v, %v", got, err)
+	}
+
+	if _, err := store.ActorGrants(ctx, partner, model.ObjectRef{Kind: actor.Kind, ID: actor.ID}, at); !errors.Is(err, ErrInvalidQuery) {
+		t.Errorf("actor without a namespace: %v", err)
+	}
+
+	revoked := at.Add(time.Hour)
+	if err := store.Save(ctx, partner, edited(t, store, g.ID, "revokedAt", revoked.Format(time.RFC3339))); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := store.ActorGrants(ctx, partner, actor, at)
+	if err != nil || len(stored) != 1 || stored[0].RevokedAt == nil || !stored[0].RevokedAt.Equal(revoked) {
+		t.Fatalf("revoked grant = %+v, %v", stored, err)
+	}
+	if got, err := store.ActorGrants(ctx, partner, actor, revoked); err != nil || len(got) != 0 {
+		t.Errorf("grants in force after revocation = %+v, %v", got, err)
+	}
+}
+
+func TestDocumentStoreListsReferrers(t *testing.T) {
+	ctx := context.Background()
+	store, _ := newDocumentStore(t)
+	capability := model.ObjectRef{Kind: model.KindCapabilityContract, Namespace: ns, ID: "CAP-RESERVE-ORDER-STOCK"}
+	at := time.Date(2026, 6, 18, 0, 0, 0, 0, time.UTC)
+	refs, err := store.Referencing(ctx, partner, capability, at, 100)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []Referrer{
+		{Document: model.ObjectRef{Kind: model.KindAuthorityGrant, Namespace: ns, ID: "AUTH-OEC-STOCK-RESERVATION-2026"}, Property: "capabilityId"},
+		{Document: model.ObjectRef{Kind: model.KindAgentDefinition, Namespace: ns, ID: "AGENTDEF-ORDER-EXCEPTION-COORDINATOR-1"}, Property: "capabilityIds"},
+		{Document: model.ObjectRef{Kind: model.KindCapabilityBinding, Namespace: ns, ID: "BIND-S4-RESERVE-ORDER-STOCK-1"}, Property: "capabilityId"},
+	} {
+		if !slices.Contains(refs, want) {
+			t.Errorf("missing %+v in %+v", want, refs)
+		}
+	}
+	if !slices.IsSortedFunc(refs, func(a, b Referrer) int {
+		return strings.Compare(a.Document.Namespace+" "+a.Document.ID+" "+a.Property, b.Document.Namespace+" "+b.Document.ID+" "+b.Property)
+	}) {
+		t.Errorf("unordered: %+v", refs)
+	}
+	if page, err := store.Referencing(ctx, partner, capability, at, 2); err != nil || !slices.Equal(page, refs[:2]) {
+		t.Errorf("limited = %+v, %v", page, err)
+	}
+	if late, err := store.Referencing(ctx, partner, capability, time.Date(2027, 6, 1, 0, 0, 0, 0, time.UTC), 100); err != nil ||
+		slices.ContainsFunc(late, func(r Referrer) bool { return r.Document.ID == "AUTH-OEC-STOCK-RESERVATION-2026" }) {
+		t.Errorf("expired grant listed: %+v, %v", late, err)
+	}
+	enterprise := model.ObjectRef{Kind: model.KindEnterprise, Namespace: ns, ID: "ENT-HARBOR"}
+	if owned, err := store.Referencing(ctx, partner, enterprise, at, 1); err != nil || len(owned) != 1 || owned[0].Property != "enterpriseId" {
+		t.Errorf("documents of the enterprise = %+v, %v", owned, err)
+	}
+	for name, err := range map[string]error{
+		"no limit": func() error { _, err := store.Referencing(ctx, partner, capability, at, 0); return err }(),
+		"unknown": func() error {
+			_, err := store.Referencing(ctx, partner, model.ObjectRef{Kind: capability.Kind, Namespace: ns, ID: "NONE"}, at, 1)
+			return err
+		}(),
+	} {
+		if err == nil {
+			t.Errorf("%s accepted", name)
+		}
 	}
 }

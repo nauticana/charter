@@ -223,6 +223,9 @@ func (q *memoryQueries) Query(_ context.Context, name string, args ...any) (*kmo
 	if strings.HasPrefix(name, qPage) {
 		return q.page(name, args)
 	}
+	if name == qReferencing {
+		return q.referencing(args)
+	}
 	sql, ok := q.sql[name]
 	if !ok {
 		return nil, fmt.Errorf("unknown query %s", name)
@@ -802,6 +805,70 @@ func (q *memoryQueries) page(name string, args []any) (*kmodel.QueryResult, erro
 	slices.SortFunc(page, func(a, b found) int { return strings.Compare(a.key, b.key) })
 	res := &kmodel.QueryResult{}
 	for _, f := range page[:min(len(page), args[len(args)-1].(int))] {
+		res.Rows = append(res.Rows, f.row)
+	}
+	return res, nil
+}
+
+// referencing answers the referencing query as its SQL does.
+func (q *memoryQueries) referencing(args []any) (*kmodel.QueryResult, error) {
+	m, err := relational()
+	if err != nil {
+		return nil, err
+	}
+	partner, target, day, limit := args[0], args[1], args[len(args)-3].(time.Time), args[len(args)-1].(int)
+	current := func(id any) map[string]any {
+		var v map[string]any
+		for _, r := range q.state.rows["enterprise_object_version"] {
+			if r["partner_id"] == partner && r["enterprise_object_id"] == id && (v == nil || r["version_no"].(int64) > v["version_no"].(int64)) {
+				v = r
+			}
+		}
+		return v
+	}
+	type found struct {
+		key string
+		row []any
+	}
+	seen := map[string]bool{}
+	var out []found
+	installed := map[string]bool{}
+	for name := range q.db.tables {
+		installed[name] = true
+	}
+	for _, ref := range m.refColumns(installed) {
+		def := q.db.tables[ref.table].def
+		owner := def.PrimaryKey[1]
+		for _, r := range q.state.rows[ref.table] {
+			if r["partner_id"] != partner || r[ref.col] != target {
+				continue
+			}
+			v := current(r[owner])
+			if _, versioned := def.column("version_no"); versioned && r["version_no"] != v["version_no"] {
+				continue
+			}
+			from, hasFrom := v["valid_from"].(time.Time)
+			to, hasTo := v["valid_to"].(time.Time)
+			if hasFrom && from.After(day) || hasTo && to.Before(day) {
+				continue
+			}
+			for _, o := range q.state.rows["enterprise_object"] {
+				key := fmt.Sprint(o["namespace"], "\x00", o["identifier"], "\x00", ref.property)
+				if o["partner_id"] != partner || o["id"] != r[owner] || seen[key] {
+					continue
+				}
+				seen[key] = true
+				row := make([]any, 0, len(o)+1)
+				for _, c := range q.db.tables["enterprise_object"].def.Columns {
+					row = append(row, o[c.Name])
+				}
+				out = append(out, found{key, append(row, ref.property)})
+			}
+		}
+	}
+	slices.SortFunc(out, func(a, b found) int { return strings.Compare(a.key, b.key) })
+	res := &kmodel.QueryResult{}
+	for _, f := range out[:min(len(out), limit)] {
 		res.Rows = append(res.Rows, f.row)
 	}
 	return res, nil

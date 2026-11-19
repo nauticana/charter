@@ -10,18 +10,15 @@ import (
 
 // Source is the abstract loading contract behind every document provider; Corpus is the in-memory implementation.
 type Source interface {
+	// Fetch reads the current version of a document.
 	Fetch(ctx context.Context, key DocumentKey) (*model.Document, error)
+	// FetchVersion reads the version of a document whose label its versioned kind declares; an empty label reads the
+	// current version, and a label nothing stores is ErrNotFound.
+	FetchVersion(ctx context.Context, key DocumentKey, label string) (*model.Document, error)
 	List(ctx context.Context, kind model.Kind) ([]*model.Document, error)
 }
 
-// VersionSource also reads a stored version of a document by the label its versioned kind declares; an empty label
-// reads the current version, and a label nothing stores is ErrNotFound.
-type VersionSource interface {
-	Source
-	FetchVersion(ctx context.Context, key DocumentKey, label string) (*model.Document, error)
-}
-
-var _ VersionSource = (*Corpus)(nil)
+var _ Source = (*Corpus)(nil)
 
 func (c *Corpus) Fetch(_ context.Context, key DocumentKey) (*model.Document, error) {
 	d, ok := c.docs[key]
@@ -64,7 +61,8 @@ func ObjectKeyOf(ownerNamespace string, ref model.ObjectRef) DocumentKey {
 	return KeyOf(ownerNamespace, model.Ref{Namespace: ref.Namespace, ID: ref.ID})
 }
 
-// Union reads several sources as one, such as definitions and the evidence they cite; the first source holding a key serves it.
+// Union reads several sources as one, such as definitions and the evidence they cite; the first source holding a key,
+// or the version asked of it, serves it.
 type Union []Source
 
 var _ Source = Union(nil)
@@ -77,6 +75,16 @@ func (u Union) Fetch(ctx context.Context, key DocumentKey) (*model.Document, err
 		}
 	}
 	return nil, fmt.Errorf("%w: %s", ErrNotFound, key)
+}
+
+func (u Union) FetchVersion(ctx context.Context, key DocumentKey, label string) (*model.Document, error) {
+	for _, s := range u {
+		d, err := s.FetchVersion(ctx, key, label)
+		if !errors.Is(err, ErrNotFound) {
+			return d, err
+		}
+	}
+	return nil, fmt.Errorf("%w: %s version %q", ErrNotFound, key, label)
 }
 
 func (u Union) List(ctx context.Context, kind model.Kind) ([]*model.Document, error) {

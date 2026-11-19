@@ -104,7 +104,7 @@ func init() {
 			object("delegation.delegator", "delegator_id"), integer("delegation.maxRedelegationDepth", "max_redelegation_depth"),
 			integer("certification.intervalDays", "certification_interval_days"), stamp("certification.certifiedAt", "certified_at"),
 			arcOf("certification.certifiedBy", on(model.KindHumanIdentity, "certified_by_id")),
-			ref("certification.evidenceRecordId", "certification_evidence_id")).
+			ref("certification.evidenceRecordId", "certification_evidence_id"), stamp("revokedAt", "revoked_at")).
 		sub(limits("limits").required())))
 	register(mutable(model.KindApproval, tbl("authority_approval", "id").
 		with(arcOf("approver", humanOrAgent("approver_human_id", "approver_agent_id")...), ref("responsibilityId", "responsibility_id"),

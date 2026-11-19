@@ -15,10 +15,10 @@ import (
 	"github.com/nauticana/charter/sdk/validate"
 )
 
-// notDerived are the kinds never copied: the target's own enterprise replaces the source's, and a record of what
-// happened in the source set is never a record of the target's.
+// notDerived are the kinds never copied: the target's own enterprise replaces the source's, and the people, the
+// runtimes, and the records of what happened in the source set are never the target's.
 var notDerived = map[model.Kind]bool{
-	model.KindEnterprise: true, model.KindActionRecord: true, model.KindEvidenceRecord: true, model.KindEvidenceBundle: true,
+	model.KindEnterprise: true, model.KindHumanIdentity: true, model.KindAgentRuntime: true, model.KindActionRecord: true, model.KindEvidenceRecord: true, model.KindEvidenceBundle: true,
 	model.KindExceptionRecord: true, model.KindEscalation: true, model.KindMediationDecision: true, model.KindApproval: true,
 	model.KindProcessInstance: true, model.KindTaskInstance: true, model.KindBindingConformance: true,
 	model.KindConformanceClaim: true,
@@ -43,13 +43,23 @@ type pending struct {
 	id, version string
 }
 
+// standing is what the target holds under a copy's identifier.
+type standing int
+
+const (
+	absent    standing = iota // nothing, or a derivation the copy replaces: the copy is written
+	identical                 // a derivation of the same version and content
+	kept                      // a derivation of another version or content, reused as it is
+)
+
 // Derive returns, ordered by identifier, the copies to save: each root at its version and every source document it
 // reaches through the schema's idRef and objectRef properties at its current version. A copy lives in the target
 // namespace with the target enterprise, names its references to the source namespace in the target, drops the
 // source's evidence and external identifiers, and records the source, its version, and its content digest. A target
-// document already derived from the same version and content is reused, and one derived from another is reused or,
-// with Upgrade, replaced; a target document of a copied identifier derived from nothing else is refused.
-func (dv *Deriver) Derive(ctx context.Context, source corpus.VersionSource, target corpus.Source, roots []Root, opts Options) ([]*model.Document, error) {
+// document already derived from the same version and content is reused, and one derived from another is reused,
+// its references not followed, or with Upgrade replaced; a target document of a copied identifier that is not derived
+// from that source is refused.
+func (dv *Deriver) Derive(ctx context.Context, source, target corpus.Source, roots []Root, opts Options) ([]*model.Document, error) {
 	if dv == nil || dv.meta == nil || source == nil || target == nil {
 		return nil, fmt.Errorf("%w: deriver, source, and target are required", ErrInvalidRequest)
 	}
@@ -80,18 +90,22 @@ func (dv *Deriver) Derive(ctx context.Context, source corpus.VersionSource, targ
 		if err != nil {
 			return nil, err
 		}
+		held, err := dv.held(ctx, target, c, opts.Upgrade)
+		if err != nil {
+			return nil, err
+		}
+		if held == absent {
+			out = append(out, c)
+		}
+		// A kept copy references what its own source version referenced, already derived with it.
+		if held == kept {
+			continue
+		}
 		for _, id := range refs {
 			if !seen[id] {
 				seen[id] = true
 				queue = append(queue, pending{id: id})
 			}
-		}
-		write, err := dv.replaces(ctx, target, c, opts.Upgrade)
-		if err != nil {
-			return nil, err
-		}
-		if write {
-			out = append(out, c)
 		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
@@ -180,33 +194,36 @@ func (dv *Deriver) relocate(value map[string]any, opts Options) []string {
 	return refs
 }
 
-// replaces decides whether a copy is written over what the target holds under its identifier.
-func (dv *Deriver) replaces(ctx context.Context, target corpus.Source, c *model.Document, upgrade bool) (bool, error) {
+// held reports what the target holds under a copy's identifier, refusing a document the copy must not replace.
+func (dv *Deriver) held(ctx context.Context, target corpus.Source, c *model.Document, upgrade bool) (standing, error) {
 	key := corpus.DocumentKey{Namespace: c.Namespace, ID: c.ID}
 	existing, err := target.Fetch(ctx, key)
 	if errors.Is(err, corpus.ErrNotFound) {
-		return true, nil
+		return absent, nil
 	}
 	if err != nil {
-		return false, fmt.Errorf("target %s: %w", key, err)
+		return absent, fmt.Errorf("target %s: %w", key, err)
 	}
 	was, now := existing.DerivedFrom, c.DerivedFrom
 	if existing.Kind != c.Kind || was == nil || was.Source.Kind != now.Source.Kind ||
 		corpus.ObjectKeyOf(existing.Namespace, was.Source) != corpus.ObjectKeyOf(c.Namespace, now.Source) {
-		return false, fmt.Errorf("%w: %s", ErrForeignDocument, key)
+		return absent, fmt.Errorf("%w: %s", ErrForeignDocument, key)
 	}
-	if (was.Version == now.Version && was.Digest == now.Digest) || !upgrade {
-		return false, nil
+	if was.Version == now.Version && was.Digest == now.Digest {
+		return identical, nil
+	}
+	if !upgrade {
+		return kept, nil
 	}
 	if was.Adoption == model.AdoptionTailored {
-		return false, fmt.Errorf("%w: %s", ErrTailored, key)
+		return absent, fmt.Errorf("%w: %s", ErrTailored, key)
 	}
 	label, versioned := corpus.DefinitionVersion(c)
 	stored, _ := corpus.DefinitionVersion(existing)
 	if corpus.Published(existing) && (!versioned || label == stored) {
-		return false, fmt.Errorf("%w: %s %q", ErrDerivationFixed, key, stored)
+		return absent, fmt.Errorf("%w: %s %q", ErrDerivationFixed, key, stored)
 	}
-	return true, nil
+	return absent, nil
 }
 
 // generic returns a value as decoded JSON, numbers kept exact.

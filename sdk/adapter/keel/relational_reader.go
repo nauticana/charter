@@ -21,7 +21,7 @@ import (
 type tableIO struct {
 	spec     *tableSpec
 	def      *tableDef
-	refs     map[string]bool     // columns holding an object id
+	refs     map[string]string   // columns holding an object id to the document property they hold
 	pins     map[string][]string // version column to the columns that may hold its definition
 	trees    map[string]byte     // 'j' json_value, 's' json_schema_node
 	refArcs  map[string]string   // column to the pseudo column of its restricted idRef
@@ -47,6 +47,12 @@ type installation struct {
 	*relationalModel
 	tables  map[string]bool
 	queries map[string]string
+	refs    []refColumn
+}
+
+// refColumn is an installed column holding a reference and the document property it holds.
+type refColumn struct {
+	table, col, property string
 }
 
 // install selects the named modules; none names every module.
@@ -55,7 +61,8 @@ func (m *relationalModel) install(modules []string) (*installation, error) {
 	if err != nil {
 		return nil, err
 	}
-	in := &installation{relationalModel: m, tables: tables, queries: m.cat.queries(tables)}
+	in := &installation{relationalModel: m, tables: tables, queries: m.cat.queries(tables), refs: m.refColumns(tables)}
+	in.queries[qReferencing] = m.cat.referencingSQL(in.refs)
 	for _, spec := range kindSpecs {
 		if !tables[spec.root.name] {
 			continue
@@ -68,6 +75,20 @@ func (m *relationalModel) install(modules []string) (*installation, error) {
 		}
 	}
 	return in, nil
+}
+
+// refColumns lists, ordered, the reference columns of the installed tables, a document's enterprise included.
+func (m *relationalModel) refColumns(tables map[string]bool) []refColumn {
+	out := []refColumn{{"enterprise_object", "enterprise_id", "enterpriseId"}}
+	for table, io := range m.io {
+		for col, property := range io.refs {
+			if tables[table] {
+				out = append(out, refColumn{table, col, property})
+			}
+		}
+	}
+	slices.SortFunc(out, func(a, b refColumn) int { return strings.Compare(a.table+"."+a.col, b.table+"."+b.col) })
+	return out
 }
 
 // kind returns the mapping of an installed kind.
@@ -136,7 +157,7 @@ func buildRelational() (*relationalModel, error) {
 						problems = append(problems, "no table "+target.table)
 						continue
 					}
-					m.io[target.table] = &tableIO{spec: t, def: def, refs: map[string]bool{target.col: true},
+					m.io[target.table] = &tableIO{spec: t, def: def, refs: map[string]string{target.col: t.at},
 						split: &splitIO{pseudo: t.name, owner: t.owner, col: target.col}}
 				}
 				return
@@ -146,31 +167,32 @@ func buildRelational() (*relationalModel, error) {
 				problems = append(problems, "no table "+t.name)
 				return
 			}
-			io := &tableIO{spec: t, def: def, refs: map[string]bool{}, pins: map[string][]string{}, trees: map[string]byte{}, refArcs: map[string]string{}}
+			io := &tableIO{spec: t, def: def, refs: map[string]string{}, pins: map[string][]string{}, trees: map[string]byte{}, refArcs: map[string]string{}}
 			for _, f := range t.fields {
+				property := joinPath(t.at, f.path)
 				switch f.kind {
 				case fRef, fObject, fActor:
-					io.refs[f.col] = true
+					io.refs[f.col] = property
 				case fArc:
 					for _, a := range f.arcs {
-						io.refs[a.col] = true
+						io.refs[a.col] = property
 					}
 				case fRefArc:
 					for _, a := range f.arcs {
-						io.refs[a.col], io.refArcs[a.col] = true, "#"+f.path
+						io.refs[a.col], io.refArcs[a.col] = property, "#"+f.path
 						if f.verCol != "" {
 							io.pins[f.verCol] = append(io.pins[f.verCol], a.col)
 						}
 					}
 				case fPin:
-					io.refs[f.col], io.pins[f.verCol] = true, []string{f.col}
+					io.refs[f.col], io.pins[f.verCol] = property, []string{f.col}
 				case fJSON:
 					io.trees[f.col] = 'j'
 				case fSchema:
 					io.trees[f.col] = 's'
 				case fApproved:
 					io.approved = true
-					io.refs["approved_capability_id"] = true
+					io.refs["approved_capability_id"] = property
 				case fMeasured:
 					io.measured = true
 				}
@@ -525,7 +547,7 @@ func (r *relationalReader) logical(io *tableIO, row map[string]any) (lrow, strin
 			lr[c.Name] = pin
 		case io.refArcs[c.Name] != "":
 			lr[io.refArcs[c.Name]] = pendingRef(v.(int64))
-		case io.refs[c.Name]:
+		case io.refs[c.Name] != "":
 			lr[c.Name] = pendingRef(v.(int64))
 		case io.trees[c.Name] == 'j':
 			lr[c.Name] = pendingJSON(v.(int64))

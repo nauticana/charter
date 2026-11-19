@@ -45,8 +45,20 @@ type Unmet struct {
 	Resolvers   []model.ObjectRef `json:"resolvers,omitempty"`
 }
 
-// Redact hides every source the viewer may not see, keeping its result and disclosing nothing else of it.
+// Redact hides every source the viewer may not see, keeping its result and disclosing nothing else of it, and every
+// resolver the viewer may not see.
 func (x Explanation) Redact(visible func(model.ObjectRef) bool) Explanation {
+	missing := make([]Unmet, len(x.Missing))
+	for i, m := range x.Missing {
+		var resolvers []model.ObjectRef
+		for _, r := range m.Resolvers {
+			if visible(r) {
+				resolvers = append(resolvers, r)
+			}
+		}
+		missing[i] = Unmet{Requirement: m.Requirement, Resolvers: resolvers}
+	}
+	x.Missing = missing
 	basis := make([]Basis, len(x.Basis))
 	for i, b := range x.Basis {
 		if b.Ref != nil && !visible(*b.Ref) {

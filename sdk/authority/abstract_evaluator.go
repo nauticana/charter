@@ -3,41 +3,92 @@ package authority
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
+	"github.com/nauticana/charter/sdk/identity"
 	"github.com/nauticana/charter/sdk/model"
-	"github.com/nauticana/charter/sdk/temporal"
 )
 
-// AbstractEvaluator implements validity, context, certification, and typed-limit evaluation; embed it and supply a GrantSource.
+// AbstractEvaluator implements validity, revocation, context, certification, and typed-limit evaluation; embed it and
+// supply a GrantSource. Identities, when set, name each actor's lifecycle authority among an explanation's resolvers.
 type AbstractEvaluator struct {
 	Source      GrantSource
 	Limits      LimitEvaluator
 	Delegations DelegationPolicy
+	Identities  identity.Provider
 }
 
 var _ Evaluator = (*AbstractEvaluator)(nil)
 
 func (e *AbstractEvaluator) Evaluate(ctx context.Context, req Request) Decision {
-	d, _ := e.evaluate(ctx, req)
+	d, _, _ := e.evaluate(ctx, req)
 	return d
 }
 
-// Explain runs the evaluation Evaluate would and reports what decided it, without performing anything.
+// Explain runs the evaluation Evaluate would and reports what decided it, without performing anything. Each unmet
+// requirement names who can resolve it: the delegators of the presented chain and of the grants considered, and the
+// actor's lifecycle authority.
 func (e *AbstractEvaluator) Explain(ctx context.Context, req Request) Explanation {
-	_, x := e.evaluate(ctx, req)
+	_, x, grants := e.evaluate(ctx, req)
+	if len(x.Missing) == 0 {
+		return x
+	}
+	resolvers := e.resolvers(ctx, req, grants)
+	for i := range x.Missing {
+		x.Missing[i].Resolvers = resolvers
+	}
 	return x
 }
 
-func (e *AbstractEvaluator) evaluate(ctx context.Context, req Request) (Decision, Explanation) {
+// resolvers lists, once each and with explicit namespaces, who can change an evaluation's outcome. An identity that
+// cannot be read contributes no lifecycle authority.
+func (e *AbstractEvaluator) resolvers(ctx context.Context, req Request, grants []model.AuthorityGrant) []model.ObjectRef {
+	var out []model.ObjectRef
+	add := func(owner string, r model.ObjectRef) {
+		r.Namespace = effectiveNamespace(owner, r.Namespace)
+		if r.ID != "" && !slices.Contains(out, r) {
+			out = append(out, r)
+		}
+	}
+	for _, hop := range req.AuthorityChain {
+		add(req.Namespace, hop.Delegator)
+	}
+	for _, g := range grants {
+		if g.Delegation != nil {
+			add(g.Namespace, g.Delegation.Delegator)
+		}
+	}
+	if e.Identities != nil {
+		ref := model.Ref{Namespace: req.Actor.Namespace, ID: req.Actor.ID}
+		var authority *model.ObjectRef
+		switch req.Actor.Kind {
+		case model.KindHumanIdentity:
+			if h, err := e.Identities.Human(ctx, req.Namespace, ref); err == nil {
+				authority = h.LifecycleAuthority
+			}
+		case model.KindAgentIdentity:
+			if a, err := e.Identities.Agent(ctx, req.Namespace, ref); err == nil {
+				authority = a.LifecycleAuthority
+			}
+		}
+		if authority != nil {
+			add(effectiveNamespace(req.Namespace, req.Actor.Namespace), *authority)
+		}
+	}
+	return out
+}
+
+func (e *AbstractEvaluator) evaluate(ctx context.Context, req Request) (Decision, Explanation, []model.AuthorityGrant) {
 	x := Explanation{Actor: req.Actor, CapabilityID: req.CapabilityID, ResourceScope: req.ResourceScope, OrganizationalContext: req.OrganizationalContext,
 		At: req.At, Basis: []Basis{}}
-	decide := func(d Decision, missing ...string) (Decision, Explanation) {
+	var grants []model.AuthorityGrant
+	decide := func(d Decision, missing ...string) (Decision, Explanation, []model.AuthorityGrant) {
 		x.Decision = d.Result
 		for _, m := range missing {
 			x.Missing = append(x.Missing, Unmet{Requirement: m})
 		}
-		return d, x
+		return d, x, grants
 	}
 	if e.Source == nil {
 		return decide(Decision{Result: Error, Reason: "no grant source"}, "a grant source")
@@ -87,16 +138,13 @@ func (e *AbstractEvaluator) check(g model.AuthorityGrant, req Request) string {
 	if g.EnterpriseID == nil || !sameRef(g.Namespace, *g.EnterpriseID, req.Namespace, req.EnterpriseID) {
 		return "enterprise differs"
 	}
-	if g.Validity == nil || !temporal.NewPeriod(*g.Validity).Contains(req.At) {
-		return "not effective at " + req.At.Format("2006-01-02")
-	}
 	if g.ResourceScope != req.ResourceScope {
 		return "resource scope differs"
 	}
 	if g.OrganizationalContext != req.OrganizationalContext {
 		return "organizational context differs"
 	}
-	if reason := CertificationLapse(g, req.At); reason != "" {
+	if reason := Lapse(g, req.At); reason != "" {
 		return reason
 	}
 	return e.Limits.Check(g.Limits, req.Measures)

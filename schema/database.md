@@ -745,6 +745,7 @@ erDiagram
         timestamp certified_at "null"
         bigint certified_by_id FK "null"
         bigint certification_evidence_id FK "null"
+        timestamp revoked_at "null"
     }
     authority_approval {
         bigint id PK

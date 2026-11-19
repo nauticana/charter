@@ -185,6 +185,9 @@ const (
 	qCurrencies    = "charter.currency.by.code"
 	qPage          = "charter.enterprise_object.page"
 	qMeasurements  = "charter.evidence_measurement.within"
+	qHumanGrants   = "charter.authority_grant.of.human"
+	qAgentGrants   = "charter.authority_grant.of.agent"
+	qReferencing   = "charter.enterprise_object.referencing"
 )
 
 // qPageOf names a kind's page query: the shared one unless the kind matches more terms or the page is under a parent.
@@ -244,6 +247,10 @@ func (c *tableCatalog) queries(installed map[string]bool) map[string]string {
 		qObjectsOfKind: "SELECT " + selectList(c.tables["enterprise_object"]) + " FROM enterprise_object WHERE partner_id = ? AND kind = ?",
 		qCurrencies:    "SELECT code, exponent FROM currency WHERE code = ANY(?)",
 		qPage:          c.pageSQL(nil, false),
+	}
+	if installed["authority_grant"] {
+		q[qHumanGrants] = "SELECT id FROM authority_grant WHERE partner_id = ? AND actor_human_id = ?"
+		q[qAgentGrants] = "SELECT id FROM authority_grant WHERE partner_id = ? AND actor_agent_id = ?"
 	}
 	if installed["evidence_measurement"] {
 		q[qMeasurements] = "SELECT evidence_record_id FROM evidence_measurement WHERE partner_id = ? AND outcome_measure_id = ANY(?) AND window_from >= ? AND window_to <= ?"
@@ -319,6 +326,31 @@ func (c *tableCatalog) pageSQL(spec *kindSpec, under bool) string {
 	return sql + " WHERE o.partner_id = ? AND o.kind = ? AND (v.valid_from IS NULL OR v.valid_from <= ?)" +
 		" AND (v.valid_to IS NULL OR v.valid_to >= ?) AND (" + match + ")" +
 		" AND (o.namespace, o.identifier) > (?, ?)" + where + " ORDER BY o.namespace, o.identifier LIMIT ?"
+}
+
+// referencingSQL selects the documents whose current version is effective on a day and whose reference columns, each
+// read at the referencing document's current version, name one object; a branch of the union binds the tenant and the
+// object, and the tenant, the day twice, and the limit follow.
+func (c *tableCatalog) referencingSQL(refs []refColumn) string {
+	branches := make([]string, len(refs))
+	for i, r := range refs {
+		owner := c.tables[r.table].PrimaryKey[1]
+		branches[i] = "SELECT t." + owner + " AS object_id, '" + r.property + "' AS property FROM " + r.table + " t WHERE t.partner_id = ? AND t." + r.col + " = ?"
+		if _, versioned := c.tables[r.table].column("version_no"); versioned {
+			branches[i] += " AND t.version_no = (SELECT MAX(m.version_no) FROM enterprise_object_version m" +
+				" WHERE m.partner_id = t.partner_id AND m.enterprise_object_id = t." + owner + ")"
+		}
+	}
+	cols := make([]string, 0, len(c.tables["enterprise_object"].Columns))
+	for _, col := range c.tables["enterprise_object"].Columns {
+		cols = append(cols, "o."+col.Name)
+	}
+	return "SELECT DISTINCT " + strings.Join(cols, ", ") + ", r.property FROM (" + strings.Join(branches, " UNION ALL ") + ") r" +
+		" JOIN enterprise_object o ON o.partner_id = ? AND o.id = r.object_id JOIN enterprise_object_version v" +
+		" ON v.partner_id = o.partner_id AND v.enterprise_object_id = o.id AND v.version_no = (SELECT MAX(m.version_no)" +
+		" FROM enterprise_object_version m WHERE m.partner_id = o.partner_id AND m.enterprise_object_id = o.id)" +
+		" WHERE (v.valid_from IS NULL OR v.valid_from <= ?) AND (v.valid_to IS NULL OR v.valid_to >= ?)" +
+		" ORDER BY o.namespace, o.identifier, r.property LIMIT ?"
 }
 
 // updatedColumns are the columns qUpdate sets, in order; its key arguments follow them.

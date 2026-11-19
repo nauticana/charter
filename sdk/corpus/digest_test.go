@@ -66,6 +66,20 @@ func TestCorpusFetchesTheVersionItHolds(t *testing.T) {
 	if _, err := c.FetchVersion(context.Background(), DocumentKey{Namespace: "a.example", ID: "U"}, ""); !errors.Is(err, ErrNotFound) {
 		t.Fatalf("unknown document: %v", err)
 	}
+	draft := New()
+	next := parsed(t, `{"namespace":"a.example","id":"T","kind":"Task","taskDefinitionVersion":"3"}`)
+	if err := draft.Add(next); err != nil {
+		t.Fatal(err)
+	}
+	both := Union{draft, c}
+	for label, want := range map[string]*model.Document{"": next, "3": next, "2": task} {
+		if d, err := both.FetchVersion(context.Background(), key, label); err != nil || d != want {
+			t.Fatalf("union label %q: %v", label, err)
+		}
+	}
+	if _, err := both.FetchVersion(context.Background(), key, "1"); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("union, another version: %v", err)
+	}
 }
 
 func TestPublishedIsPastDrafting(t *testing.T) {

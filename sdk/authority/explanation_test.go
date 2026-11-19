@@ -2,9 +2,13 @@ package authority
 
 import (
 	"context"
+	"slices"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/nauticana/charter/sdk/corpus"
+	"github.com/nauticana/charter/sdk/identity"
 	"github.com/nauticana/charter/sdk/model"
 )
 
@@ -33,15 +37,28 @@ func TestExplainReportsWhatDecided(t *testing.T) {
 	}
 }
 
-func TestCertificationByHolderLapses(t *testing.T) {
+func TestGrantLapses(t *testing.T) {
 	g := harborGrant(t)
-	at := time.Date(2026, 6, 18, 0, 0, 0, 0, time.UTC)
-	if reason := CertificationLapse(g, at); reason != "" {
-		t.Fatalf("current certification: %s", reason)
+	at := time.Date(2026, 6, 18, 9, 0, 0, 0, time.UTC)
+	if reason := Lapse(g, at); reason != "" {
+		t.Fatalf("grant in force: %s", reason)
 	}
+	revoked := at.Add(time.Hour)
+	g.RevokedAt = &revoked
+	if reason := Lapse(g, at); reason != "" {
+		t.Errorf("before revocation: %s", reason)
+	}
+	if reason := Lapse(g, revoked); !strings.HasPrefix(reason, "revoked at") {
+		t.Errorf("at revocation: %q", reason)
+	}
+	g.RevokedAt = nil
 	g.Certification.CertifiedBy = g.Actor
-	if CertificationLapse(g, at) == "" {
+	if Lapse(g, at) == "" {
 		t.Error("self-certification accepted")
+	}
+	g.Validity = nil
+	if !strings.HasPrefix(Lapse(g, at), "not effective") {
+		t.Error("grant without validity in force")
 	}
 }
 
@@ -102,5 +119,32 @@ func TestWidens(t *testing.T) {
 		if got := e.Widens(tc.outer, tc.inner); got != tc.want {
 			t.Errorf("%s: widens %t, want %t", tc.name, got, tc.want)
 		}
+	}
+}
+
+func TestExplainNamesResolvers(t *testing.T) {
+	c, err := corpus.NewDirLoader("../../examples/harbor-manufacturing/instances").Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g := harborGrant(t)
+	g.Delegation = &model.Delegation{Delegator: model.ObjectRef{Kind: model.KindHumanIdentity, ID: "HUM-DELEGATOR"}}
+	ev := &AbstractEvaluator{Source: &BaseGrantSource{Items: []model.AuthorityGrant{g, g}}, Identities: identity.NewBaseProvider(c)}
+	req := Request{Namespace: g.Namespace, EnterpriseID: *g.EnterpriseID, Actor: g.Actor, CapabilityID: g.CapabilityID, ResourceScope: g.ResourceScope,
+		OrganizationalContext: g.OrganizationalContext, At: time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)}
+	x := ev.Explain(context.Background(), req)
+	want := []model.ObjectRef{{Kind: model.KindHumanIdentity, Namespace: g.Namespace, ID: "HUM-DELEGATOR"},
+		{Kind: model.KindPosition, Namespace: g.Namespace, ID: "POS-SALES-OPERATIONS-MANAGER"}}
+	if len(x.Missing) != 1 || !slices.Equal(x.Missing[0].Resolvers, want) {
+		t.Fatalf("resolvers: %+v", x.Missing)
+	}
+	hidden := x.Redact(func(r model.ObjectRef) bool { return r.Kind == model.KindPosition })
+	if !slices.Equal(hidden.Missing[0].Resolvers, want[1:]) || len(x.Missing[0].Resolvers) != 2 {
+		t.Errorf("redacted resolvers: %+v, original %+v", hidden.Missing, x.Missing)
+	}
+	ev.Identities = nil
+	req.CapabilityID = model.Ref{ID: "CAP-OTHER"}
+	if x := ev.Explain(context.Background(), req); x.Decision != Missing || len(x.Missing[0].Resolvers) != 0 {
+		t.Errorf("no grant, no identities: %+v", x.Missing)
 	}
 }

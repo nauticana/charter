@@ -35,6 +35,9 @@ columns:
   - name: certification_evidence_id
     type: BIGINT
     nullable: true
+  - name: revoked_at
+    type: TIMESTAMP
+    nullable: true
 primary_key: [partner_id, id]
 indexes:
   - name: capability_grants_ix

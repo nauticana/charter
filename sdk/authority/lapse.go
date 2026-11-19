@@ -8,8 +8,15 @@ import (
 	"github.com/nauticana/charter/sdk/temporal"
 )
 
-// CertificationLapse reports why a grant whose recertification is overdue at t, or was made by its holder, is suspended (CHR-AUTH-011).
-func CertificationLapse(g model.AuthorityGrant, at time.Time) string {
+// Lapse reports why a grant is not in force at t: outside its validity, revoked (CHR-AUTH-005), or suspended because its
+// recertification is overdue or was made by its holder (CHR-AUTH-011). An empty reason means the grant is in force.
+func Lapse(g model.AuthorityGrant, at time.Time) string {
+	if g.Validity == nil || !temporal.NewPeriod(*g.Validity).Contains(at) {
+		return "not effective at " + at.Format("2006-01-02")
+	}
+	if g.RevokedAt != nil && !at.Before(*g.RevokedAt) {
+		return "revoked at " + g.RevokedAt.Format(time.RFC3339)
+	}
 	c := g.Certification
 	if c == nil {
 		return ""

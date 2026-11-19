@@ -9,7 +9,6 @@ import (
 	"github.com/nauticana/charter/sdk/corpus"
 	"github.com/nauticana/charter/sdk/identity"
 	"github.com/nauticana/charter/sdk/model"
-	"github.com/nauticana/charter/sdk/temporal"
 )
 
 type ActiveActorRule struct{ AbstractRule }
@@ -72,10 +71,7 @@ func (r GrantEffectiveRule) Validate(c *corpus.Corpus) []Finding {
 			if !grantActorOK || !actionActorOK || grantActor.Namespace != actionActor.Namespace || grantActor.ID != actionActor.ID {
 				out = append(out, r.finding(a.Namespace, a.ID, fmt.Sprintf("grant %s actor differs", g.ID)))
 			}
-			if g.Validity == nil || !temporal.NewPeriod(*g.Validity).Contains(a.ActionTime) {
-				out = append(out, r.finding(a.Namespace, a.ID, fmt.Sprintf("grant %s not effective at %s", g.ID, a.ActionTime.Format("2006-01-02"))))
-			}
-			if reason := authority.CertificationLapse(g, a.ActionTime); reason != "" {
+			if reason := authority.Lapse(g, a.ActionTime); reason != "" {
 				out = append(out, r.finding(a.Namespace, a.ID, fmt.Sprintf("grant %s %s", g.ID, reason)))
 			}
 		}
