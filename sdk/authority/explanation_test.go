@@ -51,10 +51,13 @@ func TestGrantLapses(t *testing.T) {
 	if reason := Lapse(g, revoked); !strings.HasPrefix(reason, "revoked at") {
 		t.Errorf("at revocation: %q", reason)
 	}
+	if Held(g, revoked) == "" {
+		t.Error("revoked grant held")
+	}
 	g.RevokedAt = nil
 	g.Certification.CertifiedBy = g.Actor
-	if Lapse(g, at) == "" {
-		t.Error("self-certification accepted")
+	if Lapse(g, at) == "" || Held(g, at) != "" {
+		t.Error("self-certification accepted, or a suspended grant not held")
 	}
 	g.Validity = nil
 	if !strings.HasPrefix(Lapse(g, at), "not effective") {

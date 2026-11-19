@@ -8,14 +8,23 @@ import (
 	"github.com/nauticana/charter/sdk/temporal"
 )
 
-// Lapse reports why a grant is not in force at t: outside its validity, revoked (CHR-AUTH-005), or suspended because its
-// recertification is overdue or was made by its holder (CHR-AUTH-011). An empty reason means the grant is in force.
-func Lapse(g model.AuthorityGrant, at time.Time) string {
+// Held reports why an actor does not hold a grant at t: outside its validity or revoked (CHR-AUTH-005). An empty
+// reason means the grant is held, though Lapse may still suspend it.
+func Held(g model.AuthorityGrant, at time.Time) string {
 	if g.Validity == nil || !temporal.NewPeriod(*g.Validity).Contains(at) {
 		return "not effective at " + at.Format("2006-01-02")
 	}
 	if g.RevokedAt != nil && !at.Before(*g.RevokedAt) {
 		return "revoked at " + g.RevokedAt.Format(time.RFC3339)
+	}
+	return ""
+}
+
+// Lapse reports why a grant is not in force at t: not held (Held), or suspended because its recertification is
+// overdue or was made by its holder (CHR-AUTH-011). An empty reason means the grant is in force.
+func Lapse(g model.AuthorityGrant, at time.Time) string {
+	if reason := Held(g, at); reason != "" {
+		return reason
 	}
 	c := g.Certification
 	if c == nil {

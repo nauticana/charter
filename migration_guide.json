@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.10.1",
+      "title": "An actor's held grants, suspended ones included",
+      "tags": [
+        "breaking"
+      ],
+      "summary": "`DocumentStore.ActorGrants` lists the grants an actor holds at a time, including those suspended by a certification lapse, and `authority.Held` tells a held grant from one outside its validity or revoked. Specification 1.10.0; keel v1.3.10.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`schema/catalog.json` `specVersion`) | 1.10.0 |\n| Go module `github.com/nauticana/charter` | v1.10.1 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.3.10 |\n\n## Compatibility impact\n\nBreaking for callers of `DocumentStore.ActorGrants` that relied on it omitting suspended grants. Documents, schemas, and tables are unchanged.\n\n## Go SDK\n\n| Before | After |\n|---|---|\n| `ActorGrants(ctx, partnerID, actor, at)` returns the grants in force | returns the grants held (within validity, not revoked); filter with `authority.Lapse(g, at) == \"\"` for the grants in force |\n\n- `authority.Held(g, at)` reports why a grant is not held: outside its validity or revoked. `Lapse` reports that reason first, then a certification suspension.\n- The keel adapter requires keel v1.3.10; it uses none of the APIs that release changed.\n"
+    },
+    {
       "version": "1.10.0",
       "title": "Grant revocation, explanation resolvers, and store reads by actor and reference",
       "tags": [

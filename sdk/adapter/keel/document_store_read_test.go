@@ -299,6 +299,11 @@ func TestDocumentStoreReadsAnActorsGrants(t *testing.T) {
 		t.Errorf("actor without a namespace: %v", err)
 	}
 
+	overdue := time.Date(2026, 9, 15, 0, 0, 0, 0, time.UTC)
+	if got, err := store.ActorGrants(ctx, partner, actor, overdue); err != nil || len(got) != 1 || authority.Lapse(got[0], overdue) == "" {
+		t.Fatalf("suspended grant = %+v, %v", got, err)
+	}
+
 	revoked := at.Add(time.Hour)
 	if err := store.Save(ctx, partner, edited(t, store, g.ID, "revokedAt", revoked.Format(time.RFC3339))); err != nil {
 		t.Fatal(err)
@@ -308,7 +313,7 @@ func TestDocumentStoreReadsAnActorsGrants(t *testing.T) {
 		t.Fatalf("revoked grant = %+v, %v", stored, err)
 	}
 	if got, err := store.ActorGrants(ctx, partner, actor, revoked); err != nil || len(got) != 0 {
-		t.Errorf("grants in force after revocation = %+v, %v", got, err)
+		t.Errorf("grants held after revocation = %+v, %v", got, err)
 	}
 }
 

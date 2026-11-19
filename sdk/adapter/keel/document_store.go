@@ -101,8 +101,8 @@ func (s *DocumentStore) Grants(partnerID int64) authority.GrantSource {
 	return tenantStore{store: s, partnerID: partnerID}
 }
 
-// ActorGrants lists the grants of an actor, named with its namespace, in force at a time (authority.Lapse), ordered
-// by namespace and identifier.
+// ActorGrants lists the grants an actor, named with its namespace, holds at a time (authority.Held), ordered by
+// namespace and identifier; authority.Lapse tells which of them are suspended.
 func (s *DocumentStore) ActorGrants(ctx context.Context, partnerID int64, actor model.ObjectRef, at time.Time) ([]model.AuthorityGrant, error) {
 	if actor.Namespace == "" || actor.ID == "" || at.IsZero() {
 		return nil, fmt.Errorf("%w: an actor with its namespace and a time are required", ErrInvalidQuery)
@@ -111,7 +111,7 @@ func (s *DocumentStore) ActorGrants(ctx context.Context, partnerID int64, actor 
 	if err != nil {
 		return nil, err
 	}
-	return slices.DeleteFunc(grants, func(g model.AuthorityGrant) bool { return authority.Lapse(g, at) != "" }), nil
+	return slices.DeleteFunc(grants, func(g model.AuthorityGrant) bool { return authority.Held(g, at) != "" }), nil
 }
 
 // Referrer is a document referencing another and the property holding the reference.
