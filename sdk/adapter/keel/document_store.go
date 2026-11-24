@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/nauticana/keel/common"
+	"github.com/nauticana/keel/data"
 	"github.com/nauticana/keel/port"
 
 	"github.com/nauticana/charter/sdk/authority"
@@ -447,24 +448,13 @@ func (s *DocumentStore) decompose(docs []*model.Document) ([]*docRows, error) {
 	return rows, nil
 }
 
-func (s *DocumentStore) write(ctx context.Context, partnerID int64, rows []*docRows, appendOnly bool) (err error) {
-	tx, err := s.db.BeginTx(ctx, s.model.queries)
+func (s *DocumentStore) write(ctx context.Context, partnerID int64, rows []*docRows, appendOnly bool) error {
+	err := data.InTx(ctx, s.db, s.model.queries, func(tx port.TxQueryService) error {
+		return newRelationalWriter(s.model, tx, partnerID).write(ctx, rows, appendOnly)
+	})
 	if err != nil {
-		return fmt.Errorf("charter documents: begin: %w", err)
-	}
-	committed := false
-	defer func() {
-		if !committed {
-			err = errors.Join(err, tx.Rollback(context.WithoutCancel(ctx)))
-		}
-	}()
-	if err := newRelationalWriter(s.model, tx, partnerID).write(ctx, rows, appendOnly); err != nil {
 		return fmt.Errorf("charter documents: %w", err)
 	}
-	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("charter documents: commit: %w", err)
-	}
-	committed = true
 	return nil
 }
 

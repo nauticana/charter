@@ -9,6 +9,15 @@
   },
   "migrations": [
     {
+      "version": "1.10.2",
+      "title": "keel v1.3.17 and Go 1.27.4",
+      "tags": [
+        "breaking"
+      ],
+      "summary": "The module requires Go 1.27.4 and the optional keel adapter targets keel v1.3.17; the adapter's writes run in keel's `data.InTx`. Specification 1.10.0.",
+      "body_markdown": "## Versions\n\n| Artifact | Version |\n|---|---|\n| Specification (`schema/catalog.json` `specVersion`) | 1.10.0 |\n| Go module `github.com/nauticana/charter` | v1.10.2, Go 1.27.4 |\n| Optional keel adapter (`sdk/adapter/keel`) | keel v1.3.17 |\n\n## Compatibility impact\n\nNone for documents, schemas, Charter tables, and Go signatures. The module requires Go 1.27.4.\n\n## Go SDK\n\n- `DocumentStore` writes and `HumanAccounts.Link` and `End` run in keel's `data.InTx`. A rollback is bounded to five seconds and is not attempted after a failed commit, which already ends the transaction. Sentinel errors still match with `errors.Is`; message texts changed.\n- `cel.dev/cel-go` is raised from v0.33.0 to v0.33.4.\n\n## Adoption\n\n1. `go get github.com/nauticana/charter@v1.10.2` with Go 1.27.4.\n2. With `sdk/adapter/keel`, adopt keel v1.3.17 by keel's own guidance first: v1.3.13, v1.3.14, and v1.3.15 change keel's tables and seeds and must be applied before deploying.\n"
+    },
+    {
       "version": "1.10.1",
       "title": "An actor's held grants, suspended ones included",
       "tags": [

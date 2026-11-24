@@ -112,6 +112,46 @@ func TestHumanAccountLinksNeverOverlap(t *testing.T) {
 	}
 }
 
+func TestHumanAccountsRollBackAFailedWrite(t *testing.T) {
+	ctx := context.Background()
+	accounts, _, db := newHumanAccounts(t)
+	link := alexLink()
+	end := link.Begda.Add(time.Hour)
+	resolves := func() bool {
+		user, err := accounts.User(ctx, partner, link.Human, end.Add(time.Hour))
+		return err == nil && user == link.UserID
+	}
+	for _, tc := range []struct {
+		name, query string
+		write       func() error
+		resolves    bool
+	}{
+		{"link", qAccountInsert, func() error { return accounts.Link(ctx, link) }, true},
+		{"end", qAccountEnd, func() error { return accounts.End(ctx, partner, link.Human, end) }, false},
+	} {
+		for _, fail := range []string{"statement", "commit"} {
+			rollbacks, want := db.rollbacks, 0 // a failed commit already ends the transaction
+			if fail == "commit" {
+				db.failCommit = true
+			} else {
+				db.failQuery = tc.query
+				want = 1
+			}
+			err := tc.write()
+			db.failCommit, db.failQuery = false, ""
+			if err == nil || db.rollbacks != rollbacks+want {
+				t.Errorf("%s with a failing %s: error %v, %d rollbacks", tc.name, fail, err, db.rollbacks-rollbacks)
+			}
+			if resolves() == tc.resolves {
+				t.Errorf("%s with a failing %s changed the store", tc.name, fail)
+			}
+		}
+		if err := tc.write(); err != nil || resolves() != tc.resolves {
+			t.Fatalf("%s after a failed attempt: %v", tc.name, err)
+		}
+	}
+}
+
 func TestHumanAccountsResolveTheLinkEffectiveAtATime(t *testing.T) {
 	ctx := context.Background()
 	accounts, _, db := newHumanAccounts(t)

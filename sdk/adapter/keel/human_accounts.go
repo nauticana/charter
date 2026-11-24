@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nauticana/keel/common"
+	"github.com/nauticana/keel/data"
 	"github.com/nauticana/keel/port"
 
 	"github.com/nauticana/charter/sdk/model"
@@ -96,7 +97,7 @@ func NewHumanAccounts(ctx context.Context, db port.DatabaseRepository, now func(
 }
 
 // Link records a new link; replaying an identical link changes nothing.
-func (a *HumanAccounts) Link(ctx context.Context, link HumanAccount) (err error) {
+func (a *HumanAccounts) Link(ctx context.Context, link HumanAccount) error {
 	if link.Begda.IsZero() {
 		link.Begda = a.now()
 	}
@@ -104,90 +105,74 @@ func (a *HumanAccounts) Link(ctx context.Context, link HumanAccount) (err error)
 	if err := link.validate(); err != nil {
 		return err
 	}
-	tx, err := a.db.BeginTx(ctx, humanAccountQueries)
-	if err != nil {
-		return fmt.Errorf("human account: begin: %w", err)
-	}
-	committed := false
-	defer func() {
-		if !committed {
-			err = errors.Join(err, tx.Rollback(context.WithoutCancel(ctx)))
+	err := data.InTx(ctx, a.db, humanAccountQueries, func(tx port.TxQueryService) error {
+		membership, err := tx.Query(ctx, qMembership, link.PartnerID, link.UserID, link.PartnerUserBegda)
+		if err != nil {
+			return fmt.Errorf("membership: %w", err)
 		}
-	}()
-	membership, err := tx.Query(ctx, qMembership, link.PartnerID, link.UserID, link.PartnerUserBegda)
-	if err != nil {
-		return fmt.Errorf("human account membership: %w", err)
-	}
-	if len(membership.Rows) == 0 {
-		return fmt.Errorf("%w: user %d in partner %d since %s", ErrNoMembership, link.UserID, link.PartnerID, link.PartnerUserBegda.Format(time.RFC3339))
-	}
-	if ends, ended := common.AsTimeOK(membership.Rows[0][0]); ended && (link.Endda == nil || link.Endda.After(ends)) {
-		return fmt.Errorf("%w: membership ends %s", ErrNoMembership, ends.Format(time.RFC3339))
-	}
-	human, err := humanObject(ctx, tx, link.PartnerID, link.Human)
-	if err != nil {
-		return err
-	}
-	var endda any
-	if link.Endda != nil {
-		endda = *link.Endda
-	}
-	overlaps, err := tx.Query(ctx, qAccountOverlaps, link.PartnerID, human, link.UserID, link.Endda == nil, endda, link.Begda)
-	if err != nil {
-		return fmt.Errorf("human account overlaps: %w", err)
-	}
-	for _, row := range overlaps.Rows {
-		if !link.sameAs(human, row) {
-			return fmt.Errorf("%w: %s:%s or user %d is already linked from %s", ErrAccountLinkOverlap, link.Human.Namespace, link.Human.ID, link.UserID,
-				common.AsTime(row[2]).Format(time.RFC3339))
+		if len(membership.Rows) == 0 {
+			return fmt.Errorf("%w: user %d in partner %d since %s", ErrNoMembership, link.UserID, link.PartnerID, link.PartnerUserBegda.Format(time.RFC3339))
 		}
-	}
-	if len(overlaps.Rows) == 0 {
-		if _, err := tx.Query(ctx, qAccountInsert, link.PartnerID, human, link.Begda, link.UserID, link.PartnerUserBegda, endda); err != nil {
-			return fmt.Errorf("human account insert: %w", err)
+		if ends, ended := common.AsTimeOK(membership.Rows[0][0]); ended && (link.Endda == nil || link.Endda.After(ends)) {
+			return fmt.Errorf("%w: membership ends %s", ErrNoMembership, ends.Format(time.RFC3339))
 		}
+		human, err := humanObject(ctx, tx, link.PartnerID, link.Human)
+		if err != nil {
+			return err
+		}
+		var endda any
+		if link.Endda != nil {
+			endda = *link.Endda
+		}
+		overlaps, err := tx.Query(ctx, qAccountOverlaps, link.PartnerID, human, link.UserID, link.Endda == nil, endda, link.Begda)
+		if err != nil {
+			return fmt.Errorf("overlaps: %w", err)
+		}
+		for _, row := range overlaps.Rows {
+			if !link.sameAs(human, row) {
+				return fmt.Errorf("%w: %s:%s or user %d is already linked from %s", ErrAccountLinkOverlap, link.Human.Namespace, link.Human.ID, link.UserID,
+					common.AsTime(row[2]).Format(time.RFC3339))
+			}
+		}
+		if len(overlaps.Rows) == 0 {
+			if _, err := tx.Query(ctx, qAccountInsert, link.PartnerID, human, link.Begda, link.UserID, link.PartnerUserBegda, endda); err != nil {
+				return fmt.Errorf("insert: %w", err)
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("human account link: %w", err)
 	}
-	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("human account: commit: %w", err)
-	}
-	committed = true
 	return nil
 }
 
 // End closes the human's link effective at endda; a human with no such link is an error.
-func (a *HumanAccounts) End(ctx context.Context, partnerID int64, human model.Ref, endda time.Time) (err error) {
+func (a *HumanAccounts) End(ctx context.Context, partnerID int64, human model.Ref, endda time.Time) error {
 	if partnerID <= 0 || human.ID == "" || endda.IsZero() {
 		return fmt.Errorf("%w: partner, human, and end are required", ErrInvalidAccountLink)
 	}
 	endda = storedTime(endda)
-	tx, err := a.db.BeginTx(ctx, humanAccountQueries)
-	if err != nil {
-		return fmt.Errorf("human account: begin: %w", err)
-	}
-	committed := false
-	defer func() {
-		if !committed {
-			err = errors.Join(err, tx.Rollback(context.WithoutCancel(ctx)))
+	err := data.InTx(ctx, a.db, humanAccountQueries, func(tx port.TxQueryService) error {
+		id, err := humanObject(ctx, tx, partnerID, human)
+		if err != nil {
+			return err
 		}
-	}()
-	id, err := humanObject(ctx, tx, partnerID, human)
+		open, err := tx.Query(ctx, qAccountOpenAt, partnerID, id, endda, endda)
+		if err != nil {
+			return fmt.Errorf("open link: %w", err)
+		}
+		if len(open.Rows) != 1 {
+			return fmt.Errorf("%w: %s:%s has no link open at %s", ErrUnmapped, human.Namespace, human.ID, endda.Format(time.RFC3339))
+		}
+		if _, err := tx.Query(ctx, qAccountEnd, endda, partnerID, id, open.Rows[0][0]); err != nil {
+			return fmt.Errorf("update: %w", err)
+		}
+		return nil
+	})
 	if err != nil {
-		return err
-	}
-	open, err := tx.Query(ctx, qAccountOpenAt, partnerID, id, endda, endda)
-	if err != nil {
-		return fmt.Errorf("human account: %w", err)
-	}
-	if len(open.Rows) != 1 {
-		return fmt.Errorf("%w: %s:%s has no link open at %s", ErrUnmapped, human.Namespace, human.ID, endda.Format(time.RFC3339))
-	}
-	if _, err := tx.Query(ctx, qAccountEnd, endda, partnerID, id, open.Rows[0][0]); err != nil {
 		return fmt.Errorf("human account end: %w", err)
 	}
-	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("human account: commit: %w", err)
-	}
-	committed = true
 	return nil
 }
 
@@ -266,7 +251,7 @@ func (l HumanAccount) sameAs(human int64, row []any) bool {
 func humanObject(ctx context.Context, q port.QueryService, partnerID int64, human model.Ref) (int64, error) {
 	res, err := q.Query(ctx, qHumanObject, partnerID, human.Namespace, human.ID)
 	if err != nil {
-		return 0, fmt.Errorf("human account identity: %w", err)
+		return 0, fmt.Errorf("identity: %w", err)
 	}
 	if len(res.Rows) != 1 {
 		return 0, fmt.Errorf("%w: %s:%s", ErrNotHumanIdentity, human.Namespace, human.ID)
